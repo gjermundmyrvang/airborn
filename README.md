@@ -2,3 +2,4 @@
 
 ## Team members
 - Falk
+- Terje
