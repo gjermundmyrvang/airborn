@@ -5,3 +5,4 @@
 - Terje
 - Oscar
 - Gjermund
+- Ola
