@@ -3,3 +3,4 @@
 ## Team members
 - Falk
 - Terje
+- Oscar
