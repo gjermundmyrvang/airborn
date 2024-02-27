@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team8.airborn
+package no.uio.ifi.in2000.team18.airborn
 
 import org.junit.Test
 

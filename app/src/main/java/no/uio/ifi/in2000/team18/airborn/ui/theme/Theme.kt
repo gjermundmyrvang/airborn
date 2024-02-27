@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team8.airborn.ui.theme
+package no.uio.ifi.in2000.team18.airborn.ui.theme
 
 import android.app.Activity
 import android.os.Build

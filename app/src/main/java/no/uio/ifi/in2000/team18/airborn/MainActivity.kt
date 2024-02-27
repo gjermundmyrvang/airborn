@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team8.airborn
+package no.uio.ifi.in2000.team18.airborn
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import no.uio.ifi.in2000.team8.airborn.ui.theme.AirbornTheme
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

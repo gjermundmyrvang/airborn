@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team8.airborn
+package no.uio.ifi.in2000.team18.airborn
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
