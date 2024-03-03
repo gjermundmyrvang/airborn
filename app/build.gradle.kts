@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "no.uio.ifi.in2000.team8.airborn"
+    namespace = "no.uio.ifi.in2000.team18.airborn"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "no.uio.ifi.in2000.team8.airborn"
+        applicationId = "no.uio.ifi.in2000.team18.airborn"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
