@@ -1,5 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn
 
+import kotlinx.coroutines.runBlocking
+import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -12,6 +14,11 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        runBlocking {
+            val data = SigchartDataSource().fetchSigcharts()
+            println(data)
+        }
+
+
     }
 }
