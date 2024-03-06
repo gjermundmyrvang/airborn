@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import no.uio.ifi.in2000.team18.airborn.ui.home.HomeScreen
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 class MainActivity : ComponentActivity() {
@@ -39,7 +40,7 @@ fun Navigation(){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
-
+            HomeScreen()
         }
     }
 }
