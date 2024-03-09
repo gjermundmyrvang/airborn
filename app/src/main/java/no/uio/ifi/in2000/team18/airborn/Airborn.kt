@@ -5,7 +5,4 @@ import dagger.hilt.android.HiltAndroidApp
 
 
 @HiltAndroidApp
-class Airborn: Application() {
-
-
-}
+class Airborn: Application()
