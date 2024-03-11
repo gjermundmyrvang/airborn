@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team18.airborn
 import kotlinx.coroutines.runBlocking
 import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.TurbulenceDataSource
+import no.uio.ifi.in2000.team18.airborn.di.Turbulences
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -33,6 +34,16 @@ class ExampleUnitTest {
     fun fetchTurbulenceCross_section() {
         runBlocking {
             val res = TurbulenceDataSource().fetchTurbulenceCross_section()
+            println(res)
+        }
+    }
+
+
+    @Test
+    fun createTurbulenceModuleAndFetch() {
+        runBlocking {
+            val dataSource = Turbulences().provideTurbulenceDataSource()
+            val res = dataSource.fetchTurbulenceCross_section()
             println(res)
         }
     }
