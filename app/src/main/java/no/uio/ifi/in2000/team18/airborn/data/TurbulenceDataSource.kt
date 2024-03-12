@@ -9,17 +9,11 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.serialization.gson.gson
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
+import javax.inject.Inject
 
-class TurbulenceDataSource {
-    val client = HttpClient(CIO) {
-        defaultRequest {
-            header("X-Gravitee-API-Key", "95d6f7c0-9b84-4002-89ba-483ac0f827c6")
-            url("https://gw-uio.intark.uh-it.no/in2000/")
-        }
-        install(ContentNegotiation) {
-            gson()
-        }
-    }
+class TurbulenceDataSource @Inject constructor(
+    val client: HttpClient
+) {
 
     suspend fun fetchTurbulenceCross_section(): List<Turbulence> {
         val res =
