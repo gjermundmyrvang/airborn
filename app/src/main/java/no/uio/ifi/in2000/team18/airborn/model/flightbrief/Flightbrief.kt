@@ -5,11 +5,11 @@ import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 
 data class Flightbrief(
     val departure: AirportBrief,
-    val arrival: AirportBrief,
+    val arrival: AirportBrief?,
     val altArrivals: List<AirportBrief>,
     val sigchart: Sigchart,
 
-)
+    )
 
 data class AirportBrief(
     val airport: Airport,
