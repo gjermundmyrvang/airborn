@@ -41,5 +41,7 @@ fun Navigation() {
         composable("home") {
             HomeScreen()
         }
+        composable("flightbrief/{flightbriefId}") {
+        }
     }
 }
