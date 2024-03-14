@@ -31,12 +31,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
-
+    val navController = LocalNavController.current
     val uistate by viewModel.state.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
     var showDropdown by remember { mutableStateOf(false) }
@@ -94,7 +95,10 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             }
             Spacer(modifier = Modifier.weight(3f))
             Button(
-                onClick = {},
+                onClick = {
+                    // Generate flightbrief
+                    navController.navigate("")
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 32.dp),
