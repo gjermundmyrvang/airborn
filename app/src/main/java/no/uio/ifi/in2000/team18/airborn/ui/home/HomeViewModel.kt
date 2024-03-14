@@ -5,13 +5,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor() : ViewModel() {
+class HomeViewModel @Inject constructor(
+    val airportDataSource: AirportDataSource
+) : ViewModel() {
     data class UiState(
         val airportInput: String = "",
-        val airports: List<String> = listOf("ENGM", "ENSB", "ENBR", "ENVA", "ENGB", "ENGC", "ENGD", "ENGE", "ENGF"),
+        val airports: List<Airport> = listOf(),
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -21,9 +25,7 @@ class HomeViewModel @Inject constructor() : ViewModel() {
         _state.update {
             it.copy(
                 airportInput = input,
-                airports = _state.value.airports.filter { airport ->
-                    airport.startsWith(input, ignoreCase = true)
-                },
+                airports = airportDataSource.search(input),
             )
         }
     }

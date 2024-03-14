@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Button
@@ -30,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import java.util.Locale
+import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +54,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(16.dp))
 
             ExposedDropdownMenuBox(expanded = showDropdown, onExpandedChange = {
                 showDropdown = it
@@ -61,7 +62,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 OutlinedTextField(
                     value = uistate.airportInput,
                     onValueChange = {
-                        viewModel.filterAirports(it.uppercase(Locale.ROOT))
+                        viewModel.filterAirports(it)
                         showDropdown = true
                     },
                     singleLine = true,
@@ -75,11 +76,18 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                     showDropdown = false
                 }) {
                     uistate.airports.forEach { airport ->
-                        DropdownMenuItem({ Text(airport) }, onClick = {
-                            showDropdown = false
-                            viewModel.selectAirport(airport)
-                            keyboardController?.hide()
-                        },
+                        DropdownMenuItem(
+                            {
+                                Column {
+                                    Text(airport.icao.code)
+                                    Text(airport.name)
+                                }
+                            },
+                            onClick = {
+                                showDropdown = false
+                                viewModel.selectAirport(airport.icao.code)
+                                keyboardController?.hide()
+                            },
                         )
                     }
                 }
@@ -90,7 +98,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 32.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xff62c4c3))
             ) {
                 Text("Generer flightbrief", fontSize = 18.sp)
             }
@@ -101,6 +109,6 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 @Preview
 @Composable
 fun HomeScreenPreview() {
-    val mockViewModel = HomeViewModel().apply { filterAirports("") }
+    val mockViewModel = HomeViewModel(AirportDataSource()).apply { filterAirports("") }
     HomeScreen(viewModel = mockViewModel)
 }
