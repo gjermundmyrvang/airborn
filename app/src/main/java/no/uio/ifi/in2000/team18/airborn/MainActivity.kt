@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,6 +18,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBrief
 import no.uio.ifi.in2000.team18.airborn.ui.home.HomeScreen
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
+
+val LocalNavController = compositionLocalOf<NavController> {
+    error("CompositionLocal MainNavController not present")
+}
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -38,11 +45,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "home") {
-        composable("home") {
-            HomeScreen()
-        }
-        composable("flightbrief/{flightbriefid}") {
+    CompositionLocalProvider(LocalNavController provides navController) {
+        NavHost(navController = navController, startDestination = "home") {
+            composable("home") {
+                HomeScreen()
+            }
+            composable("flightbrief/{flightbriefId}") {
+                FlightBrief()
+            }
         }
     }
 }
