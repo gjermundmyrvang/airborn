@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBrief
 import no.uio.ifi.in2000.team18.airborn.ui.home.HomeScreen
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
@@ -41,7 +42,7 @@ fun Navigation() {
         composable("home") {
             HomeScreen()
         }
-        composable("flightbrief/{flightbriefId}") {
+        composable("flightbrief/{flightbriefid}") {
         }
     }
 }
