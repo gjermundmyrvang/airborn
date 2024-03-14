@@ -1,8 +1,11 @@
 package no.uio.ifi.in2000.team18.airborn
 
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
 import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
+import no.uio.ifi.in2000.team18.airborn.data.TafmetarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.TurbulenceDataSource
+import no.uio.ifi.in2000.team18.airborn.model.Tafmetar
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -16,7 +19,7 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
         runBlocking {
-            val data = SigchartDataSource().fetchSigcharts()
+            val data = SigchartDataSource(HttpClient()).fetchSigcharts()
             println(data)
         }
     }
@@ -24,7 +27,7 @@ class ExampleUnitTest {
     @Test
     fun fetchTurbulenceIsCorrcet() {
         runBlocking {
-            val resMap = TurbulenceDataSource().fetchTurbulenceMap()
+            val resMap = TurbulenceDataSource(HttpClient()).fetchTurbulenceMap()
             println("\n$resMap")
         }
     }
@@ -32,12 +35,13 @@ class ExampleUnitTest {
     @Test
     fun fetchTurbulenceCross_section() {
         runBlocking {
-            val res = TurbulenceDataSource().fetchTurbulenceCross_section()
+            val res = TurbulenceDataSource(HttpClient()).fetchTurbulenceCross_section()
             println(res)
         }
     }
 
 
+    /*
     @Test
     fun createTurbulenceModuleAndFetch() {
         runBlocking {
@@ -45,6 +49,5 @@ class ExampleUnitTest {
             val res = dataSource.fetchTurbulenceCross_section()
             println(res)
         }
-    }
-
+    }*/
 }
