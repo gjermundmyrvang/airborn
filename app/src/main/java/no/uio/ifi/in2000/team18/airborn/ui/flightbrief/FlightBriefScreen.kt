@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -52,9 +53,7 @@ fun TestFlightBrief() {
 fun FlightBrief(viewModel: FlightBriefViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
 
-    val flightbrief = state.flightbrief
-
-    when (flightbrief) {
+    when (val flightbrief = state.flightbrief) {
         is LoadingState.Loading -> {
             // TODO: Show spinner
         }
@@ -70,9 +69,11 @@ fun FlightBrief(viewModel: FlightBriefViewModel = hiltViewModel()) {
                 item {
                     Collapsible(header = "Metar/Taf", expanded = true) {
                         Column {
-                            Text(text = "METAR: ${flightbrief.value.departure.metarTaf?.latestMetar}")
+                            Text(text = "METAR:", fontWeight = FontWeight.Bold)
+                            Text(text = "${flightbrief.value.departure.metarTaf?.latestMetar}")
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text(text = "TAF: ENGM 111100Z 1112/1212 03008KT 9999 BKN020=")
+                            Text(text = "TAF:", fontWeight = FontWeight.Bold)
+                            Text(text = "${flightbrief.value.departure.metarTaf?.latestTaf}")
                         }
                     }
                 }
