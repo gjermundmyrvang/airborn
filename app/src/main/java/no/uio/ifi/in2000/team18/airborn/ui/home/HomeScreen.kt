@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
-import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +41,8 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val navController = LocalNavController.current
     val uistate by viewModel.state.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
-    var showDropdown by remember { mutableStateOf(false) }
+    var showDepartureDropdown by remember { mutableStateOf(false) }
+    var showArrivalDropdown by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -57,16 +57,16 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ExposedDropdownMenuBox(expanded = showDropdown, onExpandedChange = {
-                showDropdown = it
+            Spacer(modifier = Modifier.height(80.dp))
+            Text(text = "Departure from:")
+            ExposedDropdownMenuBox(expanded = showDepartureDropdown, onExpandedChange = {
+                showDepartureDropdown = it
             }) {
                 OutlinedTextField(
-                    value = uistate.airportInput,
+                    value = uistate.departureAirportInput,
                     onValueChange = {
-                        viewModel.filterAirports(it)
-                        showDropdown = true
+                        viewModel.filterDepartureAirports(it)
+                        showDepartureDropdown = true
                     },
                     singleLine = true,
                     label = { Text("Start Destination") },
@@ -75,10 +75,10 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                         keyboardController?.hide()
                     })
                 )
-                ExposedDropdownMenu(expanded = showDropdown, onDismissRequest = {
-                    showDropdown = false
+                ExposedDropdownMenu(expanded = showDepartureDropdown, onDismissRequest = {
+                    showDepartureDropdown = false
                 }) {
-                    uistate.airports.forEach { airport ->
+                    uistate.departureAirports.forEach { airport ->
                         DropdownMenuItem(
                             {
                                 Column {
@@ -87,8 +87,46 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                                 }
                             },
                             onClick = {
-                                showDropdown = false
-                                viewModel.selectAirport(airport.icao.code)
+                                showDepartureDropdown = false
+                                viewModel.selectDepartureAirport(airport.icao.code)
+                                keyboardController?.hide()
+                            },
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(80.dp))
+            Text(text = "Arriving at:")
+            ExposedDropdownMenuBox(expanded = showArrivalDropdown, onExpandedChange = {
+                showArrivalDropdown = it
+            }) {
+                OutlinedTextField(
+                    value = uistate.arrivalAirportInput,
+                    onValueChange = {
+                        viewModel.filterArrivalAirports(it)
+                        showArrivalDropdown = true
+                    },
+                    singleLine = true,
+                    label = { Text("End Destination") },
+                    modifier = Modifier.menuAnchor(),
+                    keyboardActions = KeyboardActions(onDone = {
+                        keyboardController?.hide()
+                    }),
+                )
+                ExposedDropdownMenu(expanded = showArrivalDropdown, onDismissRequest = {
+                    showArrivalDropdown = false
+                }) {
+                    uistate.arrivalAirports.forEach { airport ->
+                        DropdownMenuItem(
+                            {
+                                Column {
+                                    Text(airport.icao.code)
+                                    Text(airport.name)
+                                }
+                            },
+                            onClick = {
+                                showArrivalDropdown = false
+                                viewModel.selectArrivalAirport(airport.icao.code)
                                 keyboardController?.hide()
                             },
                         )
