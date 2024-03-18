@@ -39,6 +39,12 @@ data class Position(
     val longitude: Double
 )
 
-data class Icao(val code: String)
-data class Metar(val text: String)
-data class Taf(val text: String)
+data class Icao(val code: String){
+    override fun toString(): String = code
+}
+data class Metar(val text: String) {
+    override fun toString(): String = text
+}
+data class Taf(val text: String){
+    override fun toString(): String = text
+}
