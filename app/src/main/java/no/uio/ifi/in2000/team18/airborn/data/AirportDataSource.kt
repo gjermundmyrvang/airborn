@@ -18,9 +18,11 @@ class AirportDataSource @Inject constructor() {
     }
 
     /**
-     * Using approximation 1 unit of latitude = 2 units of longitude,
-     * which is more exact for southern part of Norway than for northern part
-     */
+     * @param airport Use airport position to get nearby airports based on map coordinates.
+     * Use this approximation for distance: 1 unit of latitude = 2 units of longitude.
+     * Note that this will look more like a perfect square area for southern part of Norway
+     * and less so for areas further north.
+     * */
     fun getAirportsNearby(airport: Airport) = airports.filter {
         val pos = airport.position
         it.position != pos &&
