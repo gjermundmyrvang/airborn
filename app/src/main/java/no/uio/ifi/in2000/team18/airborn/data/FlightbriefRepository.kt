@@ -7,9 +7,8 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import java.time.LocalDateTime
-import javax.inject.Inject
 
-class FlightbriefRepository @Inject constructor(
+class FlightbriefRepository constructor(
     val sigchartDataSource: SigchartDataSource,
     val turbulenceDataSource: TurbulenceDataSource,
     val tafmetarDataSource: TafmetarDataSource,
