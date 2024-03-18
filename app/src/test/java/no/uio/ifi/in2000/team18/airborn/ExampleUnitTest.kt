@@ -3,12 +3,8 @@ package no.uio.ifi.in2000.team18.airborn
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
 import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
-import no.uio.ifi.in2000.team18.airborn.data.TafmetarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.TurbulenceDataSource
-import no.uio.ifi.in2000.team18.airborn.model.Tafmetar
 import org.junit.Test
-
-import org.junit.Assert.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -39,7 +35,6 @@ class ExampleUnitTest {
             println(res)
         }
     }
-
 
     /*
     @Test

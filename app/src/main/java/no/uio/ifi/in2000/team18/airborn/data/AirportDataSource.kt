@@ -4,6 +4,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 class AirportDataSource @Inject constructor() {
     fun getByIcao(icao: Icao) = airports.find { it.icao == icao }
@@ -14,6 +15,17 @@ class AirportDataSource @Inject constructor() {
         ) || it.name.contains(
             query, ignoreCase = true
         )
+    }
+
+    /**
+     * Using approximation 1 unit of latitude = 2 units of longitude,
+     * which is more exact for southern part of Norway than for northern part
+     */
+    fun getAirportsNearby(airport: Airport) = airports.filter {
+        val pos = airport.position
+        it.position != pos &&
+                it.position.latitude.minus(pos.latitude).absoluteValue < 1 &&
+                it.position.longitude.minus(pos.longitude).absoluteValue < 2
     }
 
     val airports = listOf(
