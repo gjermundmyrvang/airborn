@@ -8,6 +8,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import java.time.LocalDateTime
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 class FlightbriefRepository constructor(
     val sigchartDataSource: SigchartDataSource,
@@ -15,7 +16,7 @@ class FlightbriefRepository constructor(
     val tafmetarDataSource: TafmetarDataSource,
     // All the data sources
 ) {
-    val flightbriefs: HashMap<String, Flightbrief> = HashMap()
+    val flightbriefs: ConcurrentHashMap<String, Flightbrief> = ConcurrentHashMap()
 
     fun getFlightbriefById(id: String): Flightbrief? = flightbriefs.getOrDefault(id, null)
 
