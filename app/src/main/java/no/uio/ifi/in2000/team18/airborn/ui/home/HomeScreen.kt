@@ -22,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
 
@@ -93,11 +95,15 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                     }
                 }
             }
+            val scope = rememberCoroutineScope()
             Spacer(modifier = Modifier.weight(3f))
             Button(
                 onClick = {
                     // Generate flightbrief
-                    navController.navigate("")
+                    scope.launch {
+                        val id = viewModel.generateFlightbrief()
+                        navController.navigate("flightbrief/$id")
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,6 +119,6 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 @Preview
 @Composable
 fun HomeScreenPreview() {
-    val mockViewModel = HomeViewModel(AirportDataSource()).apply { filterAirports("") }
-    HomeScreen(viewModel = mockViewModel)
+//    val mockViewModel = HomeViewModel(AirportDataSource()).apply { filterAirports("") }
+//    HomeScreen(viewModel = mockViewModel)
 }
