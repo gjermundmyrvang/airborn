@@ -118,9 +118,9 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
         val airport = airportBrief.airport.name
         Column {
             Text(
-                text = "Departure from\n$airport",
+                text = airport,
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
+                fontSize = 22.sp,
                 lineHeight = 50.sp,
             )
         }
@@ -196,9 +196,9 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
         val airport = airportBrief.airport.name
         Column {
             Text(
-                text = "Arriving at\n$airport",
+                text = airport,
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
+                fontSize = 22.sp,
                 lineHeight = 50.sp,
             )
         }
@@ -221,7 +221,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://aa031pag95akoa22u.api.met.no/weatherapi/turbulence/2.0/?icao=ENBN&time=2024-03-12T12%3A00%3A00Z&type=map")
+                        .data(airportBrief.turbulence?.map?.last()?.uri)
                         .setHeader("User-Agent", "Team18").crossfade(500).build(),
                     loading = {
                         Column(
@@ -246,7 +246,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://aa031pag95akoa22u.api.met.no/weatherapi/turbulence/2.0/?icao=ENBN&time=2024-03-12T12%3A00%3A00Z&type=cross_section")
+                        .data(airportBrief.turbulence?.crossSection?.last()?.uri)
                         .setHeader("User-Agent", "Team18").crossfade(500).build(),
                     loading = {
                         Column(
@@ -269,7 +269,9 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
 
 @Composable
 fun OverallInfoTab(flightbrief: Flightbrief) {
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
         item {
             Collapsible(header = "Sigchart") {
                 SubcomposeAsyncImage(
