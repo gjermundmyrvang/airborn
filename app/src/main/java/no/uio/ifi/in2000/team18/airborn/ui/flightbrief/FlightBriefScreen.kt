@@ -136,7 +136,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                 modifier = Modifier.fillMaxWidth(),
                 contentScale = ContentScale.FillWidth,
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://aa031pag95akoa22u.api.met.no/weatherapi/sigcharts/2.0/?area=norway&time=2024-03-11T18%3A00%3A00Z")
+                    .data("https://aa031pag95akoa22u.api.met.no/weatherapi/sigcharts/2.0/?area=norway&time=2024-03-11T18%3A00")
                     .setHeader("User-Agent", "Team18").crossfade(500).build(),
                 loading = {
                     Column(
@@ -150,7 +150,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                         )
                     }
                 },
-                contentDescription = "Image of ..."
+                contentDescription = "Image of sigchart"
             )
         }
     }
@@ -161,7 +161,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://aa031pag95akoa22u.api.met.no/weatherapi/turbulence/2.0/?icao=ENBN&time=2024-03-12T12%3A00%3A00Z&type=map")
+                        .data(airportBrief.turbulence?.map?.last()?.uri)
                         .setHeader("User-Agent", "Team18").crossfade(500).build(),
                     loading = {
                         Column(
@@ -175,7 +175,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                             )
                         }
                     },
-                    contentDescription = "Image of ..."
+                    contentDescription = "Image of turbulence map"
                 )
                 Divider(
                     modifier = Modifier.padding(all = 5.dp),
@@ -186,7 +186,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://aa031pag95akoa22u.api.met.no/weatherapi/turbulence/2.0/?icao=ENBN&time=2024-03-12T12%3A00%3A00Z&type=cross_section")
+                        .data(airportBrief.turbulence?.crossSection?.last()?.uri)
                         .setHeader("User-Agent", "Team18").crossfade(500).build(),
                     loading = {
                         Column(
@@ -200,7 +200,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                             )
                         }
                     },
-                    contentDescription = "Image of ..."
+                    contentDescription = "Image of turbulence cross section"
                 )
             }
         }
@@ -213,7 +213,8 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
     item {
         val airport = airportBrief.airport.name
         Column {
-            Text(text = "Arriving at\n$airport",
+            Text(
+                text = "Arriving at\n$airport",
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp,
                 lineHeight = 50.sp,
