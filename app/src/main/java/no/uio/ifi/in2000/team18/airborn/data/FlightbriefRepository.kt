@@ -1,11 +1,10 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Flightbrief
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.TurbulenceMapAndCross
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -42,11 +41,21 @@ class FlightbriefRepository constructor(
     private suspend fun createAirportBrief(icao: Icao, time: LocalDateTime): AirportBrief =
         AirportBrief(
             airport = airportDataSource.getByIcao(icao)!!,
-            metarTaf = createMetarTaf(icao.code), turbulence = null,
+            metarTaf = createMetarTaf(icao.code),
+            turbulence = createTurbulence(icao),
         )
 
     private suspend fun createMetarTaf(icao: String): MetarTaf {
         return tafmetarDataSource.fetchTafMetar(icao)
     }
 
+    private suspend fun createTurbulence(icao: Icao): TurbulenceMapAndCross? {
+        val map = turbulenceDataSource.fetchTurbulenceMap(icao)
+        val crossSection = turbulenceDataSource.fetchTurbulenceCrossSection(icao)
+        if (map == null || crossSection == null) return null
+        return TurbulenceMapAndCross(
+            map,
+            crossSection,
+        )
+    }
 }

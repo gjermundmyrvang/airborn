@@ -31,7 +31,7 @@ class ExampleUnitTest {
     @Test
     fun fetchTurbulenceCross_section() {
         runBlocking {
-            val res = TurbulenceDataSource(HttpClient()).fetchTurbulenceCross_section()
+            val res = TurbulenceDataSource(HttpClient()).fetchTurbulenceCrossSection()
             println(res)
         }
     }
