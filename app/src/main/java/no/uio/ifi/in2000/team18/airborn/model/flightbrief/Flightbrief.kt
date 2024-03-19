@@ -8,8 +8,7 @@ data class Flightbrief(
     val arrival: AirportBrief?,
     val altArrivals: List<AirportBrief>,
     val sigchart: Sigchart,
-
-    )
+)
 
 data class AirportBrief(
     val airport: Airport,
@@ -44,12 +43,14 @@ data class Position(
     val longitude: Double
 )
 
-data class Icao(val code: String){
+data class Icao(val code: String) {
     override fun toString(): String = code
 }
+
 data class Metar(val text: String) {
     override fun toString(): String = text
 }
-data class Taf(val text: String){
+
+data class Taf(val text: String) {
     override fun toString(): String = text
 }
