@@ -1,5 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +12,6 @@ import no.uio.ifi.in2000.team18.airborn.data.FlightbriefRepository
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import java.time.LocalDateTime
-import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,33 +20,44 @@ class HomeViewModel @Inject constructor(
     val flightbriefRepository: FlightbriefRepository,
 ) : ViewModel() {
     data class UiState(
-        val airportInput: String = "",
-        val airports: List<Airport> = listOf(),
+        val departureAirportInput: String = "",
+        val departureAirports: List<Airport> = listOf(),
+        val arrivalAirportInput: String = "",
+        val arrivalAirports: List<Airport> = listOf(),
     )
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
 
-    fun filterAirports(input: String) {
+    fun filterDepartureAirports(input: String) {
         _state.update {
             it.copy(
-                airportInput = input,
-                airports = airportDataSource.search(input),
+                departureAirportInput = input,
+                departureAirports = airportDataSource.search(input),
             )
         }
     }
 
-    fun selectAirport(airport: String) {
+    fun filterArrivalAirports(input: String) {
         _state.update {
-            it.copy(airportInput = airport)
+            it.copy(
+                arrivalAirportInput = input,
+                arrivalAirports = airportDataSource.search(input),
+            )
         }
-
     }
+
+    fun selectDepartureAirport(airport: String) =
+        _state.update { it.copy(departureAirportInput = airport) }
+
+    fun selectArrivalAirport(airport: String) =
+        _state.update { it.copy(arrivalAirportInput = airport) }
+
 
     suspend fun generateFlightbrief(): String =
         flightbriefRepository.createFlightbrief(
-            Icao(state.value.airportInput),
-            null,
+            Icao(state.value.departureAirportInput),
+            if (state.value.arrivalAirportInput.isEmpty()) null else Icao(state.value.arrivalAirportInput),
             LocalDateTime.now()
         )
 }

@@ -14,6 +14,7 @@ class FlightbriefRepository constructor(
     val sigchartDataSource: SigchartDataSource,
     val turbulenceDataSource: TurbulenceDataSource,
     val tafmetarDataSource: TafmetarDataSource,
+    val airportDataSource: AirportDataSource,
     // All the data sources
 ) {
     val flightbriefs: ConcurrentHashMap<String, Flightbrief> = ConcurrentHashMap()
@@ -32,14 +33,16 @@ class FlightbriefRepository constructor(
             sigchart = sigchartDataSource.findSigchart(time)
         )
 
-        val id = UUID.randomUUID().toString() // This is always unique. There are more uuids than atoms in the observable universe
+        val id = UUID.randomUUID()
+            .toString() // This is always unique. There are more uuids than atoms in the observable universe
         flightbriefs[id] = brief
         return id
     }
 
     private suspend fun createAirportBrief(icao: Icao, time: LocalDateTime): AirportBrief =
         AirportBrief(
-            airport = Airport(icao, "", Position(0.0, 0.0)), metarTaf = createMetarTaf(icao.code), turbulence = null
+            airport = airportDataSource.getByIcao(icao)!!,
+            metarTaf = createMetarTaf(icao.code), turbulence = null,
         )
 
     private suspend fun createMetarTaf(icao: String): MetarTaf {
