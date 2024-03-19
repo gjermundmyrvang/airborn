@@ -15,6 +15,6 @@ class SigchartDataSource @Inject constructor(val client: HttpClient) {
     }
 
     suspend fun findSigchart(time: LocalDateTime): Sigchart {
-        return fetchSigcharts()[0] // TODO: find correct sigchart
+        return fetchSigcharts().last() // TODO: find correct sigchart
     }
 }

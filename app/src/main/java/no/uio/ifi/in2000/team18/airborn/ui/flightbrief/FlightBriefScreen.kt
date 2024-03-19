@@ -85,7 +85,7 @@ fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FlightBreifScreenContent(flightbrief: Flightbrief) = Column {
-    val pagerState = rememberPagerState { 2 }
+    val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
         Tab(
@@ -97,11 +97,17 @@ fun FlightBreifScreenContent(flightbrief: Flightbrief) = Column {
             onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
             text = { Text("Arrival") }
         )
+        Tab(
+            selected = pagerState.currentPage == 2,
+            onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
+            text = { Text("Overall") }
+        )
     }
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureBriefTab(flightbrief.departure)
             1 -> flightbrief.arrival?.let { ArrivalBriefTab(it) }
+            2 -> OverallInfoTab(flightbrief = flightbrief)
         }
     }
 }
@@ -112,9 +118,9 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
         val airport = airportBrief.airport.name
         Column {
             Text(
-                text = "Departure from\n$airport",
+                text = airport,
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
+                fontSize = 22.sp,
                 lineHeight = 50.sp,
             )
         }
@@ -128,30 +134,6 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                 Text(text = "TAF:", fontWeight = FontWeight.Bold)
                 Text(text = "${airportBrief.metarTaf?.latestTaf}")
             }
-        }
-    }
-    item {
-        Collapsible(header = "Sigchart") {
-            SubcomposeAsyncImage(
-                modifier = Modifier.fillMaxWidth(),
-                contentScale = ContentScale.FillWidth,
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://aa031pag95akoa22u.api.met.no/weatherapi/sigcharts/2.0/?area=norway&time=2024-03-11T18%3A00")
-                    .setHeader("User-Agent", "Team18").crossfade(500).build(),
-                loading = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(30.dp),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            strokeWidth = 1.dp
-                        )
-                    }
-                },
-                contentDescription = "Image of sigchart"
-            )
         }
     }
     item {
@@ -214,9 +196,9 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
         val airport = airportBrief.airport.name
         Column {
             Text(
-                text = "Arriving at\n$airport",
+                text = airport,
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
+                fontSize = 22.sp,
                 lineHeight = 50.sp,
             )
         }
@@ -233,37 +215,13 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
         }
     }
     item {
-        Collapsible(header = "Sigchart") {
-            SubcomposeAsyncImage(
-                modifier = Modifier.fillMaxWidth(),
-                contentScale = ContentScale.FillWidth,
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://aa031pag95akoa22u.api.met.no/weatherapi/sigcharts/2.0/?area=norway&time=2024-03-11T18%3A00%3A00Z")
-                    .setHeader("User-Agent", "Team18").crossfade(500).build(),
-                loading = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(30.dp),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            strokeWidth = 1.dp
-                        )
-                    }
-                },
-                contentDescription = "Image of ..."
-            )
-        }
-    }
-    item {
         Collapsible(header = "Turbulence") {
             Column {
                 SubcomposeAsyncImage(
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://aa031pag95akoa22u.api.met.no/weatherapi/turbulence/2.0/?icao=ENBN&time=2024-03-12T12%3A00%3A00Z&type=map")
+                        .data(airportBrief.turbulence?.map?.last()?.uri)
                         .setHeader("User-Agent", "Team18").crossfade(500).build(),
                     loading = {
                         Column(
@@ -288,7 +246,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://aa031pag95akoa22u.api.met.no/weatherapi/turbulence/2.0/?icao=ENBN&time=2024-03-12T12%3A00%3A00Z&type=cross_section")
+                        .data(airportBrief.turbulence?.crossSection?.last()?.uri)
                         .setHeader("User-Agent", "Team18").crossfade(500).build(),
                     loading = {
                         Column(
@@ -303,6 +261,38 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                         }
                     },
                     contentDescription = "Image of ..."
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OverallInfoTab(flightbrief: Flightbrief) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        item {
+            Collapsible(header = "Sigchart") {
+                SubcomposeAsyncImage(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(flightbrief.sigchart.uri)
+                        .setHeader("User-Agent", "Team18").crossfade(500).build(),
+                    loading = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(30.dp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                strokeWidth = 1.dp
+                            )
+                        }
+                    },
+                    contentDescription = "Image of sigchart. Updated at ${flightbrief.sigchart.updated}"
                 )
             }
         }
