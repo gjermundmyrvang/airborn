@@ -14,7 +14,7 @@ data class Flightbrief(
 data class AirportBrief(
     val airport: Airport,
     val metarTaf: MetarTaf?,
-    val turbulence: Turbulence?,
+    val turbulence: TurbulenceMapAndCross?,
 )
 
 
@@ -27,6 +27,11 @@ data class MetarTaf(
     val latestMetar
         get(): Metar? = if (metars.isNotEmpty()) metars.last() else null
 }
+
+data class TurbulenceMapAndCross(
+    val map: List<Turbulence>,
+    val crossSection: List<Turbulence>
+)
 
 data class Airport(
     val icao: Icao,
