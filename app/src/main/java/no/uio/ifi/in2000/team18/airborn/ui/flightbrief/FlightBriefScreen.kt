@@ -137,6 +137,18 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
         }
     }
     item {
+        Collapsible(header = "Isobaric data") {
+            Column {
+                Text(text = "Date and time:", fontWeight = FontWeight.Bold)
+                Text(text = "${airportBrief.isobaric?.time}")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Data:", fontWeight = FontWeight.Bold)
+                // data from isobaric layers, includes height TODO: a table or chart would be nice
+                Text(text = "${airportBrief.isobaric?.data}")
+            }
+        }
+    }
+    item {
         Collapsible(header = "Turbulence") {
             Column {
                 SubcomposeAsyncImage(
@@ -211,6 +223,18 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "TAF:", fontWeight = FontWeight.Bold)
                 Text(text = "${airportBrief.metarTaf?.latestTaf}")
+            }
+        }
+    }
+    item {
+        Collapsible(header = "Isobaric data") {
+            Column {
+                Text(text = "Date and time:", fontWeight = FontWeight.Bold)
+                Text(text = "${airportBrief.isobaric?.time}")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Data:", fontWeight = FontWeight.Bold)
+                // data from isobaric layers, includes height TODO: a table or chart would be nice
+                Text(text = "${airportBrief.isobaric?.data}")
             }
         }
     }
@@ -361,6 +385,7 @@ fun LightPreviewFlightBrief() {
                 ),
                 metarTaf = MetarTaf(listOf(Metar("Hello")), listOf()),
                 turbulence = null,
+                isobaric = null
             ),
             arrival = null,
             altArrivals = listOf(),

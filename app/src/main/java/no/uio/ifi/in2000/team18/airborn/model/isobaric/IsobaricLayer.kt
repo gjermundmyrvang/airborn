@@ -4,5 +4,6 @@ data class IsobaricLayer(
     val pressure: Double,
     val temperature: Double,
     val windFromDirection: Double,
-    val windSpeed: Double
+    val windSpeed: Double,
+    var height: Double? = null
 )
