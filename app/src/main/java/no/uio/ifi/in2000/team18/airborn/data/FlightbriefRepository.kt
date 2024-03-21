@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class FlightbriefRepository constructor(
+class FlightbriefRepository(
     val sigchartDataSource: SigchartDataSource,
     val turbulenceDataSource: TurbulenceDataSource,
     val tafmetarDataSource: TafmetarDataSource,
@@ -39,17 +39,17 @@ class FlightbriefRepository constructor(
     }
 
     // TODO: change time format?
-    private suspend fun createAirportBrief(icao: Icao, time: LocalDateTime): AirportBrief =
-        AirportBrief(
-            airport = airportDataSource.getByIcao(icao)!!,
+    private suspend fun createAirportBrief(icao: Icao, time: LocalDateTime): AirportBrief {
+        val airport = airportDataSource.getByIcao(icao)!!
+        return AirportBrief(
+            airport = airport,
             metarTaf = createMetarTaf(icao.code),
             turbulence = turbulenceDataSource.createTurbulence(icao),
-            isobaric = isobaricRepository.getIsobaricData
-                (
-                airportDataSource.getByIcao(icao)!!.position,
-                time = "A date and a time"
+            isobaric = isobaricRepository.getIsobaricData(
+                airport.position, time = "A date and a time"
             )
         )
+    }
 
     private suspend fun createMetarTaf(icao: String): MetarTaf {
         return tafmetarDataSource.fetchTafMetar(icao)
