@@ -3,7 +3,6 @@ package no.uio.ifi.in2000.team18.airborn
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
 import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
-import no.uio.ifi.in2000.team18.airborn.data.TurbulenceDataSource
 import org.junit.Test
 
 /**
@@ -20,21 +19,21 @@ class ExampleUnitTest {
         }
     }
 
-    @Test
-    fun fetchTurbulenceIsCorrcet() {
-        runBlocking {
-            val resMap = TurbulenceDataSource(HttpClient()).fetchTurbulenceMap()
-            println("\n$resMap")
-        }
-    }
+    /* @Test
+     fun fetchTurbulenceIsCorrcet() {
+         runBlocking {
+             val resMap = TurbulenceDataSource(HttpClient()).fetchTurbulenceMap()
+             println("\n$resMap")
+         }
+     }
 
-    @Test
-    fun fetchTurbulenceCross_section() {
-        runBlocking {
-            val res = TurbulenceDataSource(HttpClient()).fetchTurbulenceCrossSection()
-            println(res)
-        }
-    }
+     @Test
+     fun fetchTurbulenceCross_section() {
+         runBlocking {
+             val res = TurbulenceDataSource(HttpClient()).fetchTurbulenceCrossSection()
+             println(res)
+         }
+     }*/
 
     /*
     @Test

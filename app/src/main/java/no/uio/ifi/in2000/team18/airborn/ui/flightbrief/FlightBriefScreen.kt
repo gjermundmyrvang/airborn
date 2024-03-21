@@ -199,6 +199,14 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
             }
         }
     }
+    item {
+        Collapsible(header = "Weather", expanded = true) {
+            Column {
+                Text(text = airportBrief.weather[0].date)
+                Text(text = "${airportBrief.weather[0].weather[0].weatherDetails.air_temperature}")
+            }
+        }
+    }
 }
 
 
@@ -385,7 +393,8 @@ fun LightPreviewFlightBrief() {
                 ),
                 metarTaf = MetarTaf(listOf(Metar("Hello")), listOf()),
                 turbulence = null,
-                isobaric = null
+                isobaric = null,
+                weather = listOf()
             ),
             arrival = null,
             altArrivals = listOf(),

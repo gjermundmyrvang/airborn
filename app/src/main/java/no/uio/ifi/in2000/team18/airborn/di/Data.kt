@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.FlightbriefRepository
 import no.uio.ifi.in2000.team18.airborn.data.IsobaricRepository
+import no.uio.ifi.in2000.team18.airborn.data.LocationForecastRepository
 import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.TafmetarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.TurbulenceDataSource
@@ -22,13 +23,15 @@ class Data {
         turbulenceDataSource: TurbulenceDataSource,
         tafmetarDataSource: TafmetarDataSource,
         airportDataSource: AirportDataSource,
-        isobaricRepository: IsobaricRepository
+        isobaricRepository: IsobaricRepository,
+        locationForecastRepository: LocationForecastRepository,
     ): FlightbriefRepository =
         FlightbriefRepository(
             sigchartDataSource,
             turbulenceDataSource,
             tafmetarDataSource,
             airportDataSource,
-            isobaricRepository
+            isobaricRepository,
+            locationForecastRepository,
         )
 }
