@@ -10,6 +10,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/")
+        }
     }
 }
 

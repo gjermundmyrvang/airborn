@@ -50,6 +50,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    packaging {
+//        pickFirst("META-INF/INDEX.LIST")
+//        pickFirst("META-INF/DEPENDENCIES")
+        resources.excludes.add("META-INF/INDEX.LIST")
+        resources.excludes.add("META-INF/DEPENDENCIES")
+    }
 }
 
 dependencies {
@@ -71,6 +78,19 @@ dependencies {
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("androidx.navigation:navigation-compose:$navVersion")
+    implementation("edu.ucar:netcdf4:4.5.5") {
+        exclude(group = "commons-logging", module = "commons-logging")
+        exclude(group = "org.slf4j", module = "jcl-over-slf4j")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "com.google.guava", module = "listenablefuture")
+        exclude("META-INF/DEPENDENCIES")
+    }
+    runtimeOnly("edu.ucar:grib:4.5.5") {
+        exclude(group = "commons-logging", module = "commons-logging")
+        exclude(group = "org.slf4j", module = "jcl-over-slf4j")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude("META-INF/DEPENDENCIES")
+    }
     kapt("com.google.dagger:hilt-android-compiler:2.46")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
