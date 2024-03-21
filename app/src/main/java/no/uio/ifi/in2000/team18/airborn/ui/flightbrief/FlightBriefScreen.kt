@@ -22,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -171,7 +171,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                     },
                     contentDescription = "Image of turbulence map"
                 )
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.padding(all = 5.dp),
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.onBackground
@@ -261,7 +261,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                     },
                     contentDescription = "Image of ..."
                 )
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.padding(all = 5.dp),
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.onBackground
@@ -360,7 +360,7 @@ fun Collapsible(
                 content = content,
             )
         }
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .padding(start = 5.dp, end = 5.dp)
                 .fillMaxWidth(),
