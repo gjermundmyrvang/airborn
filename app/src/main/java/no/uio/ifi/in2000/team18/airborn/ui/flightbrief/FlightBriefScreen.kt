@@ -138,13 +138,26 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
     }
     item {
         Collapsible(header = "Isobaric data") {
-            Column {
-                Text(text = "Date and time:", fontWeight = FontWeight.Bold)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // data from isobaric layers, includes height TODO: a table or chart would be nice
                 Text(text = "${airportBrief.isobaric?.time}")
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Data:", fontWeight = FontWeight.Bold)
-                // data from isobaric layers, includes height TODO: a table or chart would be nice
-                Text(text = "${airportBrief.isobaric?.data}")
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("pressure", fontWeight = FontWeight.Bold)
+                    Text("temperature", fontWeight = FontWeight.Bold)
+                }
+                airportBrief.isobaric?.data?.forEach {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("${it.pressure}")
+                        Text("${it.temperature - 273.15}")
+                    }
+                }
             }
         }
     }
@@ -236,13 +249,26 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
     }
     item {
         Collapsible(header = "Isobaric data") {
-            Column {
-                Text(text = "Date and time:", fontWeight = FontWeight.Bold)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // data from isobaric layers, includes height TODO: a table or chart would be nice
                 Text(text = "${airportBrief.isobaric?.time}")
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Data:", fontWeight = FontWeight.Bold)
-                // data from isobaric layers, includes height TODO: a table or chart would be nice
-                Text(text = "${airportBrief.isobaric?.data}")
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("pressure", fontWeight = FontWeight.Bold)
+                    Text("temperature", fontWeight = FontWeight.Bold)
+                }
+                airportBrief.isobaric?.data?.forEach {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("${it.pressure}")
+                        Text("${it.temperature - 273.15}")
+                    }
+                }
             }
         }
     }
