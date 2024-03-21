@@ -4,12 +4,10 @@ import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
-class LocationForecastRepository(private val locationForecastDataSource: LocationForecastDataSource) { // Will eventually use Dagger&Hilt
-
+class LocationForecastRepository @Inject constructor(val locationForecastDataSource: LocationForecastDataSource) {
     suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
         val weatherData = locationForecastDataSource.fetchForecast(airport).properties.timeseries
         return mapToWeatherDay(weatherData)
@@ -32,14 +30,4 @@ class LocationForecastRepository(private val locationForecastDataSource: Locatio
             )
         }
     }
-}
-
-suspend fun main() {
-    val data = LocationForecastRepository(LocationForecastDataSource())
-    val airport = Airport(
-        icao = Icao("ENBN"),
-        name = "Brønnøysund airport, Brønnøy",
-        position = Position(60.1, 9.58)
-    )
-    println(data.getWeatherDays(airport))
 }

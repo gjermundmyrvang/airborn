@@ -13,7 +13,8 @@ class FlightbriefRepository(
     val turbulenceDataSource: TurbulenceDataSource,
     val tafmetarDataSource: TafmetarDataSource,
     val airportDataSource: AirportDataSource,
-    val isobaricRepository: IsobaricRepository
+    val isobaricRepository: IsobaricRepository,
+    val locationForecastRepository: LocationForecastRepository,
     // All the data sources
 ) {
     val flightbriefs: ConcurrentHashMap<String, Flightbrief> = ConcurrentHashMap()
@@ -47,7 +48,8 @@ class FlightbriefRepository(
             turbulence = turbulenceDataSource.createTurbulence(icao),
             isobaric = isobaricRepository.getIsobaricData(
                 airport.position, time = time
-            )
+            ),
+            weather = locationForecastRepository.getWeatherDays(airport)
         )
     }
 
