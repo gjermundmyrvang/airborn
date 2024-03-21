@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,8 +35,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,8 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,6 +55,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
+import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Flightbrief
@@ -213,10 +216,11 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
         }
     }
     item {
-        Collapsible(header = "Weather", expanded = true) {
-            Column {
-                Text(text = airportBrief.weather[0].date)
-                Text(text = "${airportBrief.weather[0].weather[0].weatherDetails.air_temperature}")
+        Collapsible(header = "Weather") {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                WeatherDayCard(weatherDay = airportBrief.weather[0])
             }
         }
     }
@@ -323,6 +327,15 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
             }
         }
     }
+    item {
+        Collapsible(header = "Weather") {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                WeatherDayCard(weatherDay = airportBrief.weather[0])
+            }
+        }
+    }
 }
 
 @Composable
@@ -362,7 +375,7 @@ fun OverallInfoTab(flightbrief: Flightbrief) {
 fun Collapsible(
     header: String, expanded: Boolean = false, content: @Composable BoxScope.() -> Unit
 ) {
-    var open by remember {
+    var open by rememberSaveable {
         mutableStateOf(expanded)
     }
     Column(
@@ -404,9 +417,49 @@ fun Collapsible(
     }
 }
 
+@Composable
+fun WeatherDayCard(weatherDay: WeatherDay) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = weatherDay.date,
+                textAlign = TextAlign.Center,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+            weatherDay.weather.forEach { hour ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "${hour.hour}")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = "${hour.weatherDetails.air_temperature}")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = "${hour.weatherDetails.air_pressure_at_sea_level}")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = "${hour.weatherDetails.wind_speed}")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = "${hour.weatherDetails.relative_humidity}")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = "${hour.weatherDetails.cloud_area_fraction}")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = "${hour.weatherDetails.wind_from_direction}")
+                }
+            }
+        }
+    }
+}
 
 @Preview(showSystemUi = true)
-@PreviewLightDark
 @Composable
 fun LightPreviewFlightBrief() {
     FlightBreifScreenContent(
