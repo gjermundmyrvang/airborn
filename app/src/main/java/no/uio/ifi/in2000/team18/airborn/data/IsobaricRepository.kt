@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team18.airborn.data
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
+import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlin.math.pow
 
@@ -15,11 +16,11 @@ class IsobaricRepository @Inject constructor(
     private val k: Double = 1 / 5.25579 // exponent
     private val l: Double = 0.0065 // temperature lapse rate (K/m)
 
-    fun getIsobaricData(position: Position, time: String): IsobaricData {
+    fun getIsobaricData(position: Position, time: LocalDateTime): IsobaricData {
         // TODO: fetch isobaricData from Datasource
-        val isobaricData: IsobaricData = IsobaricData( // example
+        val isobaricData = IsobaricData( // example
             Position(60.81, 11.06),
-            "unknown time",
+            LocalDateTime.now(), // TODO: should time be nullable
             listOf(
                 IsobaricLayer(850.0, -0.83, 199.11, 3.51),
                 IsobaricLayer(800.0, -8.36, 227.14, 9.35),

@@ -46,7 +46,7 @@ class FlightbriefRepository(
             metarTaf = createMetarTaf(icao.code),
             turbulence = turbulenceDataSource.createTurbulence(icao),
             isobaric = isobaricRepository.getIsobaricData(
-                airport.position, time = "A date and a time"
+                airport.position, time = time
             )
         )
     }
