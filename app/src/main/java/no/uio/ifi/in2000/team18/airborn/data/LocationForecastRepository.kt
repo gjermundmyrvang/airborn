@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 
-class LocationForecastRepository @Inject constructor(val locationForecastDataSource: LocationForecastDataSource) {
+class LocationForecastRepository @Inject constructor(private val locationForecastDataSource: LocationForecastDataSource) {
     suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
         val weatherData = locationForecastDataSource.fetchForecast(airport).properties.timeseries
         return mapToWeatherDay(weatherData)
