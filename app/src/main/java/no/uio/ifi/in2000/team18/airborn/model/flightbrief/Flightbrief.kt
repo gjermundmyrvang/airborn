@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
+import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 
 data class Flightbrief(
     val departure: AirportBrief,
@@ -14,6 +15,7 @@ data class AirportBrief(
     val airport: Airport,
     val metarTaf: MetarTaf?,
     val turbulence: TurbulenceMapAndCross?,
+    val isobaric: IsobaricData?
 )
 
 

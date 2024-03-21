@@ -8,11 +8,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class FlightbriefRepository constructor(
+class FlightbriefRepository(
     val sigchartDataSource: SigchartDataSource,
     val turbulenceDataSource: TurbulenceDataSource,
     val tafmetarDataSource: TafmetarDataSource,
     val airportDataSource: AirportDataSource,
+    val isobaricRepository: IsobaricRepository
     // All the data sources
 ) {
     val flightbriefs: ConcurrentHashMap<String, Flightbrief> = ConcurrentHashMap()
@@ -37,12 +38,18 @@ class FlightbriefRepository constructor(
         return id
     }
 
-    private suspend fun createAirportBrief(icao: Icao, time: LocalDateTime): AirportBrief =
-        AirportBrief(
-            airport = airportDataSource.getByIcao(icao)!!,
+    // TODO: change time format?
+    private suspend fun createAirportBrief(icao: Icao, time: LocalDateTime): AirportBrief {
+        val airport = airportDataSource.getByIcao(icao)!!
+        return AirportBrief(
+            airport = airport,
             metarTaf = createMetarTaf(icao.code),
             turbulence = turbulenceDataSource.createTurbulence(icao),
+            isobaric = isobaricRepository.getIsobaricData(
+                airport.position, time = time
+            )
         )
+    }
 
     private suspend fun createMetarTaf(icao: String): MetarTaf {
         return tafmetarDataSource.fetchTafMetar(icao)
