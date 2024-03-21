@@ -6,13 +6,17 @@ data class LocationData(
 )
 
 data class WeatherDay(
+    val date: String,
     val weather: List<WeatherHour>
 )
 
 data class WeatherHour(
     val hour: Int,
-
-    )
+    val weatherDetails: Details,
+    val next_12_hours: SummaryData? = null,
+    val next_1_hours: SummaryData? = null,
+    val next_6_hours: SummaryData? = null
+)
 
 data class Meta(
     val updated_at: String,
