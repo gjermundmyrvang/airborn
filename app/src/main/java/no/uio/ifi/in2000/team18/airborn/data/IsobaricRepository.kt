@@ -7,14 +7,16 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlin.math.pow
 
+
+const val TEMPERATURE_LAPSE_RATE: Double = 0.0065 // in (K/m)
+const val PRESSURE_CALCULATION_EXPONENT: Double = 1 / 5.25579
+
 class IsobaricRepository @Inject constructor(
     /** TODO: connect to relevant DataSources,
      * probably locationForecast and grib
      */
 ) {
     // constants for height calculation
-    private val k: Double = 1 / 5.25579 // exponent
-    private val l: Double = 0.0065 // temperature lapse rate (K/m)
 
     fun getIsobaricData(position: Position, time: LocalDateTime): IsobaricData {
         // TODO: fetch isobaricData from Datasource
@@ -49,6 +51,7 @@ class IsobaricRepository @Inject constructor(
         layer: IsobaricLayer,
         refTemperature: Double = 288.15,
         pressureLevelZero: Double = 1013.25,
-    ) = layer.height ?: ( // calculate height
-            refTemperature * (1 - (layer.pressure / pressureLevelZero).pow(k)) / l)
+    ) = layer.height ?: (refTemperature * (1 - (layer.pressure / pressureLevelZero).pow(
+        PRESSURE_CALCULATION_EXPONENT
+    )) / TEMPERATURE_LAPSE_RATE)
 }
