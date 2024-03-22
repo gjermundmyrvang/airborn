@@ -148,8 +148,8 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("height", fontWeight = FontWeight.Bold)
-                    Text("pressure", fontWeight = FontWeight.Bold)
                     Text("temperature", fontWeight = FontWeight.Bold)
+                    Text("pressure", fontWeight = FontWeight.Bold)
                 }
                 airportBrief.isobaric?.data?.forEach {
                     Row(
@@ -261,8 +261,8 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("height", fontWeight = FontWeight.Bold)
-                    Text("pressure", fontWeight = FontWeight.Bold)
                     Text("temperature", fontWeight = FontWeight.Bold)
+                    Text("pressure", fontWeight = FontWeight.Bold)
                 }
                 airportBrief.isobaric?.data?.forEach {
                     Row(
