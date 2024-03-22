@@ -61,6 +61,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import kotlin.math.roundToInt
 
 @Preview(showSystemUi = true)
 @Composable
@@ -146,6 +147,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    Text("height", fontWeight = FontWeight.Bold)
                     Text("pressure", fontWeight = FontWeight.Bold)
                     Text("temperature", fontWeight = FontWeight.Bold)
                 }
@@ -154,8 +156,9 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("${it.pressure}")
-                        Text("${it.temperature - 273.15}")
+                        Text("%.0f m".format(it.height))
+                        Text("%.1f c".format(it.temperature - 273.15))
+                        Text("%.0f hPa".format(it.pressure))
                     }
                 }
             }
@@ -257,6 +260,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    Text("height", fontWeight = FontWeight.Bold)
                     Text("pressure", fontWeight = FontWeight.Bold)
                     Text("temperature", fontWeight = FontWeight.Bold)
                 }
@@ -265,8 +269,9 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("${it.pressure}")
-                        Text("${it.temperature - 273.15}")
+                        Text("%.0f m".format(it.height))
+                        Text("%.1f c".format(it.temperature - 273.15))
+                        Text("%.0f hPa".format(it.pressure))
                     }
                 }
             }
