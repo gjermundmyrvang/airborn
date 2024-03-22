@@ -4,6 +4,7 @@ plugins {
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
 
+    id("org.jetbrains.dokka") version "1.9.20"
 }
 
 android {
@@ -78,6 +79,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("androidx.navigation:navigation-compose:$navVersion")
+    dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.9.20")
     implementation("edu.ucar:netcdf4:4.5.5") {
         exclude(group = "commons-logging", module = "commons-logging")
         exclude(group = "org.slf4j", module = "jcl-over-slf4j")
