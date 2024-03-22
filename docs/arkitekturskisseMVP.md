@@ -9,6 +9,10 @@ graph TD
     dataSigchart[SigchartDataSource]
     dataTurbulence[TurbulenceDataSource]
     dataMetarTaf[TafMetarDataSource]
+    dataIsobaricGrib[GribDataSource]
+    isobaricRepo[IsobaricRepository]
+    dataForecast[LocationForecastDataSource]
+    forecastRepo[LocationForecastRepository]
 
     subgraph view[View]
         viewHome
@@ -22,10 +26,14 @@ graph TD
 
     subgraph data[Data]
         flightRepo
+        isobaricRepo
         dataAirport
         dataSigchart
         dataTurbulence
         dataMetarTaf
+        dataIsobaricGrib
+        dataForecast
+        forecastRepo
     end
 
     viewHome --> viewModelHome
@@ -37,11 +45,14 @@ graph TD
     flightRepo --> dataSigchart
     flightRepo --> dataTurbulence
     flightRepo --> dataMetarTaf
-    classDef viewColor fill: #23FF00
-    classDef viewModelColor fill: #00FFFB
-    classDef dataColor fill: #FF0000
-    classDef title font-size: 22px
-    classDef paddingData padding-right: 2em;
+    flightRepo --> isobaricRepo
+    flightRepo --> forecastRepo
+    isobaricRepo --> dataIsobaricGrib
+    forecastRepo --> dataForecast
+    classDef viewColor fill: #3CDA84
+    classDef viewModelColor fill: #4383F2
+    classDef dataColor fill: #082E42
+    classDef title font-size: 22px, color: #FAFAFA
     class view title
     class viewmodel title
     class data title
