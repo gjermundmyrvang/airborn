@@ -22,8 +22,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +55,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
+import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Flightbrief
@@ -220,7 +220,9 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                WeatherDayCard(weatherDay = airportBrief.weather[0])
+                WeatherDayCard(
+                    weatherDay = airportBrief.weather[0]
+                )
             }
         }
     }
@@ -419,42 +421,72 @@ fun Collapsible(
 
 @Composable
 fun WeatherDayCard(weatherDay: WeatherDay) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth()
+    var expand by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    val originalHourList = weatherDay.weather
+    val groupedHourList = weatherDay.weather.chunked(6)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Text(
+            text = weatherDay.date,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.End)
+        )
+        groupedHourList.forEach { hour ->
+            val firstHourInterval = hour.first()
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "${firstHourInterval.hour}-${hour.last().hour}")
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = "${firstHourInterval.weatherDetails.air_temperature}")
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = "${firstHourInterval.weatherDetails.air_pressure_at_sea_level}")
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = "${firstHourInterval.weatherDetails.wind_speed}")
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = "${firstHourInterval.weatherDetails.relative_humidity}")
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = "${firstHourInterval.weatherDetails.cloud_area_fraction}")
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = "${firstHourInterval.weatherDetails.wind_from_direction}")
+            }
+            HorizontalDivider(
+                modifier = Modifier
+                    .padding(start = 5.dp, end = 5.dp),
+                thickness = 2.dp,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+    }
+}
+
+@Composable
+fun WeatherHourScreen(weatherHour: WeatherHour) {
+    Card(
+        modifier = Modifier
+            .padding(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = weatherDay.date,
-                textAlign = TextAlign.Center,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-            weatherDay.weather.forEach { hour ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "${hour.hour}")
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = "${hour.weatherDetails.air_temperature}")
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = "${hour.weatherDetails.air_pressure_at_sea_level}")
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = "${hour.weatherDetails.wind_speed}")
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = "${hour.weatherDetails.relative_humidity}")
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = "${hour.weatherDetails.cloud_area_fraction}")
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = "${hour.weatherDetails.wind_from_direction}")
-                }
-            }
+
         }
     }
 }
