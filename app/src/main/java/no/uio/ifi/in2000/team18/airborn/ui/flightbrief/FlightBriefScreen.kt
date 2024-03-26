@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -25,11 +26,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -353,15 +356,69 @@ fun Weathersection(weather: List<WeatherDay>) {
         WeatherNowSection(weatherHour = weather[0].weather[0])
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
         WeatherTodaySection(weatherDay = weather[0])
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+        WeatherWeekSection(weatherDays = weather)
+    }
+}
+
+@Composable
+fun WeatherWeekSection(weatherDays: List<WeatherDay>) {
+    Box {
+        LazyRow(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items(weatherDays) { day ->
+                WeatherDayCard(weatherDay = day)
+                Spacer(modifier = Modifier.width(3.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun WeatherDayCard(weatherDay: WeatherDay) {
+    val hourNow = weatherDay.weather[0] /*TODO find current hour*/
+    val summary =
+        hourNow.next_12_hours /* TODO if null, check next_6_hours and if null again check next_1_hour*/
+    val highestTemp =
+        weatherDay.weather.maxByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature // This is fucked
+    val lowestTemp =
+        weatherDay.weather.minByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature
+    OutlinedCard(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        modifier = Modifier.padding(top = 5.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = weatherDay.date.substring(0, 3) + ".",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = summary?.summary?.symbol_code
+                    ?: "Weathericon"
+            )
+            Text(
+                text = "$highestTemp\u2103/$lowestTemp\u2103",
+                fontSize = 15.sp,
+            )
+        }
     }
 }
 
 @Composable
 fun WeatherTodaySection(weatherDay: WeatherDay) {
     val weatherHours = weatherDay.weather
-    Box(
-
-    ) {
+    Box {
         LazyRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
