@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -17,12 +18,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -43,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
@@ -229,13 +233,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
     }
     item {
         Collapsible(header = "Weather") {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                WeatherDayCard(
-                    weatherDay = airportBrief.weather[0]
-                )
-            }
+            Weathersection(weather = airportBrief.weather)
         }
     }
 }
@@ -343,12 +341,135 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
             }
         }
     }
-    item {
-        Collapsible(header = "Weather") {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                WeatherDayCard(weatherDay = airportBrief.weather[0])
+}
+
+@Composable
+fun Weathersection(weather: List<WeatherDay>) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        WeatherNowSection(weatherHour = weather[0].weather[0])
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+        WeatherTodaySection(weatherDay = weather[0])
+    }
+}
+
+@Composable
+fun WeatherTodaySection(weatherDay: WeatherDay) {
+    val weatherHours = weatherDay.weather
+    Box(
+
+    ) {
+        LazyRow(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items(weatherHours) { hour ->
+                WeatherHourColumn(weatherHour = hour)
+            }
+        }
+    }
+}
+
+@Composable
+fun WeatherHourColumn(weatherHour: WeatherHour) {
+    val summary = weatherHour.next_1_hours
+    Column(
+        modifier = Modifier
+            .padding(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(text = "${weatherHour.hour}:00")
+        if (summary != null) {
+            Text(
+                text = "${summary.details["precipitation_amount"]}%",
+                fontSize = 12.sp,
+            )
+        } else {
+            Text(text = " ")
+        }
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = summary?.summary?.symbol_code
+                ?: "Weathericon"
+        )
+        Text(
+            text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+fun WeatherNowSection(weatherHour: WeatherHour) {
+    val summary = weatherHour.next_1_hours
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    text = "Now",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = summary?.summary?.symbol_code
+                            ?: "Weathericon"
+                    )
+                }
+            }
+            Column {
+                summary?.summary?.symbol_code?.let {
+                    Text(
+                        text = it,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
+                if (summary != null) {
+                    Text(
+                        text = "Rain: ${summary.details["precipitation_amount"]}%",
+                        fontSize = 12.sp
+                    )
+                }
+                Text(
+                    text = "Wind: ${weatherHour.weatherDetails.wind_speed}m/s from: ${weatherHour.weatherDetails.wind_from_direction}degrees",
+                    fontSize = 12.sp
+                )
+                Text(
+                    text = "Relative Humidity: ${weatherHour.weatherDetails.relative_humidity}%",
+                    fontSize = 12.sp
+                )
+                Text(
+                    text = "Pressure: ${weatherHour.weatherDetails.air_pressure_at_sea_level}hPa",
+                    fontSize = 12.sp
+                )
+                Text(
+                    text = "Cloud fraction: ${weatherHour.weatherDetails.cloud_area_fraction}%",
+                    fontSize = 12.sp
+                )
             }
         }
     }
@@ -430,78 +551,6 @@ fun Collapsible(
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.onBackground
         )
-    }
-}
-
-@Composable
-fun WeatherDayCard(weatherDay: WeatherDay) {
-    var expand by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    val originalHourList = weatherDay.weather
-    val groupedHourList = weatherDay.weather.chunked(6)
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(5.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Text(
-            text = weatherDay.date,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.End)
-        )
-        groupedHourList.forEach { hour ->
-            val firstHourInterval = hour.first()
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(5.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "${firstHourInterval.hour}-${hour.last().hour}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.air_temperature}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.air_pressure_at_sea_level}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.wind_speed}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.relative_humidity}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.cloud_area_fraction}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.wind_from_direction}")
-            }
-            HorizontalDivider(
-                modifier = Modifier
-                    .padding(start = 5.dp, end = 5.dp),
-                thickness = 2.dp,
-                color = MaterialTheme.colorScheme.outline
-            )
-        }
-    }
-}
-
-@Composable
-fun WeatherHourScreen(weatherHour: WeatherHour) {
-    Card(
-        modifier = Modifier
-            .padding(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-
-        }
     }
 }
 
