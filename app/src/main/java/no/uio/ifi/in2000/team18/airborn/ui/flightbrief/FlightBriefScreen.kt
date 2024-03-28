@@ -353,9 +353,9 @@ fun Weathersection(weather: List<WeatherDay>) {
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        WeatherNowSection(weatherHour = weather[0].weather[0])
+        WeatherNowSection(weatherHour = weather.first().weather.first())
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
-        WeatherTodaySection(weatherDay = weather[0])
+        WeatherTodaySection(weatherDay = weather.first())
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
         WeatherWeekSection(weatherDays = weather)
     }
@@ -367,16 +367,21 @@ fun WeatherWeekSection(weatherDays: List<WeatherDay>) {
         LazyRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            items(weatherDays) { day ->
-                WeatherDayCard(weatherDay = day)
-                Spacer(modifier = Modifier.width(3.dp))
+            item {
+                val today = weatherDays.first()
+                WeatherDayCard(weatherDay = today, selected = true, today = "today")
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+            items(weatherDays.subList(1, weatherDays.size)) { day ->
+                WeatherDayCard(weatherDay = day, today = null)
+                Spacer(modifier = Modifier.width(10.dp))
             }
         }
     }
 }
 
 @Composable
-fun WeatherDayCard(weatherDay: WeatherDay) {
+fun WeatherDayCard(weatherDay: WeatherDay, selected: Boolean = false, today: String?) {
     val hourNow = weatherDay.weather[0] /*TODO find current hour*/
     val summary =
         hourNow.next_12_hours /* TODO if null, check next_6_hours and if null again check next_1_hour*/
@@ -388,17 +393,23 @@ fun WeatherDayCard(weatherDay: WeatherDay) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        modifier = Modifier.padding(top = 5.dp)
+        border = BorderStroke(
+            width = if (selected) 2.dp else 1.dp,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+        ),
+        modifier = Modifier
+            .padding(top = 5.dp),
+        onClick = { /* TODO this card being selected by user for showing data related to this date in the weathersections */ },
     ) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(5.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = weatherDay.date.substring(0, 3) + ".",
+                text = today ?: (weatherDay.date.substring(0, 3) + "."),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -432,20 +443,24 @@ fun WeatherTodaySection(weatherDay: WeatherDay) {
 @Composable
 fun WeatherHourColumn(weatherHour: WeatherHour) {
     val summary = weatherHour.next_1_hours
+    val precipitationAmount = summary?.details?.get("precipitation_amount")
     Column(
         modifier = Modifier
             .padding(5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.SpaceAround
     ) {
         Text(text = "${weatherHour.hour}:00")
-        if (summary != null) {
+        if ((precipitationAmount != null) && (precipitationAmount > 1)) {
             Text(
-                text = "${summary.details["precipitation_amount"]}%",
-                fontSize = 12.sp,
+                text = "${precipitationAmount}%",
+                fontSize = 16.sp,
+                color = Color.Blue,
             )
         } else {
-            Text(text = " ")
+            Text(
+                text = " "
+            )
         }
         Image(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
@@ -455,7 +470,7 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
         Text(
             text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
             fontWeight = FontWeight.Bold,
-            fontSize = 12.sp
+            fontSize = 16.sp
         )
     }
 }
