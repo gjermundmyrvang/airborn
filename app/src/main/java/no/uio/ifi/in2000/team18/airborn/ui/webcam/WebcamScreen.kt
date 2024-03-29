@@ -1,7 +1,10 @@
 package no.uio.ifi.in2000.team18.airborn.ui.webcam
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,19 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,14 +38,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WebcamSection(webcams: List<Webcam>) {
-    var expanded by remember { mutableStateOf(false) }
     if (webcams.isEmpty()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -54,7 +55,7 @@ fun WebcamSection(webcams: List<Webcam>) {
             )
         }
     } else {
-        var currentWebcam by remember { mutableStateOf(webcams.first()) }
+        var currentWebcam by rememberSaveable { mutableStateOf(webcams.first()) }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -89,39 +90,51 @@ fun WebcamSection(webcams: List<Webcam>) {
                 hyperlinks = listOf("https://www.windy.com/", "https://www.windy.com/webcams/add")
             )
             Spacer(modifier = Modifier.height(16.dp))
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = {
-                    expanded = it
-                },
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(500.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                OutlinedTextField(
-                    value = currentWebcam.title,
-                    onValueChange = {
-                        expanded = true
-                    },
-                    readOnly = true,
-                    label = { Text("Change webcam") },
-                    modifier = Modifier.menuAnchor()
-                )
-                ExposedDropdownMenu(expanded = expanded, onDismissRequest = {
-                    expanded = false
-                }) {
-                    webcams.forEach { webcam ->
-                        DropdownMenuItem(
-                            {
-                                Text(webcam.title)
-                            },
-                            onClick = {
-                                currentWebcam = webcam
-                                expanded = false
-                            },
-                        )
-                        HorizontalDivider(
-                            thickness = 1.dp, color = MaterialTheme.colorScheme.outline
-                        )
+                LazyColumn(content = {
+                    items(webcams) { webcam ->
+                        NearbyWebcam(
+                            webcam = webcam,
+                            current = currentWebcam
+                        ) { clickedWebcam ->
+                            currentWebcam = clickedWebcam
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
-                }
+                })
+            }
+        }
+    }
+}
+
+@Composable
+fun NearbyWebcam(
+    webcam: Webcam, current: Webcam, onWebcamClicked: (Webcam) -> Unit
+) {
+    val borderColor =
+        if (webcam == current) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.outline
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onWebcamClicked(webcam) },
+        border = BorderStroke(1.dp, color = borderColor)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = webcam.images.current.thumbnail,
+                contentDescription = webcam.title,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(text = webcam.title, fontWeight = FontWeight.Bold)
+                Text(text = "updated: " + webcam.lastUpdatedOn, fontSize = 15.sp)
             }
         }
     }
