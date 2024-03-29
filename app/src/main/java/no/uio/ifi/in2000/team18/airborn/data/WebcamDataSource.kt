@@ -8,15 +8,17 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.serialization.gson.gson
+import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.WebcamResponse
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 
 class WebcamDataSource {
     private var radius: Int = 50
+    private val apiKey = R.string.api_key
     val client: HttpClient = HttpClient(CIO) {
         defaultRequest {
-            header("x-windy-api-key", "titERHFlGOLQGIILEUnufyWHQYcAlbDO")
+            header("x-windy-api-key", apiKey)
         }
         install(ContentNegotiation) {
             gson()
