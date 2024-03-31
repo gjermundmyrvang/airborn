@@ -16,7 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefScreen
-import no.uio.ifi.in2000.team18.airborn.ui.home.HomeScreen2
+import no.uio.ifi.in2000.team18.airborn.ui.home.HomeScreen
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 val LocalNavController = compositionLocalOf<NavController> {
@@ -48,7 +48,7 @@ fun Navigation() {
     CompositionLocalProvider(LocalNavController provides navController) {
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
-                HomeScreen2()
+                HomeScreen()
             }
             composable("flightbrief/{flightbriefId}") {
                 FlightBriefScreen()

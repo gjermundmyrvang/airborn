@@ -41,7 +41,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen2(
+fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
