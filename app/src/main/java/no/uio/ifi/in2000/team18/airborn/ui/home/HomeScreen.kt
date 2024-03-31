@@ -137,6 +137,7 @@ private fun DepartureOnlyContent(
         items(airports) { airport ->
             AirportInfoRow(item = airport) { clickedAirport ->
                 viewModel.selectDepartureAirport(clickedAirport.icao.code)
+                keyboardController?.hide()
                 scope.launch {
                     val id = viewModel.generateFlightbrief()
                     navController.navigate("flightbrief/$id")
@@ -186,14 +187,13 @@ private fun DepartureAndArrivalContent(
     LazyColumn(modifier = Modifier.imePadding(), content = {
         items(airports) { airport ->
             AirportInfoRow(item = airport) { clickedAirport ->
+                keyboardController?.hide()
                 if (!departureSelected) {
                     departureSelected = true
                     viewModel.selectDepartureAirport(clickedAirport.icao.code)
-                    keyboardController?.hide()
                 } else {
                     arrivalSelected = true
                     viewModel.selectArrivalAirport(clickedAirport.icao.code)
-                    keyboardController?.hide()
                 }
             }
         }
