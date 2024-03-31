@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,21 +14,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -45,55 +56,153 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
-    val airports = state.airports
-    val navController = LocalNavController.current
-    val keyboardController = LocalSoftwareKeyboardController.current
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    val scope = rememberCoroutineScope()
-
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
     ) {
-        BottomSheetScaffold(scaffoldState = bottomSheetScaffoldState, sheetContent = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                OutlinedTextField(
-                    value = state.airportInput,
-                    onValueChange = {
-                        viewModel.filterAirports(it)
-                    },
-                    singleLine = true,
-                    label = { Text("Departure airport") },
-                    keyboardActions = KeyboardActions(onDone = {
-                        keyboardController?.hide()
-                    }),
-                )
-                LazyColumn(modifier = modifier.imePadding(), content = {
-                    items(airports) { airport ->
-                        AirportInfoRow(item = airport) { clickedAirport ->
-                            viewModel.selectAirport(clickedAirport.icao.code)
-                            scope.launch {
-                                val id = viewModel.generateFlightbrief()
-                                navController.navigate("flightbrief/$id")
-                            }
-                        }
+        BottomSheetScaffold(
+            scaffoldState = bottomSheetScaffoldState,
+            sheetContent = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CustomTabRow(
+                        selectedIndex = selectedTabIndex,
+                        onSelectedIndexChanged = { newTabIndex ->
+                            selectedTabIndex = newTabIndex
+                        })
+                    when (selectedTabIndex) {
+                        0 -> DepartureOnlyContent(
+                            modifier = modifier
+                                .padding(start = 5.dp, end = 5.dp)
+                                .fillMaxWidth(),
+                            viewModel = viewModel
+                        )
+
+                        1 -> DepartureAndArrivalContent(
+                            modifier = modifier
+                                .padding(start = 5.dp, end = 5.dp)
+                                .fillMaxWidth(),
+                            viewModel = viewModel
+                        )
                     }
-                })
+                }
+            },
+            sheetPeekHeight = 300.dp,
+            sheetShadowElevation = 5.dp,
+            sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            content = { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .padding(paddingValues = paddingValues)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 80.sp
+                    )
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun DepartureOnlyContent(
+    modifier: Modifier,
+    viewModel: HomeViewModel,
+) {
+    val state by viewModel.state.collectAsState()
+    val airports = state.airports
+    val navController = LocalNavController.current
+    val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    OutlinedTextField(
+        value = state.departureAirportInput,
+        modifier = modifier,
+        onValueChange = {
+            viewModel.filterDepartureAirports(it)
+        },
+        singleLine = true,
+        label = { Text("Departure airport") },
+        keyboardActions = KeyboardActions(onDone = {
+            keyboardController?.hide()
+        }),
+    )
+    LazyColumn(modifier = Modifier.imePadding(), content = {
+        items(airports) { airport ->
+            AirportInfoRow(item = airport) { clickedAirport ->
+                viewModel.selectDepartureAirport(clickedAirport.icao.code)
+                scope.launch {
+                    val id = viewModel.generateFlightbrief()
+                    navController.navigate("flightbrief/$id")
+                }
             }
-        }, sheetPeekHeight = 300.dp, content = {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 80.sp
-                )
+        }
+    })
+}
+
+@Composable
+private fun DepartureAndArrivalContent(
+    modifier: Modifier,
+    viewModel: HomeViewModel,
+) {
+    val state by viewModel.state.collectAsState()
+    val airports = state.airports
+    val navController = LocalNavController.current
+    var departureSelected by remember { mutableStateOf(false) }
+    var arrivalSelected by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    OutlinedTextField(
+        value = state.departureAirportInput,
+        modifier = modifier,
+        onValueChange = {
+            viewModel.filterDepartureAirports(it)
+        },
+        singleLine = true,
+        label = { Text("Departure airport") },
+        keyboardActions = KeyboardActions(onDone = {
+            keyboardController?.hide()
+        }),
+    )
+    OutlinedTextField(
+        value = state.arrivalAirportInput,
+        modifier = modifier,
+        onValueChange = {
+            viewModel.filterArrivalAirports(it)
+        },
+        singleLine = true,
+        enabled = departureSelected,
+        label = { Text("Arrival airport") },
+        keyboardActions = KeyboardActions(onDone = {
+            keyboardController?.hide()
+        }),
+    )
+    LazyColumn(modifier = Modifier.imePadding(), content = {
+        items(airports) { airport ->
+            AirportInfoRow(item = airport) { clickedAirport ->
+                if (!departureSelected) {
+                    departureSelected = true
+                    viewModel.selectDepartureAirport(clickedAirport.icao.code)
+                    keyboardController?.hide()
+                } else {
+                    arrivalSelected = true
+                    viewModel.selectArrivalAirport(clickedAirport.icao.code)
+                    keyboardController?.hide()
+                }
             }
-        })
+        }
+    })
+    LaunchedEffect(departureSelected, arrivalSelected) {
+        if (departureSelected && arrivalSelected) {
+            val id = viewModel.generateFlightbrief()
+            navController.navigate("flightbrief/$id")
+        }
     }
 }
 
@@ -127,6 +236,42 @@ private fun AirportInfoRow(
                     color = Color.Black
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CustomTabRow(selectedIndex: Int, onSelectedIndexChanged: (Int) -> Unit) {
+    val list = listOf("Departure", "Departure/Arrival")
+
+    TabRow(selectedTabIndex = selectedIndex,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier
+            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .clip(RoundedCornerShape(50)),
+        indicator = {
+            Box {}
+        }) {
+        list.forEachIndexed { index, text ->
+            val selected = selectedIndex == index
+            Tab(modifier = if (selected) Modifier
+                .clip(RoundedCornerShape(50))
+                .background(
+                    MaterialTheme.colorScheme.onBackground
+                )
+            else Modifier
+                .clip(RoundedCornerShape(50))
+                .background(
+                    Color.Transparent
+                ),
+                selected = selected,
+                onClick = { run { onSelectedIndexChanged(index) } },
+                text = {
+                    Text(
+                        text = text,
+                        color = if (selected) Color.White else MaterialTheme.colorScheme.onBackground
+                    )
+                })
         }
     }
 }

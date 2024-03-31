@@ -16,11 +16,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    val airportDataSource: AirportDataSource,
-    val flightbriefRepository: FlightbriefRepository,
+    private val airportDataSource: AirportDataSource,
+    private val flightbriefRepository: FlightbriefRepository,
 ) : ViewModel() {
     data class UiState(
-        val airportInput: String = "", val airports: List<Airport> = listOf()
+        val departureAirportInput: String = "",
+        val arrivalAirportInput: String = "",
+        val airports: List<Airport> = listOf(),
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -28,29 +30,42 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val airports = airportDataSource.airports
             _state.update {
                 it.copy(
-                    airports = airports
+                    airports = airportDataSource.airports
                 )
             }
         }
     }
 
-    fun filterAirports(input: String) {
+    fun filterDepartureAirports(input: String) {
         _state.update {
             it.copy(
-                airportInput = input,
+                departureAirportInput = input,
                 airports = airportDataSource.search(input),
             )
         }
     }
 
-    fun selectAirport(airport: String) = _state.update { it.copy(airportInput = airport) }
+    fun filterArrivalAirports(input: String) {
+        _state.update {
+            it.copy(
+                arrivalAirportInput = input,
+                airports = airportDataSource.search(input),
+            )
+        }
+    }
+
+    fun selectDepartureAirport(airport: String) =
+        _state.update { it.copy(departureAirportInput = airport) }
+
+    fun selectArrivalAirport(airport: String) =
+        _state.update { it.copy(arrivalAirportInput = airport) }
+
 
     suspend fun generateFlightbrief(): String = flightbriefRepository.createFlightbrief(
-        Icao(state.value.airportInput),
-        if (state.value.airportInput.isEmpty()) null else Icao(state.value.airportInput),
+        Icao(state.value.departureAirportInput),
+        if (state.value.arrivalAirportInput.isEmpty()) null else Icao(state.value.arrivalAirportInput),
         LocalDateTime.now()
     )
 }
