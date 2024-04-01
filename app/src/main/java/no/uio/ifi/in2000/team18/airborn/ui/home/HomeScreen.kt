@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -61,12 +62,16 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
     ) {
         BottomSheetScaffold(
+            modifier = modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             scaffoldState = bottomSheetScaffoldState,
             sheetContent = {
                 Column(
+                    modifier = Modifier
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CustomTabRow(
@@ -136,8 +141,8 @@ private fun DepartureOnlyContent(
     LazyColumn(modifier = Modifier.imePadding(), content = {
         items(airports) { airport ->
             AirportInfoRow(item = airport) { clickedAirport ->
-                viewModel.selectDepartureAirport(clickedAirport.icao.code)
                 keyboardController?.hide()
+                viewModel.selectDepartureAirport(clickedAirport.icao.code)
                 scope.launch {
                     val id = viewModel.generateFlightbrief()
                     navController.navigate("flightbrief/$id")
@@ -238,6 +243,7 @@ private fun AirportInfoRow(
             }
         }
     }
+    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
 }
 
 @Composable
@@ -247,7 +253,7 @@ private fun CustomTabRow(selectedIndex: Int, onSelectedIndexChanged: (Int) -> Un
     TabRow(selectedTabIndex = selectedIndex,
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         modifier = Modifier
-            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .padding(vertical = 4.dp, horizontal = 5.dp)
             .clip(RoundedCornerShape(50)),
         indicator = {
             Box {}
