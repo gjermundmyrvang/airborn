@@ -64,7 +64,6 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
-import kotlin.math.roundToInt
 
 @Preview(showSystemUi = true)
 @Composable
@@ -78,11 +77,21 @@ fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
 
     when (val flightbrief = state.flightbrief) {
         is LoadingState.Loading -> {
-            /* TODO: Show spinner */
+            LoadingScreen()
         }
 
         is LoadingState.Error -> Text("Error", color = Color.Red)
         is LoadingState.Success -> FlightBreifScreenContent(flightbrief = flightbrief.value)
+    }
+}
+
+@Composable
+fun LoadingScreen() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "LOADING...")
     }
 }
 
