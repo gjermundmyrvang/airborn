@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
-import no.uio.ifi.in2000.team18.airborn.data.FlightbriefRepository
+import no.uio.ifi.in2000.team18.airborn.data.FlightBriefRepository
 import no.uio.ifi.in2000.team18.airborn.data.IsobaricRepository
 import no.uio.ifi.in2000.team18.airborn.data.LocationForecastRepository
 import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
@@ -18,15 +18,15 @@ import javax.inject.Singleton
 class Data {
     @Provides
     @Singleton
-    fun provideFlightbriefRepository(
+    fun provideFlightBriefRepository(
         sigchartDataSource: SigchartDataSource,
         turbulenceDataSource: TurbulenceDataSource,
         tafmetarDataSource: TafmetarDataSource,
         airportDataSource: AirportDataSource,
         isobaricRepository: IsobaricRepository,
         locationForecastRepository: LocationForecastRepository,
-    ): FlightbriefRepository =
-        FlightbriefRepository(
+    ): FlightBriefRepository =
+        FlightBriefRepository(
             sigchartDataSource,
             turbulenceDataSource,
             tafmetarDataSource,

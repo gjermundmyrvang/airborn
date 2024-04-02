@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Airport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,8 +141,8 @@ private fun DepartureOnlyContent(
                 keyboardController?.hide()
                 viewModel.selectDepartureAirport(clickedAirport.icao.code)
                 scope.launch {
-                    val id = viewModel.generateFlightbrief()
-                    navController.navigate("flightbrief/$id")
+                    val id = viewModel.generateFlightBrief()
+                    navController.navigate("flightBrief/$id")
                 }
             }
         }
@@ -202,8 +202,8 @@ private fun DepartureAndArrivalContent(
     })
     LaunchedEffect(departureSelected, arrivalSelected) {
         if (departureSelected && arrivalSelected) {
-            val id = viewModel.generateFlightbrief()
-            navController.navigate("flightbrief/$id")
+            val id = viewModel.generateFlightBrief()
+            navController.navigate("flightBrief/$id")
         }
     }
 }

@@ -3,7 +3,7 @@ package no.uio.ifi.in2000.team18.airborn.data
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Airport
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale

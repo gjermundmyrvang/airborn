@@ -1,9 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn
 
 import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Position
 import org.junit.Assert
 import org.junit.Test
 

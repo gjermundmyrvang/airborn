@@ -1,7 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
 import android.util.Log
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import ucar.nc2.dt.GridDatatype

@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
+package no.uio.ifi.in2000.team18.airborn.ui.flightBrief
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -56,13 +56,13 @@ import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Flightbrief
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.AirportBrief
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.FlightBrief
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Metar
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Preview(showSystemUi = true)
@@ -75,13 +75,13 @@ fun TestFlightBrief() {
 fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
 
-    when (val flightbrief = state.flightbrief) {
+    when (val flightBrief = state.flightBrief) {
         is LoadingState.Loading -> {
             LoadingScreen()
         }
 
         is LoadingState.Error -> Text("Error", color = Color.Red)
-        is LoadingState.Success -> FlightBreifScreenContent(flightbrief = flightbrief.value)
+        is LoadingState.Success -> FlightBreifScreenContent(flightBrief = flightBrief.value)
     }
 }
 
@@ -97,7 +97,7 @@ fun LoadingScreen() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FlightBreifScreenContent(flightbrief: Flightbrief) = Column {
+fun FlightBreifScreenContent(flightBrief: FlightBrief) = Column {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
@@ -118,9 +118,9 @@ fun FlightBreifScreenContent(flightbrief: Flightbrief) = Column {
     }
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
-            0 -> DepartureBriefTab(flightbrief.departure)
-            1 -> flightbrief.arrival?.let { ArrivalBriefTab(it) }
-            2 -> OverallInfoTab(flightbrief = flightbrief)
+            0 -> DepartureBriefTab(flightBrief.departure)
+            1 -> flightBrief.arrival?.let { ArrivalBriefTab(it) }
+            2 -> OverallInfoTab(flightBrief = flightBrief)
         }
     }
 }
@@ -355,7 +355,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
 }
 
 @Composable
-fun OverallInfoTab(flightbrief: Flightbrief) {
+fun OverallInfoTab(flightBrief: FlightBrief) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -365,7 +365,7 @@ fun OverallInfoTab(flightbrief: Flightbrief) {
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(flightbrief.sigchart.uri)
+                        .data(flightBrief.sigchart.uri)
                         .setHeader("User-Agent", "Team18").crossfade(500).build(),
                     loading = {
                         Column(
@@ -379,7 +379,7 @@ fun OverallInfoTab(flightbrief: Flightbrief) {
                             )
                         }
                     },
-                    contentDescription = "Image of sigchart. Updated at ${flightbrief.sigchart.updated}"
+                    contentDescription = "Image of sigchart. Updated at ${flightBrief.sigchart.updated}"
                 )
             }
         }
@@ -509,7 +509,7 @@ fun WeatherHourScreen(weatherHour: WeatherHour) {
 @Composable
 fun LightPreviewFlightBrief() {
     FlightBreifScreenContent(
-        flightbrief = Flightbrief(
+        flightBrief = FlightBrief(
             departure = AirportBrief(
                 airport = Airport(
                     icao = Icao("ENGM"),
