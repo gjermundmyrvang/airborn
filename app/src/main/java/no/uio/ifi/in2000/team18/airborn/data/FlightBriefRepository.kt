@@ -1,9 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.AirportBrief
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.FlightBrief
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.FlightBrief
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap

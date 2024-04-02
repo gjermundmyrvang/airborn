@@ -1,6 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.model.isobaric
 
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Position
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import java.time.LocalDateTime
 
 data class IsobaricData(

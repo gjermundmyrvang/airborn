@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team18.airborn.ui.flightBrief
+package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -56,13 +56,13 @@ import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.AirportBrief
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.FlightBrief
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Metar
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.MetarTaf
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Position
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.FlightBrief
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Preview(showSystemUi = true)

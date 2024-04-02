@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.FlightBriefRepository
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import java.time.LocalDateTime
 import javax.inject.Inject
 
