@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team18.airborn.model.flightBrief
+package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence

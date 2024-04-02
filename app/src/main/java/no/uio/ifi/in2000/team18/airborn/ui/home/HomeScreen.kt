@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
-import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
