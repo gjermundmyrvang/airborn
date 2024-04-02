@@ -60,8 +60,7 @@ fun HomeScreen(
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         BottomSheetScaffold(
             modifier = modifier
@@ -70,12 +69,10 @@ fun HomeScreen(
             scaffoldState = bottomSheetScaffoldState,
             sheetContent = {
                 Column(
-                    modifier = Modifier
-                        .padding(16.dp),
+                    modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    CustomTabRow(
-                        selectedIndex = selectedTabIndex,
+                    CustomTabRow(selectedIndex = selectedTabIndex,
                         onSelectedIndexChanged = { newTabIndex ->
                             selectedTabIndex = newTabIndex
                         })
