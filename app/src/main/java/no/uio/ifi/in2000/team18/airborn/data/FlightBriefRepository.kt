@@ -1,14 +1,14 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Flightbrief
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.AirportBrief
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.FlightBrief
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightBrief.MetarTaf
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class FlightbriefRepository(
+class FlightBriefRepository(
     val sigchartDataSource: SigchartDataSource,
     val turbulenceDataSource: TurbulenceDataSource,
     val tafmetarDataSource: TafmetarDataSource,
@@ -17,16 +17,16 @@ class FlightbriefRepository(
     val locationForecastRepository: LocationForecastRepository,
     // All the data sources
 ) {
-    val flightbriefs: ConcurrentHashMap<String, Flightbrief> = ConcurrentHashMap()
+    val flightBriefs: ConcurrentHashMap<String, FlightBrief> = ConcurrentHashMap()
 
-    fun getFlightbriefById(id: String): Flightbrief? = flightbriefs.getOrDefault(id, null)
+    fun getFlightBriefById(id: String): FlightBrief? = flightBriefs.getOrDefault(id, null)
 
 
     /**
      * @param to if this is null it means that it should be the same as from
      */
-    suspend fun createFlightbrief(from: Icao, to: Icao?, time: LocalDateTime): String {
-        val brief = Flightbrief(
+    suspend fun createFlightBrief(from: Icao, to: Icao?, time: LocalDateTime): String {
+        val brief = FlightBrief(
             departure = createAirportBrief(from, time),
             arrival = to?.let { createAirportBrief(it, time) }, // TODO: calculate arrival time
             altArrivals = listOf(),
@@ -35,7 +35,7 @@ class FlightbriefRepository(
 
         val id = UUID.randomUUID()
             .toString() // This is always unique. There are more uuids than atoms in the observable universe
-        flightbriefs[id] = brief
+        flightBriefs[id] = brief
         return id
     }
 

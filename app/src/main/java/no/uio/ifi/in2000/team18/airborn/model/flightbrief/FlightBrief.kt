@@ -1,11 +1,11 @@
-package no.uio.ifi.in2000.team18.airborn.model.flightbrief
+package no.uio.ifi.in2000.team18.airborn.model.flightBrief
 
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 
-data class Flightbrief(
+data class FlightBrief(
     val departure: AirportBrief,
     val arrival: AirportBrief?,
     val altArrivals: List<AirportBrief>,

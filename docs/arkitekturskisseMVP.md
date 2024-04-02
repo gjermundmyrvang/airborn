@@ -39,7 +39,7 @@ graph TD
     viewHome --> viewModelHome
     viewFlight --> viewModelFlight
     viewModelHome -->|Search flights| dataAirport
-    viewModelHome -->|createFlightbrief| flightRepo
+    viewModelHome -->|createFlightBrief| flightRepo
     viewModelFlight --> flightRepo
     flightRepo --> dataAirport
     flightRepo --> dataSigchart
