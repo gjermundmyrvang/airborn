@@ -4,6 +4,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
+import java.time.ZonedDateTime
 
 data class FlightBrief(
     val departure: AirportBrief,
@@ -34,7 +35,18 @@ data class MetarTaf(
 data class TurbulenceMapAndCross(
     val map: List<Turbulence>,
     val crossSection: List<Turbulence>
-)
+) {
+
+    val mapDict
+        get(): Map<ZonedDateTime, Turbulence> = map.map { ZonedDateTime.parse(it.params.time) to it }
+            .toMap()
+
+    val crossSectionDict
+        get(): Map<ZonedDateTime, Turbulence> = crossSection.map { ZonedDateTime.parse(it.params.time) to it }
+            .toMap()
+
+   
+}
 
 data class Airport(
     val icao: Icao,
