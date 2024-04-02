@@ -72,7 +72,6 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
-import no.uio.ifi.in2000.team18.airborn.ui.flightBrief.FlightBriefViewModel
 
 @Preview(showSystemUi = true)
 @Composable
