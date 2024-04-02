@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -71,6 +72,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.flightBrief.FlightBriefViewModel
 
 @Preview(showSystemUi = true)
 @Composable
@@ -83,12 +85,9 @@ fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
 
     when (val flightBrief = state.flightBrief) {
-        is LoadingState.Loading -> {
-            LoadingScreen()
-        }
-
+        is LoadingState.Loading -> LoadingScreen()
         is LoadingState.Error -> Text("Error", color = Color.Red)
-        is LoadingState.Success -> FlightBreifScreenContent(flightBrief = flightBrief.value)
+        is LoadingState.Success -> FlightBriefScreenContent(flightBrief = flightBrief.value)
     }
 }
 
@@ -104,24 +103,19 @@ fun LoadingScreen() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FlightBreifScreenContent(flightBrief: FlightBrief) = Column {
+fun FlightBriefScreenContent(flightBrief: FlightBrief) = Column {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
-        Tab(
-            selected = pagerState.currentPage == 0,
+        Tab(selected = pagerState.currentPage == 0,
             onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
             text = { Text("Departure") })
-        Tab(
-            selected = pagerState.currentPage == 1,
+        Tab(selected = pagerState.currentPage == 1,
             onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-            text = { Text("Arrival") }
-        )
-        Tab(
-            selected = pagerState.currentPage == 2,
+            text = { Text("Arrival") })
+        Tab(selected = pagerState.currentPage == 2,
             onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
-            text = { Text("Overall") }
-        )
+            text = { Text("Overall") })
     }
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
@@ -344,36 +338,45 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
             }
         }
     }
-}
-
-@Composable
-fun Weathersection(weather: List<WeatherDay>) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        WeatherNowSection(weatherHour = weather.first().weather.first())
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
-        WeatherTodaySection(weatherDay = weather.first())
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
-        WeatherWeekSection(weatherDays = weather)
+    item {
+        Collapsible(header = "Weather") {
+            Weathersection(weather = airportBrief.weather)
+        }
     }
 }
 
 @Composable
-fun WeatherWeekSection(weatherDays: List<WeatherDay>) {
+fun Weathersection(weather: List<WeatherDay>) {
+    var selectedDay by remember { mutableStateOf(weather.first()) }
+    Column(
+        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        WeatherNowSection(weatherHour = selectedDay.weather.first())
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+        WeatherTodaySection(weatherDay = weather.first())
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+        WeatherWeekSection(weatherDays = weather) { day ->
+            selectedDay = day
+        }
+    }
+}
+
+@Composable
+fun WeatherWeekSection(weatherDays: List<WeatherDay>, onDaySelected: (WeatherDay) -> Unit) {
+    var selectedDay by remember {
+        mutableStateOf(weatherDays.first())
+    }
     Box {
         LazyRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            item {
-                val today = weatherDays.first()
-                WeatherDayCard(weatherDay = today, selected = true, today = "today")
-                Spacer(modifier = Modifier.width(10.dp))
-            }
-            items(weatherDays.subList(1, weatherDays.size)) { day ->
-                WeatherDayCard(weatherDay = day, today = null)
+            items(weatherDays.subList(0, weatherDays.size)) { day ->
+                WeatherDayCard(
+                    weatherDay = day, selected = selectedDay, today = null
+                ) { daySelected ->
+                    selectedDay = daySelected
+                    onDaySelected(daySelected)
+                }
                 Spacer(modifier = Modifier.width(10.dp))
             }
         }
@@ -381,25 +384,32 @@ fun WeatherWeekSection(weatherDays: List<WeatherDay>) {
 }
 
 @Composable
-fun WeatherDayCard(weatherDay: WeatherDay, selected: Boolean = false, today: String?) {
-    val hourNow = weatherDay.weather[0] /*TODO find current hour*/
+fun WeatherDayCard(
+    weatherDay: WeatherDay,
+    selected: WeatherDay,
+    today: String?,
+    onDaySelected: (WeatherDay) -> Unit
+) {
+    val hourNow = selected.weather[0] /*TODO find current hour*/
     val summary =
         hourNow.next_12_hours /* TODO if null, check next_6_hours and if null again check next_1_hour*/
     val highestTemp =
-        weatherDay.weather.maxByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature // This is fucked
+        weatherDay.weather.maxByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature
     val lowestTemp =
         weatherDay.weather.minByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature
+    val isSelected = selected == weatherDay
+    val borderColor =
+        if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+
     OutlinedCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
         border = BorderStroke(
-            width = if (selected) 2.dp else 1.dp,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+            width = if (isSelected) 2.dp else 1.dp, color = borderColor
         ),
-        modifier = Modifier
-            .padding(top = 5.dp),
-        onClick = { /* TODO this card being selected by user for showing data related to this date in the weathersections */ },
+        modifier = Modifier.padding(top = 5.dp),
+        onClick = { onDaySelected(weatherDay) },
     ) {
         Column(
             modifier = Modifier
@@ -415,8 +425,7 @@ fun WeatherDayCard(weatherDay: WeatherDay, selected: Boolean = false, today: Str
             )
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = summary?.summary?.symbol_code
-                    ?: "Weathericon"
+                contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
             )
             Text(
                 text = "$highestTemp\u2103/$lowestTemp\u2103",
@@ -445,8 +454,7 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
     val summary = weatherHour.next_1_hours
     val precipitationAmount = summary?.details?.get("precipitation_amount")
     Column(
-        modifier = Modifier
-            .padding(5.dp),
+        modifier = Modifier.padding(5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceAround
     ) {
@@ -464,13 +472,11 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
         }
         Image(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = summary?.summary?.symbol_code
-                ?: "Weathericon"
+            contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
         )
         Text(
             text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp
+            fontWeight = FontWeight.Bold, fontSize = 16.sp
         )
     }
 }
@@ -479,8 +485,7 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
 fun WeatherNowSection(weatherHour: WeatherHour) {
     val summary = weatherHour.next_1_hours
     Box(
-        modifier = Modifier
-            .padding(16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
         Row(
             modifier = Modifier
@@ -491,9 +496,7 @@ fun WeatherNowSection(weatherHour: WeatherHour) {
         ) {
             Column {
                 Text(
-                    text = "Now",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    text = "Now", fontWeight = FontWeight.Bold, fontSize = 18.sp
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 Row(
@@ -501,29 +504,24 @@ fun WeatherNowSection(weatherHour: WeatherHour) {
                 ) {
                     Text(
                         text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontWeight = FontWeight.Bold, fontSize = 18.sp
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                     Image(
                         painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                        contentDescription = summary?.summary?.symbol_code
-                            ?: "Weathericon"
+                        contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
                     )
                 }
             }
             Column {
                 summary?.summary?.symbol_code?.let {
                     Text(
-                        text = it,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        text = it, fontWeight = FontWeight.Bold, fontSize = 18.sp
                     )
                 }
                 if (summary != null) {
                     Text(
-                        text = "Rain: ${summary.details["precipitation_amount"]}%",
-                        fontSize = 12.sp
+                        text = "Rain: ${summary.details["precipitation_amount"]}%", fontSize = 12.sp
                     )
                 }
                 Text(
@@ -559,7 +557,9 @@ fun OverallInfoTab(flightBrief: FlightBrief) {
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(flightBrief.sigchart.uri)
-                        .setHeader("User-Agent", "Team18").crossfade(500).build(),
+                        .setHeader("User-Agent", "Team18")
+                        .crossfade(500)
+                        .build(),
                     loading = {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -629,22 +629,17 @@ fun Collapsible(
 @Preview(showSystemUi = true)
 @Composable
 fun LightPreviewFlightBrief() {
-    FlightBreifScreenContent(
+    FlightBriefScreenContent(
         flightBrief = FlightBrief(
             departure = AirportBrief(
                 airport = Airport(
-                    icao = Icao("ENGM"),
-                    name = "Gardermoen",
-                    Position(0.0, 0.0)
+                    icao = Icao("ENGM"), name = "Gardermoen", Position(0.0, 0.0)
                 ),
                 metarTaf = MetarTaf(listOf(Metar("Hello")), listOf()),
                 turbulence = null,
                 isobaric = null,
                 weather = listOf()
-            ),
-            arrival = null,
-            altArrivals = listOf(),
-            sigchart = Sigchart(
+            ), arrival = null, altArrivals = listOf(), sigchart = Sigchart(
                 params = SigchartParameters(area = Area.Norway, time = ""),
                 updated = "",
                 uri = "",
