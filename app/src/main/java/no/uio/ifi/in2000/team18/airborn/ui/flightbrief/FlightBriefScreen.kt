@@ -52,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,8 +61,11 @@ import coil.request.ImageRequest
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Area
+import no.uio.ifi.in2000.team18.airborn.model.Details
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
+import no.uio.ifi.in2000.team18.airborn.model.Summary
+import no.uio.ifi.in2000.team18.airborn.model.SummaryData
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -228,7 +232,7 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
         }
     }
     item {
-        Collapsible(header = "Weather") {
+        Collapsible(header = "Weather", padding = 0.dp) {
             Weathersection(weather = airportBrief.weather)
         }
     }
@@ -338,7 +342,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
         }
     }
     item {
-        Collapsible(header = "Weather") {
+        Collapsible(header = "Weather", padding = 0.dp) {
             Weathersection(weather = airportBrief.weather)
         }
     }
@@ -348,12 +352,12 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
 fun Weathersection(weather: List<WeatherDay>) {
     var selectedDay by remember { mutableStateOf(weather.first()) }
     Column(
-        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        WeatherNowSection(weatherHour = selectedDay.weather.first())
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+        WeatherNowSection(weatherDay = selectedDay, today = selectedDay == weather.first())
         WeatherTodaySection(weatherDay = selectedDay)
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
         WeatherWeekSection(weatherDays = weather) { day ->
             selectedDay = day
         }
@@ -369,6 +373,9 @@ fun WeatherWeekSection(weatherDays: List<WeatherDay>, onDaySelected: (WeatherDay
         LazyRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
+            item {
+                Spacer(modifier = Modifier.width(10.dp))
+            }
             items(weatherDays.subList(0, weatherDays.size)) { day ->
                 WeatherDayCard(
                     weatherDay = day, selected = selectedDay, today = null
@@ -377,6 +384,9 @@ fun WeatherWeekSection(weatherDays: List<WeatherDay>, onDaySelected: (WeatherDay
                     onDaySelected(daySelected)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
+            }
+            item {
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }
@@ -407,7 +417,9 @@ fun WeatherDayCard(
         border = BorderStroke(
             width = if (isSelected) 2.dp else 1.dp, color = borderColor
         ),
-        modifier = Modifier.padding(top = 5.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 5.dp),
         onClick = { onDaySelected(weatherDay) },
     ) {
         Column(
@@ -415,6 +427,7 @@ fun WeatherDayCard(
                 .fillMaxSize()
                 .padding(5.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = today ?: (weatherDay.date.substring(0, 3) + "."),
@@ -422,6 +435,7 @@ fun WeatherDayCard(
                 fontWeight = FontWeight.Bold,
             )
             Image(
+                modifier = Modifier.size(50.dp),
                 painter = painterResource(
                     id = hourNow.icon_12_hour ?: R.drawable.ic_launcher_foreground
                 ) /*TODO implement errorIcon instead of launcher*/,
@@ -442,6 +456,9 @@ fun WeatherTodaySection(weatherDay: WeatherDay) {
         LazyRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
+            item {
+                Spacer(modifier = Modifier.width(10.dp))
+            }
             items(weatherHours) { hour ->
                 WeatherHourColumn(weatherHour = hour)
             }
@@ -451,12 +468,12 @@ fun WeatherTodaySection(weatherDay: WeatherDay) {
 
 @Composable
 fun WeatherHourColumn(weatherHour: WeatherHour) {
-    val summary = weatherHour.next_1_hours
+    val summary = weatherHour.next_1_hours ?: weatherHour.next_6_hours ?: weatherHour.next_12_hours
     val precipitationAmount = summary?.details?.get("precipitation_amount")
     Column(
         modifier = Modifier.padding(5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround
+        verticalArrangement = Arrangement.Center
     ) {
         Text(text = "${weatherHour.hour}:00")
         if ((precipitationAmount != null) && (precipitationAmount > 1)) {
@@ -471,8 +488,10 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
             )
         }
         Image(
+            modifier = Modifier.size(50.dp),
             painter = painterResource(
-                id = weatherHour.icon_1_hour ?: R.drawable.ic_launcher_foreground
+                id = weatherHour.icon_1_hour ?: weatherHour.icon_6_hour ?: weatherHour.icon_12_hour
+                ?: R.drawable.ic_launcher_foreground
             ),
             contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
         )
@@ -484,70 +503,176 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
 }
 
 @Composable
-fun WeatherNowSection(weatherHour: WeatherHour) {
-    val summary = weatherHour.next_1_hours
-    Box(
-        modifier = Modifier.padding(16.dp)
+fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
+    val weatherHour = weatherDay.weather.first() /*TODO find correct hour*/
+    val summary = if (today) weatherHour.next_1_hours else weatherHour.next_12_hours
+    val icon = if (today) weatherHour.icon_1_hour else weatherHour.icon_12_hour
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
+        Column {
+            Text(
+                text = if (today) "Now" else weatherDay.date,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+            Row(
+                modifier = Modifier.padding(top = 10.dp)
+            ) {
                 Text(
-                    text = "Now", fontWeight = FontWeight.Bold, fontSize = 18.sp
+                    text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
+                    fontWeight = FontWeight.Bold, fontSize = 18.sp
                 )
-                Spacer(modifier = Modifier.height(5.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
-                        fontWeight = FontWeight.Bold, fontSize = 18.sp
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Image(
-                        painter = painterResource(
-                            id = weatherHour.icon_1_hour ?: R.drawable.ic_launcher_foreground
-                        ),
-                        contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
-                    )
-                }
-            }
-            Column {
-                summary?.summary?.symbol_code?.let {
-                    Text(
-                        text = it, fontWeight = FontWeight.Bold, fontSize = 18.sp
-                    )
-                }
-                if (summary != null) {
-                    Text(
-                        text = "Rain: ${summary.details["precipitation_amount"]}%", fontSize = 12.sp
-                    )
-                }
-                Text(
-                    text = "Wind: ${weatherHour.weatherDetails.wind_speed}m/s from: ${weatherHour.weatherDetails.wind_from_direction}degrees",
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "Relative Humidity: ${weatherHour.weatherDetails.relative_humidity}%",
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "Pressure: ${weatherHour.weatherDetails.air_pressure_at_sea_level}hPa",
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "Cloud fraction: ${weatherHour.weatherDetails.cloud_area_fraction}%",
-                    fontSize = 12.sp
+                Spacer(modifier = Modifier.width(16.dp))
+                Image(
+                    modifier = Modifier.size(80.dp),
+                    painter = painterResource(
+                        id = icon ?: R.drawable.ic_launcher_foreground
+                    ),
+                    contentDescription = "WeatherIcon"
                 )
             }
         }
+        Column {
+            if (summary != null) {
+                Text(
+                    text = summary.summary.symbol_code,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Text(
+                    text = "Rain: ${summary.details["precipitation_amount"]}%", fontSize = 12.sp
+                )
+            }
+            Text(
+                text = "Wind: ${weatherHour.weatherDetails.wind_speed}m/s from: ${weatherHour.weatherDetails.wind_from_direction}degrees",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Relative Humidity: ${weatherHour.weatherDetails.relative_humidity}%",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Pressure: ${weatherHour.weatherDetails.air_pressure_at_sea_level}hPa",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Cloud fraction: ${weatherHour.weatherDetails.cloud_area_fraction}%",
+                fontSize = 12.sp
+            )
+        }
     }
 }
+
+@Preview(showSystemUi = true)
+@Composable
+fun TestWeatherSection() {
+    val hour = WeatherHour(
+        hour = 12,
+        weatherDetails = Details(
+            air_pressure_at_sea_level = 1001.98,
+            air_temperature = 18.0,
+            cloud_area_fraction = 46.9,
+            relative_humidity = 65.98,
+            wind_speed = 23.65,
+            wind_from_direction = 236.98
+        ),
+        next_12_hours = SummaryData(
+            summary = Summary(
+                symbol_code = "partly_cloudy"
+            ),
+            details = mapOf(
+                "participation_amount" to 13.87
+            )
+        ),
+        next_6_hours = SummaryData(
+            summary = Summary(
+                symbol_code = "partly_cloudy"
+            ),
+            details = mapOf(
+                "participation_amount" to 13.87
+            )
+        ),
+        next_1_hours = SummaryData(
+            summary = Summary(
+                symbol_code = "partly_cloudy"
+            ),
+            details = mapOf(
+                "participation_amount" to 13.87
+            )
+        ),
+        icon_6_hour = R.drawable.partlycloudy_day,
+        icon_1_hour = R.drawable.partlycloudy_day,
+        icon_12_hour = R.drawable.partlycloudy_day,
+    )
+    val day = WeatherDay(
+        date = "torsdag 5. april",
+        weather = listOf(
+            hour, hour, hour, hour
+        )
+    )
+    val weatherdays = listOf(
+        day, day, day, day
+    )
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Weathersection(weather = weatherdays)
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun TestWeatherNowSection() {
+    val day = WeatherDay(
+        date = "torsdag 5. april",
+        weather = listOf(
+            WeatherHour(
+                hour = 12,
+                weatherDetails = Details(
+                    air_pressure_at_sea_level = 1001.98,
+                    air_temperature = 18.0,
+                    cloud_area_fraction = 46.9,
+                    relative_humidity = 65.98,
+                    wind_speed = 23.65,
+                    wind_from_direction = 236.98
+                ),
+                next_12_hours = SummaryData(
+                    summary = Summary(
+                        symbol_code = "partly_cloudy"
+                    ),
+                    details = mapOf(
+                        "participation_amount" to 13.87
+                    )
+                ),
+                next_6_hours = SummaryData(
+                    summary = Summary(
+                        symbol_code = "partly_cloudy"
+                    ),
+                    details = mapOf(
+                        "participation_amount" to 13.87
+                    )
+                ),
+                next_1_hours = SummaryData(
+                    summary = Summary(
+                        symbol_code = "partly_cloudy"
+                    ),
+                    details = mapOf(
+                        "participation_amount" to 13.87
+                    )
+                ),
+                icon_6_hour = R.drawable.partlycloudy_day,
+                icon_1_hour = R.drawable.partlycloudy_day,
+                icon_12_hour = R.drawable.partlycloudy_day,
+            )
+        )
+    )
+    WeatherNowSection(weatherDay = day, true)
+}
+
 
 @Composable
 fun OverallInfoTab(flightBrief: FlightBrief) {
@@ -586,7 +711,11 @@ fun OverallInfoTab(flightBrief: FlightBrief) {
 
 @Composable
 fun Collapsible(
-    header: String, expanded: Boolean = false, content: @Composable BoxScope.() -> Unit
+    modifier: Modifier = Modifier,
+    padding: Dp = 16.dp,
+    header: String,
+    expanded: Boolean = false,
+    content: @Composable BoxScope.() -> Unit
 ) {
     var open by rememberSaveable {
         mutableStateOf(expanded)
@@ -616,7 +745,7 @@ fun Collapsible(
         }
         if (open) {
             Box(
-                modifier = Modifier.padding(16.dp),
+                modifier = modifier.padding(padding),
                 content = content,
             )
         }
