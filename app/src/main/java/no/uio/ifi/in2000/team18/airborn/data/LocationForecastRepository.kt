@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
@@ -11,6 +12,136 @@ import java.util.Locale
 import javax.inject.Inject
 
 class LocationForecastRepository @Inject constructor(private val locationForecastDataSource: LocationForecastDataSource) {
+    private val english = mapOf(
+        "clearsky" to "Clear sky",
+        "fair" to "Fair",
+        "partlycloudy" to "Partly cloudy",
+        "cloudy" to "Cloudy",
+        "lightrainshowers" to "Light rain showers",
+        "rainshowers" to "Rain showers",
+        "heavyrainshowers" to "Heavy rain showers",
+        "lightrainshowersandthunder" to "Light rain showers and thunder",
+        "rainshowersandthunder" to "Rain showers and thunder",
+        "heavyrainshowersandthunder" to "Heavy rain showers and thunder",
+        "lightsleetshowers" to "Light sleet showers",
+        "sleetshowers" to "Sleet showers",
+        "heavysleetshowers" to "Heavy sleet showers",
+        "lightssleetshowersandthunder " to "Light sleet showers and thunder",
+        "sleetshowersandthunder" to "Sleet showers and thunder",
+        "heavysleetshowersandthunder" to "Heavy sleet showers and thunder",
+        "lightsnowshowers" to "Light snow showers",
+        "snowshowers" to "Snow showers",
+        "heavysnowshowers" to "Heavy snow showers",
+        "lightssnowshowersandthunder" to "Light snow showers and thunder",
+        "snowshowersandthunder" to "Snow showers and thunder",
+        "heavysnowshowersandthunder" to "Heavy snow showers and thunder",
+        "lightrain" to "Light rain",
+        "rain" to "Rain",
+        "heavyrain" to "Heavy rain",
+        "lightrainandthunder" to "Light rain and thunder",
+        "rainandthunder" to "Rain and thunder",
+        "heavyrainandthunder" to "Heavy rain and thunder",
+        "lightsleet" to "Light sleet",
+        "sleet" to "Sleet",
+        "heavysleet" to "Heavy sleet",
+        "lightsleetandthunder" to "Light sleet and thunder",
+        "sleetandthunder" to "Sleet and thunder",
+        "heavysleetandthunder" to "Heavy sleet and thunder",
+        "lightsnow" to "Light snow",
+        "snow" to "Snow",
+        "heavysnow" to "Heavy snow",
+        "lightsnowandthunder" to "Light snow and thunder",
+        "snowandthunder" to "Snow and thunder",
+        "heavysnowandthunder" to "Heavy snow and thunder",
+        "fog" to "Fog",
+    )
+    private val bokmål = mapOf(
+        "clearsky" to "Klarvær",
+        "fair" to "Lettskyet",
+        "partlycloudy" to "Delvis skyet",
+        "cloudy" to "Skyet",
+        "lightrainshowers" to "Lette regnbyger",
+        "rainshowers" to "Regnbyger",
+        "heavyrainshowers" to "Kraftige regnbyger",
+        "lightrainshowersandthunder" to "Lette regnbyger og torden",
+        "rainshowersandthunder" to "Regnbyger og torden",
+        "heavyrainshowersandthunder" to "Kraftige regnbyger og torden",
+        "lightsleetshowers" to "Lette sluddbyger",
+        "sleetshowers" to "Sluddbyger",
+        "heavysleetshowers" to "Kraftige sluddbyger",
+        "lightssleetshowersandthunder " to "Lette sluddbyger og torden",
+        "sleetshowersandthunder" to "Sluddbyger og torden",
+        "heavysleetshowersandthunder" to "Kraftige sluddbyger og torden",
+        "lightsnowshowers" to "Lette snøbyger",
+        "snowshowers" to "Snøbyger",
+        "heavysnowshowers" to "Kraftige snøbyger",
+        "lightssnowshowersandthunder" to "Lette snøbyger og torden",
+        "snowshowersandthunder" to "Snøbyger og torden",
+        "heavysnowshowersandthunder" to "Kraftige snøbyger og torden",
+        "lightrain" to "Lett regn",
+        "rain" to "Regn",
+        "heavyrain" to "Kraftig regn",
+        "lightrainandthunder" to "Lett regn og torden",
+        "rainandthunder" to "Regn og torden",
+        "heavyrainandthunder" to "Kraftig regn og torden",
+        "lightsleet" to "Lett sludd",
+        "sleet" to "Sludd",
+        "heavysleet" to "Kraftig sludd",
+        "lightsleetandthunder" to "Lett sludd og torden",
+        "sleetandthunder" to "Sludd og torden",
+        "heavysleetandthunder" to "Kraftig sludd og torden",
+        "lightsnow" to "Lett snø",
+        "snow" to "Snø",
+        "heavysnow" to "Kraftig snø",
+        "lightsnowandthunder" to "Lett snø og torden",
+        "snowandthunder" to "Snø og torden",
+        "heavysnowandthunder" to "Kraftig snø og torden",
+        "fog" to "Tåke",
+    )
+    private val nynorsk = mapOf(
+        "clearsky" to "Klårvêr",
+        "fair" to "Lettskya",
+        "partlycloudy" to "Delvis skya",
+        "cloudy" to "Skya",
+        "lightrainshowers" to "Lette regnbyer",
+        "rainshowers" to "Regnbyer",
+        "heavyrainshowers" to "Kraftige regnbyer",
+        "lightrainshowersandthunder" to "Lette regnbyer og torevêr",
+        "rainshowersandthunder" to "Regnbyer og torevêr",
+        "heavyrainshowersandthunder" to "Kraftige regnbyer og torevêr",
+        "lightsleetshowers" to "Lette sluddbyer",
+        "sleetshowers" to "Sluddbyer",
+        "heavysleetshowers" to "Kraftige sluddbyer",
+        "lightssleetshowersandthunder " to "Lette sluddbyer og torevêr",
+        "sleetshowersandthunder" to "Sluddbyer og torevêr",
+        "heavysleetshowersandthunder" to "Kraftige sluddbyer og torevêr ",
+        "lightsnowshowers" to "Lette snøbyer",
+        "snowshowers" to "Snøbyer",
+        "heavysnowshowers" to "Kraftige snøbyer",
+        "lightssnowshowersandthunder" to "Lette snøbyer og torevêr",
+        "snowshowersandthunder" to "Snøbyer og torevêr",
+        "heavysnowshowersandthunder" to "Kraftige snøbyer og torevêr",
+        "lightrain" to "Lett regn",
+        "rain" to "Regn",
+        "heavyrain" to "Kraftig regn",
+        "lightrainandthunder" to "Lett regn og torevêr",
+        "rainandthunder" to "Regn og torevêr",
+        "heavyrainandthunder" to "Kraftig regn og torevêr",
+        "lightsleet" to "Lett sludd",
+        "sleet" to "Sludd",
+        "heavysleet" to "Kraftig sludd",
+        "lightsleetandthunder" to "Lett sludd og torevêr",
+        "sleetandthunder" to "Sludd og torevêr",
+        "heavysleetandthunder" to "Kraftig sludd og torevêr",
+        "lightsnow" to "Lett snø",
+        "snow" to "Snø",
+        "heavysnow" to "Kraftig snø",
+        "lightsnowandthunder" to "Lett snø og torevêr",
+        "snowandthunder" to "Snø og torevêr",
+        "heavysnowandthunder" to "Kraftig snø og torevêr",
+        "fog" to "Skodde",
+    )
+
     suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
         val weatherData = locationForecastDataSource.fetchForecast(airport).properties.timeseries
         return mapToWeatherDay(weatherData)
@@ -26,12 +157,36 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
                     WeatherHour(
                         hour = ZonedDateTime.parse(timeSeries.time).hour,
                         weatherDetails = timeSeries.data.instant.details,
-                        next_12_hours = timeSeries.data.next_12_hours,
-                        next_1_hours = timeSeries.data.next_1_hours,
-                        next_6_hours = timeSeries.data.next_6_hours,
-                        icon_1_hour = timeSeries.data.next_1_hours?.summary?.let { iconMapper(it.symbol_code) },
-                        icon_6_hour = timeSeries.data.next_6_hours?.summary?.let { iconMapper(it.symbol_code) },
-                        icon_12_hour = timeSeries.data.next_12_hours?.summary?.let { iconMapper(it.symbol_code) },
+                        nextOneHour = if (timeSeries.data.next_1_hours != null) english[timeSeries.data.next_1_hours.summary.symbol_code.substringBefore(
+                            "_"
+                        )]
+                            ?.let {
+                                NextHourDetails(
+                                    symbol_code = it,
+                                    icon = iconMapper(timeSeries.data.next_1_hours.summary.symbol_code),
+                                    chanceOfRain = timeSeries.data.next_1_hours.details["precipitation_amount"]
+                                )
+                            } else null,
+                        nextSixHour = if (timeSeries.data.next_6_hours != null) english[timeSeries.data.next_6_hours.summary.symbol_code.substringBefore(
+                            "_"
+                        )]
+                            ?.let {
+                                NextHourDetails(
+                                    symbol_code = it,
+                                    icon = iconMapper(timeSeries.data.next_6_hours.summary.symbol_code),
+                                    chanceOfRain = timeSeries.data.next_6_hours.details["precipitation_amount"]
+                                )
+                            } else null,
+                        nextTwelweHour = if (timeSeries.data.next_12_hours != null) english[timeSeries.data.next_12_hours.summary.symbol_code.substringBefore(
+                            "_"
+                        )]
+                            ?.let {
+                                NextHourDetails(
+                                    symbol_code = it,
+                                    icon = iconMapper(timeSeries.data.next_12_hours.summary.symbol_code),
+                                    chanceOfRain = timeSeries.data.next_12_hours.details["precipitation_amount"]
+                                )
+                            } else null,
                     )
                 }
             )

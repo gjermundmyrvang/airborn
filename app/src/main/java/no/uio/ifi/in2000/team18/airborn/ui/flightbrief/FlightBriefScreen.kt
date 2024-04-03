@@ -63,10 +63,9 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Details
+import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
-import no.uio.ifi.in2000.team18.airborn.model.Summary
-import no.uio.ifi.in2000.team18.airborn.model.SummaryData
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -77,6 +76,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import java.time.LocalTime
 
 @Preview(showSystemUi = true)
 @Composable
@@ -358,7 +358,7 @@ fun Weathersection(weather: List<WeatherDay>) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         WeatherNowSection(weatherDay = selectedDay, today = selectedDay == weather.first())
-        WeatherTodaySection(weatherDay = selectedDay)
+        WeatherTodaySection(weatherDay = selectedDay, today = selectedDay == weather.first())
         WeatherWeekSection(weatherDays = weather) { day ->
             selectedDay = day
         }
@@ -414,16 +414,18 @@ fun WeatherDayCard(
     today: Boolean = false,
     onDaySelected: (WeatherDay) -> Unit
 ) {
-    val hourNow = weatherDay.weather[0] /*TODO find current hour*/
-    val summary =
-        hourNow.next_12_hours /* TODO if null, check next_6_hours and if null again check next_1_hour*/
+    val weatherHours =
+        if (today) weatherDay.weather.filter { it.hour >= LocalTime.now().hour } else weatherDay.weather
+    val hourNow = weatherHours.first()
     val highestTemp =
-        weatherDay.weather.maxByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature
+        weatherHours.maxByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature
     val lowestTemp =
-        weatherDay.weather.minByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature
+        weatherHours.minByOrNull { it.weatherDetails.air_temperature }!!.weatherDetails.air_temperature
     val isSelected = selected == weatherDay
     val borderColor =
         if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+    val icon =
+        if (today) hourNow.nextOneHour?.icon else hourNow.nextTwelweHour?.icon // if today we want to show current weather, but for the rest of the week we want a overview
 
     OutlinedCard(
         colors = CardDefaults.cardColors(
@@ -452,9 +454,9 @@ fun WeatherDayCard(
             Image(
                 modifier = Modifier.size(50.dp),
                 painter = painterResource(
-                    id = hourNow.icon_12_hour ?: R.drawable.ic_launcher_foreground
+                    id = icon ?: R.drawable.ic_launcher_foreground
                 ) /*TODO implement errorIcon instead of launcher*/,
-                contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
+                contentDescription = hourNow.nextTwelweHour?.symbol_code ?: "Weathericon"
             )
             Text(
                 text = "$highestTemp\u2103/$lowestTemp\u2103",
@@ -465,8 +467,9 @@ fun WeatherDayCard(
 }
 
 @Composable
-fun WeatherTodaySection(weatherDay: WeatherDay) {
-    val weatherHours = weatherDay.weather
+fun WeatherTodaySection(weatherDay: WeatherDay, today: Boolean) {
+    val weatherHours =
+        if (today) weatherDay.weather.filter { it.hour >= LocalTime.now().hour } else weatherDay.weather
     Box {
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
@@ -488,32 +491,30 @@ fun WeatherTodaySection(weatherDay: WeatherDay) {
 
 @Composable
 fun WeatherHourColumn(weatherHour: WeatherHour) {
-    val summary = weatherHour.next_1_hours ?: weatherHour.next_6_hours ?: weatherHour.next_12_hours
-    val precipitationAmount = summary?.details?.get("precipitation_amount")
+    val precipitationAmount = weatherHour.nextOneHour?.chanceOfRain
     Column(
         modifier = Modifier.padding(5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "${weatherHour.hour}:00")
+        Text(text = "${weatherHour.hour}")
         if ((precipitationAmount != null) && (precipitationAmount > 1)) {
             Text(
                 text = "${precipitationAmount}%",
                 fontSize = 16.sp,
                 color = Color.Blue,
             )
-        } else {
-            Text(
-                text = " "
-            )
         }
         Image(
             modifier = Modifier.size(50.dp),
             painter = painterResource(
-                id = weatherHour.icon_1_hour ?: weatherHour.icon_6_hour ?: weatherHour.icon_12_hour
+                id = weatherHour.nextOneHour?.icon ?: weatherHour.nextSixHour?.icon
+                ?: weatherHour.nextTwelweHour?.icon
                 ?: R.drawable.ic_launcher_foreground
             ),
-            contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
+            contentDescription = weatherHour.nextOneHour?.symbol_code
+                ?: weatherHour.nextSixHour?.symbol_code ?: weatherHour.nextTwelweHour?.symbol_code
+                ?: "Weathericon"
         )
         Text(
             text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
@@ -524,9 +525,11 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
 
 @Composable
 fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
-    val weatherHour = weatherDay.weather.first() /*TODO find correct hour*/
-    val summary = if (today) weatherHour.next_1_hours else weatherHour.next_12_hours
-    val icon = if (today) weatherHour.icon_1_hour else weatherHour.icon_12_hour
+    val weatherHour =
+        if (today) weatherDay.weather.first { it.hour >= LocalTime.now().hour } else weatherDay.weather.first()
+    val nextHours = if (today) weatherHour.nextOneHour else weatherHour.nextTwelweHour
+    val icon =
+        if (today) weatherHour.nextOneHour?.icon else weatherHour.nextTwelweHour?.icon // if today we want to show current weather, but for the rest of the week we want a overview
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -557,15 +560,17 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
             }
         }
         Column {
-            if (summary != null) {
+            if (nextHours != null) {
                 Text(
-                    text = summary.summary.symbol_code,
+                    text = nextHours.symbol_code,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                 )
-                Text(
-                    text = "Rain: ${summary.details["precipitation_amount"]}%", fontSize = 12.sp
-                )
+                if (nextHours.chanceOfRain != null) {
+                    Text(
+                        text = "Rain: ${nextHours.chanceOfRain}%", fontSize = 12.sp
+                    )
+                }
             }
             Text(
                 text = "Wind: ${weatherHour.weatherDetails.wind_speed}m/s from: ${weatherHour.weatherDetails.wind_from_direction}degrees",
@@ -600,33 +605,21 @@ fun TestWeatherSection() {
             wind_speed = 23.65,
             wind_from_direction = 236.98
         ),
-        next_12_hours = SummaryData(
-            summary = Summary(
-                symbol_code = "partly_cloudy"
-            ),
-            details = mapOf(
-                "participation_amount" to 13.87
-            )
+        nextOneHour = NextHourDetails(
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            chanceOfRain = 22.98
         ),
-        next_6_hours = SummaryData(
-            summary = Summary(
-                symbol_code = "partly_cloudy"
-            ),
-            details = mapOf(
-                "participation_amount" to 13.87
-            )
+        nextSixHour = NextHourDetails(
+            symbol_code = "Sunny",
+            icon = R.drawable.clearsky_day,
+            chanceOfRain = null
         ),
-        next_1_hours = SummaryData(
-            summary = Summary(
-                symbol_code = "partly_cloudy"
-            ),
-            details = mapOf(
-                "participation_amount" to 13.87
-            )
-        ),
-        icon_6_hour = R.drawable.partlycloudy_day,
-        icon_1_hour = R.drawable.partlycloudy_day,
-        icon_12_hour = R.drawable.partlycloudy_day,
+        nextTwelweHour = NextHourDetails(
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            chanceOfRain = 22.98
+        )
     )
     val day = WeatherDay(
         date = "torsdag 5. april",
@@ -647,47 +640,36 @@ fun TestWeatherSection() {
 @Preview(showSystemUi = true)
 @Composable
 fun TestWeatherNowSection() {
+    val hour = WeatherHour(
+        hour = 12,
+        weatherDetails = Details(
+            air_pressure_at_sea_level = 1001.98,
+            air_temperature = 18.0,
+            cloud_area_fraction = 46.9,
+            relative_humidity = 65.98,
+            wind_speed = 23.65,
+            wind_from_direction = 236.98
+        ),
+        nextOneHour = NextHourDetails(
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            chanceOfRain = 22.98
+        ),
+        nextSixHour = NextHourDetails(
+            symbol_code = "Sunny",
+            icon = R.drawable.clearsky_day,
+            chanceOfRain = null
+        ),
+        nextTwelweHour = NextHourDetails(
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            chanceOfRain = 22.98
+        )
+    )
     val day = WeatherDay(
         date = "torsdag 5. april",
         weather = listOf(
-            WeatherHour(
-                hour = 12,
-                weatherDetails = Details(
-                    air_pressure_at_sea_level = 1001.98,
-                    air_temperature = 18.0,
-                    cloud_area_fraction = 46.9,
-                    relative_humidity = 65.98,
-                    wind_speed = 23.65,
-                    wind_from_direction = 236.98
-                ),
-                next_12_hours = SummaryData(
-                    summary = Summary(
-                        symbol_code = "partly_cloudy"
-                    ),
-                    details = mapOf(
-                        "participation_amount" to 13.87
-                    )
-                ),
-                next_6_hours = SummaryData(
-                    summary = Summary(
-                        symbol_code = "partly_cloudy"
-                    ),
-                    details = mapOf(
-                        "participation_amount" to 13.87
-                    )
-                ),
-                next_1_hours = SummaryData(
-                    summary = Summary(
-                        symbol_code = "partly_cloudy"
-                    ),
-                    details = mapOf(
-                        "participation_amount" to 13.87
-                    )
-                ),
-                icon_6_hour = R.drawable.partlycloudy_day,
-                icon_1_hour = R.drawable.partlycloudy_day,
-                icon_12_hour = R.drawable.partlycloudy_day,
-            )
+            hour, hour, hour
         )
     )
     WeatherNowSection(weatherDay = day, true)
