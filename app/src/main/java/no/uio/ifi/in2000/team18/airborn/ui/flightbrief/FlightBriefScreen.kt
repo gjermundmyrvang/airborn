@@ -352,7 +352,7 @@ fun Weathersection(weather: List<WeatherDay>) {
     ) {
         WeatherNowSection(weatherHour = selectedDay.weather.first())
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
-        WeatherTodaySection(weatherDay = weather.first())
+        WeatherTodaySection(weatherDay = selectedDay)
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
         WeatherWeekSection(weatherDays = weather) { day ->
             selectedDay = day
@@ -389,7 +389,7 @@ fun WeatherDayCard(
     today: String?,
     onDaySelected: (WeatherDay) -> Unit
 ) {
-    val hourNow = selected.weather[0] /*TODO find current hour*/
+    val hourNow = weatherDay.weather[0] /*TODO find current hour*/
     val summary =
         hourNow.next_12_hours /* TODO if null, check next_6_hours and if null again check next_1_hour*/
     val highestTemp =
@@ -415,7 +415,6 @@ fun WeatherDayCard(
                 .fillMaxSize()
                 .padding(5.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
                 text = today ?: (weatherDay.date.substring(0, 3) + "."),
@@ -423,7 +422,9 @@ fun WeatherDayCard(
                 fontWeight = FontWeight.Bold,
             )
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(
+                    id = hourNow.icon_12_hour ?: R.drawable.ic_launcher_foreground
+                ) /*TODO implement errorIcon instead of launcher*/,
                 contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
             )
             Text(
@@ -470,7 +471,9 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
             )
         }
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(
+                id = weatherHour.icon_1_hour ?: R.drawable.ic_launcher_foreground
+            ),
             contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
         )
         Text(
@@ -507,7 +510,9 @@ fun WeatherNowSection(weatherHour: WeatherHour) {
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        painter = painterResource(
+                            id = weatherHour.icon_1_hour ?: R.drawable.ic_launcher_foreground
+                        ),
                         contentDescription = summary?.summary?.symbol_code ?: "Weathericon"
                     )
                 }

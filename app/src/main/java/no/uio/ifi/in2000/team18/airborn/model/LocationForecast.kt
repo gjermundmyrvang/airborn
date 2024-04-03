@@ -15,7 +15,10 @@ data class WeatherHour(
     val weatherDetails: Details,
     val next_12_hours: SummaryData? = null,
     val next_1_hours: SummaryData? = null,
-    val next_6_hours: SummaryData? = null
+    val next_6_hours: SummaryData? = null,
+    val icon_1_hour: Int? = null,
+    val icon_6_hour: Int? = null,
+    val icon_12_hour: Int? = null,
 )
 
 data class Meta(
