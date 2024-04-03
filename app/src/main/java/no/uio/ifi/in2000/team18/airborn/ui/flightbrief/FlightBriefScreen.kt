@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -365,7 +366,10 @@ fun Weathersection(weather: List<WeatherDay>) {
 }
 
 @Composable
-fun WeatherWeekSection(weatherDays: List<WeatherDay>, onDaySelected: (WeatherDay) -> Unit) {
+fun WeatherWeekSection(
+    weatherDays: List<WeatherDay>,
+    onDaySelected: (WeatherDay) -> Unit
+) {
     var selectedDay by remember {
         mutableStateOf(weatherDays.first())
     }
@@ -376,27 +380,38 @@ fun WeatherWeekSection(weatherDays: List<WeatherDay>, onDaySelected: (WeatherDay
             item {
                 Spacer(modifier = Modifier.width(10.dp))
             }
-            items(weatherDays.subList(0, weatherDays.size)) { day ->
-                WeatherDayCard(
-                    weatherDay = day, selected = selectedDay, today = null
-                ) { daySelected ->
-                    selectedDay = daySelected
-                    onDaySelected(daySelected)
+            itemsIndexed(weatherDays) { i, day ->
+                if (i == 0) {
+                    WeatherDayCard(
+                        weatherDay = day,
+                        selected = selectedDay,
+                        today = true
+                    ) { daySelected ->
+                        selectedDay = daySelected
+                        onDaySelected(daySelected)
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                } else {
+                    WeatherDayCard(
+                        weatherDay = day,
+                        selected = selectedDay,
+                    ) { daySelected ->
+                        selectedDay = daySelected
+                        onDaySelected(daySelected)
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
                 }
-                Spacer(modifier = Modifier.width(10.dp))
-            }
-            item {
-                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }
+    Spacer(modifier = Modifier.height(16.dp))
 }
 
 @Composable
 fun WeatherDayCard(
     weatherDay: WeatherDay,
     selected: WeatherDay,
-    today: String?,
+    today: Boolean = false,
     onDaySelected: (WeatherDay) -> Unit
 ) {
     val hourNow = weatherDay.weather[0] /*TODO find current hour*/
@@ -430,7 +445,7 @@ fun WeatherDayCard(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = today ?: (weatherDay.date.substring(0, 3) + "."),
+                text = if (today) "today" else weatherDay.date.substring(0, 3) + ".",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -454,13 +469,18 @@ fun WeatherTodaySection(weatherDay: WeatherDay) {
     val weatherHours = weatherDay.weather
     Box {
         LazyRow(
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         ) {
             item {
                 Spacer(modifier = Modifier.width(10.dp))
             }
             items(weatherHours) { hour ->
                 WeatherHourColumn(weatherHour = hour)
+            }
+            item {
+                Spacer(modifier = Modifier.width(10.dp))
             }
         }
     }
@@ -524,7 +544,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
             ) {
                 Text(
                     text = "${weatherHour.weatherDetails.air_temperature}" + "\u2103", // celsius
-                    fontWeight = FontWeight.Bold, fontSize = 18.sp
+                    fontWeight = FontWeight.Bold, fontSize = 22.sp
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Image(
@@ -541,7 +561,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
                 Text(
                     text = summary.summary.symbol_code,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
                 )
                 Text(
                     text = "Rain: ${summary.details["precipitation_amount"]}%", fontSize = 12.sp

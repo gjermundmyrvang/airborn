@@ -17,7 +17,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
     }
 
     private fun mapToWeatherDay(timeseries: List<TimeSeries>): List<WeatherDay> {
-        val formatter = DateTimeFormatter.ofPattern("EEEE dd. MMMM", Locale("no"))
+        val formatter = DateTimeFormatter.ofPattern("EEEE dd. MMMM", Locale("en"))
         val groupedByDate = timeseries.groupBy { ZonedDateTime.parse(it.time).toLocalDate() }
         return groupedByDate.map { (date, timeSeriesList) ->
             WeatherDay(
