@@ -13,7 +13,7 @@ data class MetersPerSecond(val value: Double) {
 }
 
 data class Celsius(val value: Double) {
-    override fun toString(): String = "$value °C"
+    override fun toString(): String = "$value \u2103"
 }
 
 data class DirectionInDegrees(val value: Double) {
@@ -22,4 +22,8 @@ data class DirectionInDegrees(val value: Double) {
 
 data class CloudFraction(val value: Double) {
     override fun toString(): String = "$value %"
+}
+
+fun main() {
+    println(Celsius(20.9))
 }
