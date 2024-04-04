@@ -33,17 +33,21 @@ data class MetarTaf(
 }
 
 data class TurbulenceMapAndCross(
-    val map: List<Turbulence>,
-    val crossSection: List<Turbulence>
+    val map: List<Turbulence>, val crossSection: List<Turbulence>
 ) {
 
-    val mapDict
-        get(): Map<ZonedDateTime, Turbulence> = map.map { ZonedDateTime.parse(it.params.time) to it }
-            .toMap()
+    val mapDict: Map<ZonedDateTime, String>? = if (map.isNotEmpty()) {
+        map.associate { ZonedDateTime.parse(it.params.time) to it.uri }
+    } else {
+        null
+    }
 
     val crossSectionDict
-        get(): Map<ZonedDateTime, Turbulence> = crossSection.map { ZonedDateTime.parse(it.params.time) to it }
-            .toMap()
+            : Map<ZonedDateTime, String>? = if (crossSection.isNotEmpty()) {
+        crossSection.associate { ZonedDateTime.parse(it.params.time) to it.uri }
+    } else {
+        null
+    }
 
     fun currentTurbulenceTime(): ZonedDateTime {
         val time = ZonedDateTime.now(ZoneOffset.UTC).let {
