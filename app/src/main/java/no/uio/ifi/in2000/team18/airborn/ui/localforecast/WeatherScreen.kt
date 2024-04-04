@@ -22,35 +22,39 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.R
-import no.uio.ifi.in2000.team18.airborn.model.Details
-import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
-import java.time.LocalTime
 
 
 @Composable
 fun Weathersection(weather: List<WeatherDay>) {
-    var selectedDay by remember { mutableStateOf(weather.first()) }
+    var selectedDay by rememberSaveable {
+        mutableIntStateOf(0)
+    }
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        WeatherNowSection(weatherDay = selectedDay, today = selectedDay == weather.first())
-        WeatherTodaySection(weatherDay = selectedDay, today = selectedDay == weather.first())
+        WeatherNowSection(
+            weatherDay = weather[selectedDay],
+            today = weather[selectedDay] == weather.first()
+        )
+        WeatherTodaySection(weatherDay = weather[selectedDay])
         WeatherWeekSection(weatherDays = weather) { day ->
             selectedDay = day
         }
@@ -59,40 +63,34 @@ fun Weathersection(weather: List<WeatherDay>) {
 
 @Composable
 fun WeatherWeekSection(
-    weatherDays: List<WeatherDay>,
-    onDaySelected: (WeatherDay) -> Unit
+    weatherDays: List<WeatherDay>, onDaySelected: (Int) -> Unit
 ) {
-    var selectedDay by remember {
-        mutableStateOf(weatherDays.first())
+    var selectedDay by rememberSaveable {
+        mutableIntStateOf(0)
     }
-    Box {
-        LazyRow(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            item {
-                Spacer(modifier = Modifier.width(10.dp))
-            }
-            itemsIndexed(weatherDays) { i, day ->
-                if (i == 0) {
-                    WeatherDayCard(
-                        weatherDay = day,
-                        selected = selectedDay,
-                        today = true
-                    ) { daySelected ->
-                        selectedDay = daySelected
-                        onDaySelected(daySelected)
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                } else {
-                    WeatherDayCard(
-                        weatherDay = day,
-                        selected = selectedDay,
-                    ) { daySelected ->
-                        selectedDay = daySelected
-                        onDaySelected(daySelected)
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
+    LazyRow(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        item {
+            Spacer(modifier = Modifier.width(10.dp))
+        }
+        itemsIndexed(weatherDays) { i, day ->
+            if (i == 0) {
+                WeatherDayCard(
+                    weatherDay = day, selected = weatherDays[selectedDay], today = true
+                ) {
+                    onDaySelected(i)
                 }
+                Spacer(modifier = Modifier.width(10.dp))
+            } else {
+                WeatherDayCard(
+                    weatherDay = day,
+                    selected = weatherDays[selectedDay],
+                ) {
+                    selectedDay = i
+                    onDaySelected(i)
+                }
+                Spacer(modifier = Modifier.width(10.dp))
             }
         }
     }
