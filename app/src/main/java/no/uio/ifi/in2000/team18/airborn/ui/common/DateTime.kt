@@ -16,6 +16,21 @@ data class DateTime(val isoDateTime: String) {
     val date
         get(): String = toLocalDateTime().toLocalDate()
             .format(DateTimeFormatter.ofPattern("dd. MMM, yyyy", Locale.ENGLISH))
+    val month
+        get(): String = toLocalDateTime().toLocalDate()
+            .format(DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH))
+    val day
+        get(): String = toLocalDateTime().toLocalDate()
+            .format(DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH))
+
+    val dayNumber
+        get(): String = toLocalDateTime().toLocalDate()
+            .format(DateTimeFormatter.ofPattern("dd", Locale.ENGLISH))
+
+    val dayNumberMonth = "$dayNumber. $month"
+
+    val dayMonth = "$day $month"
+
     val time
         get(): String = toLocalDateTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"))
 }
