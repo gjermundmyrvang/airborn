@@ -179,51 +179,8 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
     item {
         Collapsible(header = "Turbulence") {
             Column {
-                SubcomposeAsyncImage(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentScale = ContentScale.FillWidth,
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(airportBrief.turbulence?.map?.last()?.uri)
-                        .setHeader("User-Agent", "Team18").crossfade(500).build(),
-                    loading = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(30.dp),
-                                color = MaterialTheme.colorScheme.onBackground,
-                                strokeWidth = 1.dp
-                            )
-                        }
-                    },
-                    contentDescription = "Image of turbulence map"
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(all = 5.dp),
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                SubcomposeAsyncImage(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentScale = ContentScale.FillWidth,
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(airportBrief.turbulence?.crossSection?.last()?.uri)
-                        .setHeader("User-Agent", "Team18").crossfade(500).build(),
-                    loading = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(30.dp),
-                                color = MaterialTheme.colorScheme.onBackground,
-                                strokeWidth = 1.dp
-                            )
-                        }
-                    },
-                    contentDescription = "Image of turbulence cross section"
-                )
+                DisplayTurbulence(airportBrief = airportBrief)
+
             }
         }
     }
@@ -295,51 +252,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
     item {
         Collapsible(header = "Turbulence") {
             Column {
-                SubcomposeAsyncImage(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentScale = ContentScale.FillWidth,
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(airportBrief.turbulence?.map?.last()?.uri)
-                        .setHeader("User-Agent", "Team18").crossfade(500).build(),
-                    loading = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(30.dp),
-                                color = MaterialTheme.colorScheme.onBackground,
-                                strokeWidth = 1.dp
-                            )
-                        }
-                    },
-                    contentDescription = "Image of ..."
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(all = 5.dp),
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                SubcomposeAsyncImage(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentScale = ContentScale.FillWidth,
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(airportBrief.turbulence?.crossSection?.last()?.uri)
-                        .setHeader("User-Agent", "Team18").crossfade(500).build(),
-                    loading = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(30.dp),
-                                color = MaterialTheme.colorScheme.onBackground,
-                                strokeWidth = 1.dp
-                            )
-                        }
-                    },
-                    contentDescription = "Image of ..."
-                )
+                DisplayTurbulence(airportBrief = airportBrief)
             }
         }
     }
@@ -531,3 +444,152 @@ fun LightPreviewFlightBrief() {
         )
     )
 }
+
+@Composable
+fun DisplayTurbulence(airportBrief: AirportBrief) {
+
+    var selectedTime by remember { mutableStateOf(airportBrief.turbulence?.currentTurbulenceTime()) }
+    var selectedDay by remember { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
+
+    val turbulence = airportBrief.turbulence
+    val mapDict = turbulence?.mapDict
+    val crossDict = turbulence?.crossSectionDict
+
+    val timeMap = turbulence?.allTurbulenceTimes()
+    val times = timeMap?.get(selectedDay)
+
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+
+        if (times != null && selectedTime != null) {
+            MultiToggleButton(currentSelection = selectedDay,
+                toggleStates = timeMap.keys.toList(),
+                { onToggleChange -> selectedDay = onToggleChange })
+
+            TurbulenceTimecards(selectedTime!!, times) { onCardClicked ->
+                selectedTime = onCardClicked
+            }
+
+            mapDict?.get(selectedTime)?.let { DisplayTurbulenceImage(uri = it) } ?: run {
+                Text("Image not available for time:\n $selectedTime")
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(all = 5.dp),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            crossDict?.get(selectedTime)?.let { DisplayTurbulenceImage(uri = it) } ?: run {
+                Text("Image not available for time:\n $selectedTime")
+            }
+
+        } else {
+            Text(text = "Turbulence not available for ${airportBrief.airport.name}")
+        }
+    }
+}
+
+
+@Composable
+fun TurbulenceTimecards(
+    currentTime: ZonedDateTime, times: List<ZonedDateTime>, onCardClicked: (ZonedDateTime) -> Unit
+) {
+
+    val selectedTint = MaterialTheme.colorScheme.surfaceTint
+    val unselectedTint = Color.Unspecified
+
+    LazyRow(
+        horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(all = 10.dp)
+    ) {
+
+        itemsIndexed(times) { _, time ->
+            val isSelected = currentTime == time
+            val backgroundTint = if (isSelected) selectedTint else unselectedTint
+            val textColor = if (isSelected) Color.White else Color.Unspecified
+
+            Card(colors = CardColors(
+                containerColor = backgroundTint,
+                contentColor = backgroundTint,
+                disabledContainerColor = backgroundTint,
+                disabledContentColor = backgroundTint
+            ),
+                modifier = Modifier.padding(start = 5.dp, end = 5.dp),
+                onClick = { onCardClicked(time) }) {
+                Text(
+                    modifier = Modifier.padding(all = 5.dp),
+
+                    text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    color = textColor//TODO: Display local time-format
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DisplayTurbulenceImage(uri: String) {
+    SubcomposeAsyncImage(
+        modifier = Modifier.fillMaxWidth(),
+        contentScale = ContentScale.FillWidth,
+        model = ImageRequest.Builder(LocalContext.current).data(uri)
+            .setHeader("User-Agent", "Team18").crossfade(500).build(),
+        loading = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(30.dp),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    strokeWidth = 1.dp
+                )
+            }
+        },
+        contentDescription = "Image of turbulence map"
+    )
+}
+
+
+@Composable
+fun MultiToggleButton(
+    currentSelection: String, toggleStates: List<String>, onToggleChange: (String) -> Unit
+) {
+    val selectedTint = MaterialTheme.colorScheme.surfaceTint
+    val unselectedTint = Color.Unspecified
+
+    Row(
+        modifier = Modifier
+            .height(IntrinsicSize.Min)
+            .clip(shape = RoundedCornerShape(20.dp))
+
+
+    ) {
+        toggleStates.forEachIndexed { _, toggleState ->
+            val isSelected = currentSelection.lowercase() == toggleState.lowercase()
+            val backgroundTint = if (isSelected) selectedTint else unselectedTint
+            val textColor = if (isSelected) Color.White else Color.Unspecified
+
+
+            Row(
+                modifier = Modifier
+                    .clip(shape = RoundedCornerShape(20.dp))
+                    .background(backgroundTint)
+                    .padding(vertical = 6.dp, horizontal = 8.dp)
+                    .toggleable(value = isSelected, enabled = true, onValueChange = { selected ->
+                        if (selected) {
+                            onToggleChange(toggleState)
+                        }
+                    })
+            ) {
+                Text(
+                    toggleState.uppercase(), color = textColor, modifier = Modifier.padding(4.dp)
+                )
+            }
+        }
+    }
+}
+
+
