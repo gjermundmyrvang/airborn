@@ -45,7 +45,25 @@ data class TurbulenceMapAndCross(
         get(): Map<ZonedDateTime, Turbulence> = crossSection.map { ZonedDateTime.parse(it.params.time) to it }
             .toMap()
 
-   
+    fun currentTurbulenceTime(): ZonedDateTime {
+        val time = ZonedDateTime.now(ZoneOffset.UTC).let {
+            if (it.minute > 30) it.plusHours(1) else it
+        }
+        val formattedTime = time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:00'Z'"))
+        return ZonedDateTime.parse(formattedTime)
+    }
+
+    fun allTurbulenceTimes(): Map<String, List<ZonedDateTime>>? {
+        val turbulenceTimes = if (map.isNotEmpty()) {
+            map.map { ZonedDateTime.parse(it.params.time) }
+        } else {
+            null
+        }
+
+        return turbulenceTimes?.groupBy { time ->
+            time.dayOfWeek.name
+        } ?: return null
+    }
 }
 
 data class Airport(
