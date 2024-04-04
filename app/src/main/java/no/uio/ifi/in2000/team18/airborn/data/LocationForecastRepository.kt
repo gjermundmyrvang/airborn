@@ -1,14 +1,20 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.model.Details
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
+import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Celsius
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.CloudFraction
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Hpa
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Humidity
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.MetersPerSecond
 import javax.inject.Inject
 
 class LocationForecastRepository @Inject constructor(private val locationForecastDataSource: LocationForecastDataSource) {
@@ -148,49 +154,54 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
     }
 
     private fun mapToWeatherDay(timeseries: List<TimeSeries>): List<WeatherDay> {
-        val formatter = DateTimeFormatter.ofPattern("EEEE dd. MMMM", Locale("en"))
-        val groupedByDate = timeseries.groupBy { ZonedDateTime.parse(it.time).toLocalDate() }
-        return groupedByDate.map { (date, timeSeriesList) ->
-            WeatherDay(
-                date = date.format(formatter).toString(),
+        val groupedByDate = timeseries.groupBy { DateTime(isoDateTime = it.time).date }
+        return groupedByDate.map { (_, timeSeriesList) ->
+            WeatherDay(date = DateTime(isoDateTime = timeSeriesList.first().time),
                 weather = timeSeriesList.map { timeSeries ->
                     WeatherHour(
-                        hour = ZonedDateTime.parse(timeSeries.time).hour,
-                        weatherDetails = timeSeries.data.instant.details,
+                        time = DateTime(isoDateTime = timeSeries.time).time,
+                        weatherDetails = mapDetailsToWeatherDetails(timeSeries.data.instant.details),
                         nextOneHour = if (timeSeries.data.next_1_hours != null) english[timeSeries.data.next_1_hours.summary.symbol_code.substringBefore(
                             "_"
-                        )]
-                            ?.let {
-                                NextHourDetails(
-                                    symbol_code = it,
-                                    icon = iconMapper(timeSeries.data.next_1_hours.summary.symbol_code),
-                                    chanceOfRain = timeSeries.data.next_1_hours.details["precipitation_amount"]
-                                )
-                            } else null,
+                        )]?.let {
+                            NextHourDetails(
+                                symbol_code = it,
+                                icon = iconMapper(timeSeries.data.next_1_hours.summary.symbol_code),
+                                chanceOfRain = timeSeries.data.next_1_hours.details["precipitation_amount"]
+                            )
+                        } else null,
                         nextSixHour = if (timeSeries.data.next_6_hours != null) english[timeSeries.data.next_6_hours.summary.symbol_code.substringBefore(
                             "_"
-                        )]
-                            ?.let {
-                                NextHourDetails(
-                                    symbol_code = it,
-                                    icon = iconMapper(timeSeries.data.next_6_hours.summary.symbol_code),
-                                    chanceOfRain = timeSeries.data.next_6_hours.details["precipitation_amount"]
-                                )
-                            } else null,
+                        )]?.let {
+                            NextHourDetails(
+                                symbol_code = it,
+                                icon = iconMapper(timeSeries.data.next_6_hours.summary.symbol_code),
+                                chanceOfRain = timeSeries.data.next_6_hours.details["precipitation_amount"]
+                            )
+                        } else null,
                         nextTwelweHour = if (timeSeries.data.next_12_hours != null) english[timeSeries.data.next_12_hours.summary.symbol_code.substringBefore(
                             "_"
-                        )]
-                            ?.let {
-                                NextHourDetails(
-                                    symbol_code = it,
-                                    icon = iconMapper(timeSeries.data.next_12_hours.summary.symbol_code),
-                                    chanceOfRain = timeSeries.data.next_12_hours.details["precipitation_amount"]
-                                )
-                            } else null,
+                        )]?.let {
+                            NextHourDetails(
+                                symbol_code = it,
+                                icon = iconMapper(timeSeries.data.next_12_hours.summary.symbol_code),
+                                chanceOfRain = timeSeries.data.next_12_hours.details["precipitation_amount"]
+                            )
+                        } else null,
                     )
-                }
-            )
+                })
         }
+    }
+
+    private fun mapDetailsToWeatherDetails(details: Details): WeatherDetails {
+        return WeatherDetails(
+            airPressureSeaLevel = Hpa(details.air_pressure_at_sea_level),
+            airTemperature = Celsius(details.air_temperature),
+            cloudFraction = CloudFraction(details.cloud_area_fraction),
+            humidity = Humidity(details.relative_humidity),
+            windDirection = DirectionInDegrees(details.wind_from_direction),
+            windSpeed = MetersPerSecond(details.wind_speed)
+        )
     }
 
     private fun iconMapper(iconAsString: String): Int {

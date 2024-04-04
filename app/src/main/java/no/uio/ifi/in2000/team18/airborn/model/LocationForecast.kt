@@ -1,18 +1,26 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
+import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Celsius
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.CloudFraction
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Hpa
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Humidity
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.MetersPerSecond
+
 
 data class LocationData(
     val properties: Properties
 )
 
 data class WeatherDay(
-    val date: String,
+    val date: DateTime,
     val weather: List<WeatherHour>
 )
 
 data class WeatherHour(
-    val hour: Int,
-    val weatherDetails: Details,
+    val time: String,
+    val weatherDetails: WeatherDetails,
     val nextOneHour: NextHourDetails? = null,
     val nextSixHour: NextHourDetails? = null,
     val nextTwelweHour: NextHourDetails? = null,
@@ -57,6 +65,15 @@ data class TimeSeriesData(
 
 data class InstantData(
     val details: Details
+)
+
+data class WeatherDetails(
+    val airPressureSeaLevel: Hpa,
+    val airTemperature: Celsius,
+    val cloudFraction: CloudFraction,
+    val humidity: Humidity,
+    val windDirection: DirectionInDegrees,
+    val windSpeed: MetersPerSecond
 )
 
 data class Details(
