@@ -124,7 +124,7 @@ fun WeatherDayCard(
             width = if (isSelected) 2.dp else 1.dp, color = borderColor
         ),
         modifier = Modifier
-            .fillMaxSize()
+            .width(120.dp)
             .padding(top = 5.dp),
         onClick = { onDaySelected(weatherDay) },
     ) {
