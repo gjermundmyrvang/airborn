@@ -42,7 +42,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -446,8 +445,8 @@ fun LightPreviewFlightBrief() {
 @Composable
 fun DisplayTurbulence(airportBrief: AirportBrief) {
 
-    var selectedTime by remember { mutableStateOf(airportBrief.turbulence?.currentTurbulenceTime()) }
-    var selectedDay by remember { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
+    var selectedTime by rememberSaveable { mutableStateOf(airportBrief.turbulence?.currentTurbulenceTime()) }
+    var selectedDay by rememberSaveable { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
 
     val turbulence = airportBrief.turbulence
     val mapDict = turbulence?.mapDict
