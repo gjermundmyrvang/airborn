@@ -35,7 +35,7 @@ class UnitTest {
     @Test
     fun testCelsius() {
         val celsius = Celsius(20.5)
-        assertEquals("20.5 °C", "$celsius")
+        assertEquals("20.5 ℃", "$celsius")
     }
 
     @Test

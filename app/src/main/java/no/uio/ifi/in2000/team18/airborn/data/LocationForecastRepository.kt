@@ -60,8 +60,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
         "snowandthunder" to "Snow and thunder",
         "heavysnowandthunder" to "Heavy snow and thunder",
         "fog" to "Fog",
-    )
-    private val bokmål = mapOf(
+    )/*private val bokmål = mapOf(
         "clearsky" to "Klarvær",
         "fair" to "Lettskyet",
         "partlycloudy" to "Delvis skyet",
@@ -104,6 +103,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
         "heavysnowandthunder" to "Kraftig snø og torden",
         "fog" to "Tåke",
     )
+     *//*
     private val nynorsk = mapOf(
         "clearsky" to "Klårvêr",
         "fair" to "Lettskya",
@@ -147,6 +147,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
         "heavysnowandthunder" to "Kraftig snø og torevêr",
         "fog" to "Skodde",
     )
+     */
 
     suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
         val weatherData = locationForecastDataSource.fetchForecast(airport).properties.timeseries
@@ -290,7 +291,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
             "snowshowersandthunder_night" -> R.drawable.snowshowersandthunder_night
             "snowshowersandthunder_polartwilight" -> R.drawable.snowshowersandthunder_polartwilight
             else -> {
-                return R.drawable.ic_launcher_foreground
+                return R.drawable.image_not_availeable
             }
         }
     }
