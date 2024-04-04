@@ -4,10 +4,12 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,12 +19,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -35,11 +42,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -64,6 +73,9 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 @Preview(showSystemUi = true)
 @Composable
@@ -88,8 +100,7 @@ fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
 @Composable
 fun LoadingScreen() {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
     ) {
         Text(text = "LOADING...")
     }
@@ -101,20 +112,15 @@ fun FlightBreifScreenContent(flightBrief: FlightBrief) = Column {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
-        Tab(
-            selected = pagerState.currentPage == 0,
+        Tab(selected = pagerState.currentPage == 0,
             onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
             text = { Text("Departure") })
-        Tab(
-            selected = pagerState.currentPage == 1,
+        Tab(selected = pagerState.currentPage == 1,
             onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-            text = { Text("Arrival") }
-        )
-        Tab(
-            selected = pagerState.currentPage == 2,
+            text = { Text("Arrival") })
+        Tab(selected = pagerState.currentPage == 2,
             onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
-            text = { Text("Overall") }
-        )
+            text = { Text("Overall") })
     }
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
@@ -278,8 +284,8 @@ fun OverallInfoTab(flightBrief: FlightBrief) {
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(flightBrief.sigchart.uri)
-                        .setHeader("User-Agent", "Team18").crossfade(500).build(),
+                        .data(flightBrief.sigchart.uri).setHeader("User-Agent", "Team18")
+                        .crossfade(500).build(),
                     loading = {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -392,8 +398,7 @@ fun WeatherDayCard(weatherDay: WeatherDay) {
                 Text(text = "${firstHourInterval.weatherDetails.wind_from_direction}")
             }
             HorizontalDivider(
-                modifier = Modifier
-                    .padding(start = 5.dp, end = 5.dp),
+                modifier = Modifier.padding(start = 5.dp, end = 5.dp),
                 thickness = 2.dp,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -404,12 +409,10 @@ fun WeatherDayCard(weatherDay: WeatherDay) {
 @Composable
 fun WeatherHourScreen(weatherHour: WeatherHour) {
     Card(
-        modifier = Modifier
-            .padding(16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -425,18 +428,13 @@ fun LightPreviewFlightBrief() {
         flightBrief = FlightBrief(
             departure = AirportBrief(
                 airport = Airport(
-                    icao = Icao("ENGM"),
-                    name = "Gardermoen",
-                    Position(0.0, 0.0)
+                    icao = Icao("ENGM"), name = "Gardermoen", Position(0.0, 0.0)
                 ),
                 metarTaf = MetarTaf(listOf(Metar("Hello")), listOf()),
                 turbulence = null,
                 isobaric = null,
                 weather = listOf()
-            ),
-            arrival = null,
-            altArrivals = listOf(),
-            sigchart = Sigchart(
+            ), arrival = null, altArrivals = listOf(), sigchart = Sigchart(
                 params = SigchartParameters(area = Area.Norway, time = ""),
                 updated = "",
                 uri = "",

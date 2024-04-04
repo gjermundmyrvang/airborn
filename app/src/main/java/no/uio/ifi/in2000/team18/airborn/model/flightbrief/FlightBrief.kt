@@ -4,7 +4,9 @@ import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 data class FlightBrief(
     val departure: AirportBrief,
@@ -77,8 +79,7 @@ data class Airport(
 )
 
 data class Position(
-    val latitude: Double,
-    val longitude: Double
+    val latitude: Double, val longitude: Double
 )
 
 data class Icao(val code: String) {
