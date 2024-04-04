@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -42,7 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -88,8 +91,7 @@ fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
 @Composable
 fun LoadingScreen() {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
     ) {
         Text(text = "LOADING...")
     }
@@ -101,20 +103,15 @@ fun FlightBreifScreenContent(flightBrief: FlightBrief) = Column {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
-        Tab(
-            selected = pagerState.currentPage == 0,
+        Tab(selected = pagerState.currentPage == 0,
             onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
             text = { Text("Departure") })
-        Tab(
-            selected = pagerState.currentPage == 1,
+        Tab(selected = pagerState.currentPage == 1,
             onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-            text = { Text("Arrival") }
-        )
-        Tab(
-            selected = pagerState.currentPage == 2,
+            text = { Text("Arrival") })
+        Tab(selected = pagerState.currentPage == 2,
             onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
-            text = { Text("Overall") }
-        )
+            text = { Text("Overall") })
     }
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
@@ -138,14 +135,12 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
             )
         }
     }
+
     item {
+        val clipboardManager = LocalClipboardManager.current
         Collapsible(header = "Metar/Taf", expanded = true) {
             Column {
-                Text(text = "METAR:", fontWeight = FontWeight.Bold)
-                Text(text = "${airportBrief.metarTaf?.latestMetar}")
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "TAF:", fontWeight = FontWeight.Bold)
-                Text(text = "${airportBrief.metarTaf?.latestTaf}")
+                MetarTaf(metarTaf = airportBrief.metarTaf)
             }
         }
     }
@@ -257,11 +252,7 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
     item {
         Collapsible(header = "Metar/Taf", expanded = true) {
             Column {
-                Text(text = "METAR:", fontWeight = FontWeight.Bold)
-                Text(text = "${airportBrief.metarTaf?.latestMetar}")
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "TAF:", fontWeight = FontWeight.Bold)
-                Text(text = "${airportBrief.metarTaf?.latestTaf}")
+                MetarTaf(metarTaf = airportBrief.metarTaf)
             }
         }
     }
@@ -365,8 +356,8 @@ fun OverallInfoTab(flightBrief: FlightBrief) {
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(flightBrief.sigchart.uri)
-                        .setHeader("User-Agent", "Team18").crossfade(500).build(),
+                        .data(flightBrief.sigchart.uri).setHeader("User-Agent", "Team18")
+                        .crossfade(500).build(),
                     loading = {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -386,6 +377,35 @@ fun OverallInfoTab(flightBrief: FlightBrief) {
     }
 }
 
+
+@Composable
+fun MetarTaf(metarTaf: MetarTaf?) {
+    val clipboardManager = LocalClipboardManager.current
+    val metar = metarTaf?.latestMetar
+    val taf = metarTaf?.latestTaf
+
+    if (metar != null) {
+        Text(text = "METAR:", fontWeight = FontWeight.Bold)
+        Text(text = metar.text, modifier = Modifier.clickable {
+            clipboardManager.setText(
+                AnnotatedString(metar.text)
+            )
+        })
+    } else {
+        Text("No METAR")
+    }
+
+    if (taf != null) {
+        Text(text = "TAF:", fontWeight = FontWeight.Bold)
+        Text(text = taf.text, modifier = Modifier.clickable {
+            clipboardManager.setText(
+                AnnotatedString(taf.text)
+            )
+        })
+    } else {
+        Text("No Taf")
+    }
+}
 
 @Composable
 fun Collapsible(
@@ -479,8 +499,7 @@ fun WeatherDayCard(weatherDay: WeatherDay) {
                 Text(text = "${firstHourInterval.weatherDetails.wind_from_direction}")
             }
             HorizontalDivider(
-                modifier = Modifier
-                    .padding(start = 5.dp, end = 5.dp),
+                modifier = Modifier.padding(start = 5.dp, end = 5.dp),
                 thickness = 2.dp,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -491,12 +510,10 @@ fun WeatherDayCard(weatherDay: WeatherDay) {
 @Composable
 fun WeatherHourScreen(weatherHour: WeatherHour) {
     Card(
-        modifier = Modifier
-            .padding(16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -512,18 +529,13 @@ fun LightPreviewFlightBrief() {
         flightBrief = FlightBrief(
             departure = AirportBrief(
                 airport = Airport(
-                    icao = Icao("ENGM"),
-                    name = "Gardermoen",
-                    Position(0.0, 0.0)
+                    icao = Icao("ENGM"), name = "Gardermoen", Position(0.0, 0.0)
                 ),
                 metarTaf = MetarTaf(listOf(Metar("Hello")), listOf()),
                 turbulence = null,
                 isobaric = null,
                 weather = listOf()
-            ),
-            arrival = null,
-            altArrivals = listOf(),
-            sigchart = Sigchart(
+            ), arrival = null, altArrivals = listOf(), sigchart = Sigchart(
                 params = SigchartParameters(area = Area.Norway, time = ""),
                 updated = "",
                 uri = "",
