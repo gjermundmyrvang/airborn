@@ -4,6 +4,9 @@ import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 data class FlightBrief(
     val departure: AirportBrief,
@@ -32,9 +35,42 @@ data class MetarTaf(
 }
 
 data class TurbulenceMapAndCross(
-    val map: List<Turbulence>,
-    val crossSection: List<Turbulence>
-)
+    val map: List<Turbulence>, val crossSection: List<Turbulence>
+) {
+
+    val mapDict: Map<ZonedDateTime, String>? = if (map.isNotEmpty()) {
+        map.associate { ZonedDateTime.parse(it.params.time) to it.uri }
+    } else {
+        null
+    }
+
+    val crossSectionDict
+            : Map<ZonedDateTime, String>? = if (crossSection.isNotEmpty()) {
+        crossSection.associate { ZonedDateTime.parse(it.params.time) to it.uri }
+    } else {
+        null
+    }
+
+    fun currentTurbulenceTime(): ZonedDateTime {
+        val time = ZonedDateTime.now(ZoneOffset.UTC).let {
+            if (it.minute > 30) it.plusHours(1) else it
+        }
+        val formattedTime = time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:00'Z'"))
+        return ZonedDateTime.parse(formattedTime)
+    }
+
+    fun allTurbulenceTimes(): Map<String, List<ZonedDateTime>>? {
+        val turbulenceTimes = if (map.isNotEmpty()) {
+            map.map { ZonedDateTime.parse(it.params.time) }
+        } else {
+            null
+        }
+
+        return turbulenceTimes?.groupBy { time ->
+            time.dayOfWeek.name
+        } ?: return null
+    }
+}
 
 data class Airport(
     val icao: Icao,
@@ -43,8 +79,7 @@ data class Airport(
 )
 
 data class Position(
-    val latitude: Double,
-    val longitude: Double
+    val latitude: Double, val longitude: Double
 )
 
 data class Icao(val code: String) {
