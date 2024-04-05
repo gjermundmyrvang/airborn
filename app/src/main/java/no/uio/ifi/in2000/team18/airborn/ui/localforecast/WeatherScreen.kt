@@ -304,7 +304,9 @@ fun WindCard(windSpeed: MetersPerSecond, fromDegrees: Double) {
                     )
                 )
             }
-            Column {
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
                 RotatableArrowIcon(direction = fromDegrees)
                 Text(text = "$fromDegrees $direction")
             }
@@ -322,7 +324,7 @@ fun TestWindCard() {
 fun RotatableArrowIcon(
     direction: Double,
     modifier: Modifier = Modifier,
-    iconSize: Dp = 50.dp,
+    iconSize: Dp = 25.dp,
     iconColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val arrowIcon: Painter = painterResource(id = R.drawable.arrow_up)
