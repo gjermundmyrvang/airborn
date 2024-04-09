@@ -1,11 +1,11 @@
 package no.uio.ifi.in2000.team18.airborn
 
 import junit.framework.TestCase.assertEquals
-import no.uio.ifi.in2000.team18.airborn.model.Celsius
 import no.uio.ifi.in2000.team18.airborn.model.DirectionInDegrees
 import no.uio.ifi.in2000.team18.airborn.model.Hpa
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.Speed
+import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import org.junit.Test
 import java.time.LocalDateTime
@@ -33,7 +33,7 @@ class UnitTest {
 
     @Test
     fun testCelsius() {
-        val celsius = Celsius(20.5)
+        val celsius = Temperature(20.5)
         assertEquals("20.5 ℃", "$celsius")
     }
 

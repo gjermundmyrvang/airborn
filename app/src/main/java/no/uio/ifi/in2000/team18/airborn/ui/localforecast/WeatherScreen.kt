@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.R
-import no.uio.ifi.in2000.team18.airborn.model.Celsius
 import no.uio.ifi.in2000.team18.airborn.model.CloudFraction
 import no.uio.ifi.in2000.team18.airborn.model.DirectionInDegrees
 import no.uio.ifi.in2000.team18.airborn.model.FogAreaFraction
@@ -46,6 +45,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Hpa
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Speed
+import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
@@ -118,9 +118,9 @@ fun WeatherDayCard(
     val weatherHours = weatherDay.weather
     val hourNow = weatherHours.first()
     val highestTemp =
-        weatherHours.maxByOrNull { it.weatherDetails.airTemperature.value }!!.weatherDetails.airTemperature.value
+        weatherHours.maxByOrNull { it.weatherDetails.airTemperature.celcius }!!.weatherDetails.airTemperature.celcius
     val lowestTemp =
-        weatherHours.minByOrNull { it.weatherDetails.airTemperature.value }!!.weatherDetails.airTemperature.value
+        weatherHours.minByOrNull { it.weatherDetails.airTemperature.celcius }!!.weatherDetails.airTemperature.celcius
     val isSelected = selected == weatherDay
     val borderColor =
         if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
@@ -363,12 +363,12 @@ fun TestWeatherSection() {
     val hour = WeatherHour(
         time = "12:00", weatherDetails = WeatherDetails(
             airPressureSeaLevel = Hpa(1001.98),
-            airTemperature = Celsius(18.0),
+            airTemperature = Temperature(18.0),
             cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
             humidity = Humidity(65.98),
             windSpeed = Speed(23.65),
             windDirection = DirectionInDegrees(236.98),
-            dewPointTemperature = Celsius(23.9),
+            dewPointTemperature = Temperature(23.9),
             fogAreaFraction = FogAreaFraction(89.9),
             uvIndex = UvIndex(2.0)
         ), nextOneHour = NextHourDetails(
@@ -400,12 +400,12 @@ fun TestWeatherNowSection() {
     val hour = WeatherHour(
         time = "12:00", weatherDetails = WeatherDetails(
             airPressureSeaLevel = Hpa(1001.98),
-            airTemperature = Celsius(18.0),
+            airTemperature = Temperature(18.0),
             cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
             humidity = Humidity(65.98),
             windSpeed = Speed(23.65),
             windDirection = DirectionInDegrees(236.98),
-            dewPointTemperature = Celsius(23.9),
+            dewPointTemperature = Temperature(23.9),
             fogAreaFraction = FogAreaFraction(89.9),
             uvIndex = UvIndex(2.0)
         ), nextOneHour = NextHourDetails(
