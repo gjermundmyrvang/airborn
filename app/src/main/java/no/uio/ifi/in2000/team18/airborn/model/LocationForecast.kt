@@ -62,11 +62,11 @@ data class InstantData(
 )
 
 data class WeatherDetails(
-    val airPressureSeaLevel: Hpa,
+    val airPressureSeaLevel: Pressure,
     val airTemperature: Temperature,
     val cloudFraction: CloudFraction,
     val humidity: Humidity,
-    val windDirection: DirectionInDegrees,
+    val windDirection: Direction,
     val windSpeed: Speed,
     val dewPointTemperature: Temperature,
     val fogAreaFraction: FogAreaFraction,

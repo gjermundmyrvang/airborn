@@ -39,11 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.CloudFraction
-import no.uio.ifi.in2000.team18.airborn.model.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.FogAreaFraction
-import no.uio.ifi.in2000.team18.airborn.model.Hpa
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
+import no.uio.ifi.in2000.team18.airborn.model.Pressure
 import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.UvIndex
@@ -258,7 +258,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
             Spacer(modifier = Modifier.height(16.dp))
             WindCard(
                 windSpeed = weatherHour.weatherDetails.windSpeed,
-                fromDegrees = weatherHour.weatherDetails.windDirection.value
+                fromDegrees = weatherHour.weatherDetails.windDirection.degrees
             )
         }
         Column {
@@ -362,12 +362,12 @@ fun RotatableArrowIcon(
 fun TestWeatherSection() {
     val hour = WeatherHour(
         time = "12:00", weatherDetails = WeatherDetails(
-            airPressureSeaLevel = Hpa(1001.98),
+            airPressureSeaLevel = Pressure(1001.98),
             airTemperature = Temperature(18.0),
             cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
             humidity = Humidity(65.98),
             windSpeed = Speed(23.65),
-            windDirection = DirectionInDegrees(236.98),
+            windDirection = Direction(236.98),
             dewPointTemperature = Temperature(23.9),
             fogAreaFraction = FogAreaFraction(89.9),
             uvIndex = UvIndex(2.0)
@@ -399,12 +399,12 @@ fun TestWeatherSection() {
 fun TestWeatherNowSection() {
     val hour = WeatherHour(
         time = "12:00", weatherDetails = WeatherDetails(
-            airPressureSeaLevel = Hpa(1001.98),
+            airPressureSeaLevel = Pressure(1001.98),
             airTemperature = Temperature(18.0),
             cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
             humidity = Humidity(65.98),
             windSpeed = Speed(23.65),
-            windDirection = DirectionInDegrees(236.98),
+            windDirection = Direction(236.98),
             dewPointTemperature = Temperature(23.9),
             fogAreaFraction = FogAreaFraction(89.9),
             uvIndex = UvIndex(2.0)

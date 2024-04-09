@@ -3,11 +3,11 @@ package no.uio.ifi.in2000.team18.airborn.data
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.CloudFraction
 import no.uio.ifi.in2000.team18.airborn.model.Details
-import no.uio.ifi.in2000.team18.airborn.model.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.FogAreaFraction
-import no.uio.ifi.in2000.team18.airborn.model.Hpa
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
+import no.uio.ifi.in2000.team18.airborn.model.Pressure
 import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
@@ -202,7 +202,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
 
     private fun mapDetailsToWeatherDetails(details: Details): WeatherDetails {
         return WeatherDetails(
-            airPressureSeaLevel = Hpa(details.air_pressure_at_sea_level),
+            airPressureSeaLevel = Pressure(details.air_pressure_at_sea_level),
             airTemperature = Temperature(details.air_temperature),
             cloudFraction = CloudFraction(
                 cloudFraction = details.cloud_area_fraction,
@@ -211,7 +211,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
                 cloudFractionLow = details.cloud_area_fraction_low
             ),
             humidity = Humidity(details.relative_humidity),
-            windDirection = DirectionInDegrees(details.wind_from_direction),
+            windDirection = Direction(details.wind_from_direction),
             windSpeed = Speed(details.wind_speed),
             dewPointTemperature = Temperature(details.dew_point_temperature),
             fogAreaFraction = FogAreaFraction(details.fog_area_fraction),
