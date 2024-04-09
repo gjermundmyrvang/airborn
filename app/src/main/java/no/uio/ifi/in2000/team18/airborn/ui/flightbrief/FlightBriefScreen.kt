@@ -71,6 +71,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.launch
+import kotlinx.datetime.format
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
 import no.uio.ifi.in2000.team18.airborn.model.Area
@@ -86,6 +87,8 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -406,7 +409,12 @@ fun MetarDecode(metar: String) {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("Report time: ")
                     }
-                    append("${decode.reportTime?.date.toString()} at ${decode.reportTime?.time} GMT")
+                    val localTime = LocalDateTime.parse(decode.reportTime.toString())
+                    val zonedDateTimeGMT = ZonedDateTime.of(localTime, ZoneId.of("GMT"))
+                    val zoneIdNorway = ZoneId.of("Europe/Oslo")
+                    val zonedDateTimeNorway = zonedDateTimeGMT.withZoneSameInstant(zoneIdNorway)
+                    val formattedTime = zonedDateTimeNorway.format(DateTimeFormatter.ofPattern("HH:mm"))
+                    append("${decode.reportTime?.date} at $formattedTime local time.")
                 })
                 Text(buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
