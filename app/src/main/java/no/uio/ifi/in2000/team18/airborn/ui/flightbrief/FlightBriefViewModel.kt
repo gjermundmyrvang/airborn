@@ -11,6 +11,8 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.FlightBriefRepository
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.FlightBrief
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Error
+import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,9 +32,9 @@ class FlightBriefViewModel @Inject constructor(
             val brief =
                 flightBriefRepository.getFlightBriefById(savedStateHandle.get<String>("flightBriefId")!!)
             if (brief != null) {
-                _state.update { it.copy(flightBrief = LoadingState.Success(brief)) }
+                _state.update { it.copy(flightBrief = brief.toSuccess()) }
             } else {
-                _state.update { it.copy(flightBrief = LoadingState.Error) }
+                _state.update { it.copy(flightBrief = Error) }
             }
         }
     }
