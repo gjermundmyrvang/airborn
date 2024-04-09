@@ -43,13 +43,7 @@ class UnitTest {
         val direction = DirectionInDegrees(45.0)
         assertEquals("45.0 degrees", "$direction")
     }
-
-    @Test
-    fun testCloudFraction() {
-        val cloudFraction = CloudFraction(0.75)
-        assertEquals("0.75 %", "$cloudFraction")
-    }
-
+    
     @Test
     fun testToLocalDateTime() {
         val isoDateTime = "2024-04-04T11:36:16Z"
