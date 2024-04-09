@@ -20,8 +20,23 @@ data class DirectionInDegrees(val value: Double) {
     override fun toString(): String = "$value degrees"
 }
 
-data class CloudFraction(val value: Double) {
+data class CloudFraction(
+    val cloudFraction: Double,
+    val cloudFractionHigh: Double,
+    val cloudFractionMedium: Double,
+    val cloudFractionLow: Double,
+) {
+    override fun toString(): String {
+        return "Cloud fraction: $cloudFraction%\nCloud fraction high: $cloudFractionHigh%\nCloud fraction medium: $cloudFractionLow%\nCloud fraction low: $cloudFractionLow%"
+    }
+}
+
+data class FogAreaFraction(val value: Double) {
     override fun toString(): String = "$value %"
+}
+
+data class UvIndex(val value: Double) {
+    override fun toString(): String = "$value"
 }
 
 fun main() {

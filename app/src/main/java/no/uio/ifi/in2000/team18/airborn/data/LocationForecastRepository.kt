@@ -12,9 +12,11 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Celsius
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.CloudFraction
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.FogAreaFraction
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Hpa
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Humidity
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.MetersPerSecond
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.UvIndex
 import javax.inject.Inject
 
 class LocationForecastRepository @Inject constructor(private val locationForecastDataSource: LocationForecastDataSource) {
@@ -198,10 +200,18 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
         return WeatherDetails(
             airPressureSeaLevel = Hpa(details.air_pressure_at_sea_level),
             airTemperature = Celsius(details.air_temperature),
-            cloudFraction = CloudFraction(details.cloud_area_fraction),
+            cloudFraction = CloudFraction(
+                cloudFraction = details.cloud_area_fraction,
+                cloudFractionHigh = details.cloud_area_fraction_high,
+                cloudFractionMedium = details.cloud_area_fraction_medium,
+                cloudFractionLow = details.cloud_area_fraction_low
+            ),
             humidity = Humidity(details.relative_humidity),
             windDirection = DirectionInDegrees(details.wind_from_direction),
-            windSpeed = MetersPerSecond(details.wind_speed)
+            windSpeed = MetersPerSecond(details.wind_speed),
+            dewPointTemperature = Celsius(details.dew_point_temperature),
+            fogAreaFraction = FogAreaFraction(details.fog_area_fraction),
+            uvIndex = UvIndex(details.ultraviolet_index_clear_sky)
         )
     }
 

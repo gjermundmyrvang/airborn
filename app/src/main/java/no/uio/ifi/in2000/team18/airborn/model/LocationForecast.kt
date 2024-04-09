@@ -4,9 +4,11 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Celsius
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.CloudFraction
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.FogAreaFraction
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Hpa
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Humidity
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.MetersPerSecond
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.UvIndex
 
 
 data class LocationData(
@@ -73,14 +75,25 @@ data class WeatherDetails(
     val cloudFraction: CloudFraction,
     val humidity: Humidity,
     val windDirection: DirectionInDegrees,
-    val windSpeed: MetersPerSecond
+    val windSpeed: MetersPerSecond,
+    val dewPointTemperature: Celsius,
+    val fogAreaFraction: FogAreaFraction,
+    val uvIndex: UvIndex,
 )
 
 data class Details(
     val air_pressure_at_sea_level: Double,
     val air_temperature: Double,
+    val air_temperature_max: Double,
+    val air_temperature_min: Double,
     val cloud_area_fraction: Double,
+    val cloud_area_fraction_high: Double,
+    val cloud_area_fraction_low: Double,
+    val cloud_area_fraction_medium: Double,
+    val dew_point_temperature: Double,
+    val fog_area_fraction: Double,
     val relative_humidity: Double,
+    val ultraviolet_index_clear_sky: Double,
     val wind_from_direction: Double,
     val wind_speed: Double
 )
