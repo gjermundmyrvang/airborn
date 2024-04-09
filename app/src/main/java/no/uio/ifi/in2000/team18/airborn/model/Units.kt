@@ -1,7 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
-data class Hpa(val value: Double) {
-    override fun toString(): String = "$value hPa"
+data class Pressure(val hpa: Double) {
+    override fun toString(): String = "$hpa hPa"
 }
 
 data class Humidity(val value: Double) {
@@ -18,8 +18,8 @@ data class Temperature(val celcius: Double) {
     override fun toString(): String = "$celcius \u2103"
 }
 
-data class DirectionInDegrees(val value: Double) {
-    override fun toString(): String = "$value degrees"
+data class Direction(val degrees: Double) {
+    override fun toString(): String = "$degrees degrees"
 }
 
 data class CloudFraction(
@@ -52,3 +52,11 @@ val Int.knots get() = this.toDouble().knots
 
 val Double.celcius get() = Temperature(celcius = this)
 val Int.celcius get() = this.toDouble().knots
+
+val Double.hpa get() = Pressure(hpa = this)
+val Int.hpa get() = this.toDouble().hpa
+val Double.pa get() = Pressure(hpa = this / 10.0)
+val Int.pa get() = this.toDouble().pa
+
+val Double.degrees get() = Direction(degrees = this)
+val Int.degrees get() = this.toDouble().degrees

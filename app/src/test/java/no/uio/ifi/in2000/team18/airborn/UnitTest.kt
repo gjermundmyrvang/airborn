@@ -1,11 +1,11 @@
 package no.uio.ifi.in2000.team18.airborn
 
 import junit.framework.TestCase.assertEquals
-import no.uio.ifi.in2000.team18.airborn.model.DirectionInDegrees
-import no.uio.ifi.in2000.team18.airborn.model.Hpa
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
-import no.uio.ifi.in2000.team18.airborn.model.Speed
-import no.uio.ifi.in2000.team18.airborn.model.Temperature
+import no.uio.ifi.in2000.team18.airborn.model.celcius
+import no.uio.ifi.in2000.team18.airborn.model.degrees
+import no.uio.ifi.in2000.team18.airborn.model.hpa
+import no.uio.ifi.in2000.team18.airborn.model.mps
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import org.junit.Test
 import java.time.LocalDateTime
@@ -15,8 +15,8 @@ import java.time.ZoneOffset
 class UnitTest {
     @Test
     fun testHpa() {
-        val hpa = Hpa(1013.25)
-        assertEquals("1013.25 hPa", "$hpa")
+        val pressure = 1013.25.hpa
+        assertEquals("1013.25 hPa", "$pressure")
     }
 
     @Test
@@ -27,19 +27,19 @@ class UnitTest {
 
     @Test
     fun testMetersPerSecond() {
-        val mps = Speed(10.2)
-        assertEquals("10.2 m/s", "$mps")
+        val speed = 10.2.mps
+        assertEquals("10.2 m/s", "$speed")
     }
 
     @Test
     fun testCelsius() {
-        val celsius = Temperature(20.5)
+        val celsius = 20.5.celcius
         assertEquals("20.5 ℃", "$celsius")
     }
 
     @Test
     fun testDirectionInDegrees() {
-        val direction = DirectionInDegrees(45.0)
+        val direction = 45.0.degrees
         assertEquals("45.0 degrees", "$direction")
     }
 
