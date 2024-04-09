@@ -44,7 +44,7 @@ class FlightBriefRepository(
         val airport = airportDataSource.getByIcao(icao)!!
         return AirportBrief(
             airport = airport,
-            metarTaf = createMetarTaf(icao.code),
+            metarTaf = createMetarTaf(icao),
             turbulence = turbulenceDataSource.createTurbulence(icao),
             isobaric = isobaricRepository.getIsobaricData(
                 airport.position, time = time
@@ -53,7 +53,7 @@ class FlightBriefRepository(
         )
     }
 
-    private suspend fun createMetarTaf(icao: String): MetarTaf {
+    private suspend fun createMetarTaf(icao: Icao): MetarTaf {
         return tafmetarDataSource.fetchTafMetar(icao)
     }
 
