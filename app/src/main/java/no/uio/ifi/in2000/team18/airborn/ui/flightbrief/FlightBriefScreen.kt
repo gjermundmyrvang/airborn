@@ -519,7 +519,7 @@ fun MetarDecode(metar: String) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(text = "Pressure: ")
+                        append(text = "Sea Level Pressure: ")
                     }
                     append("${decode.pressureQNH?.hPa.toString()} hPa")
                 })
