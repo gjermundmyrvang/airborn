@@ -1,14 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Celsius
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.CloudFraction
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.DirectionInDegrees
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.FogAreaFraction
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Hpa
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Humidity
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.MetersPerSecond
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.UvIndex
 
 
 data class LocationData(
@@ -75,7 +67,7 @@ data class WeatherDetails(
     val cloudFraction: CloudFraction,
     val humidity: Humidity,
     val windDirection: DirectionInDegrees,
-    val windSpeed: MetersPerSecond,
+    val windSpeed: Speed,
     val dewPointTemperature: Celsius,
     val fogAreaFraction: FogAreaFraction,
     val uvIndex: UvIndex,

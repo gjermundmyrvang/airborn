@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team18.airborn.ui.localforecast
+package no.uio.ifi.in2000.team18.airborn.model
 
 data class Hpa(val value: Double) {
     override fun toString(): String = "$value hPa"
@@ -8,8 +8,8 @@ data class Humidity(val value: Double) {
     override fun toString(): String = "$value %"
 }
 
-data class MetersPerSecond(val value: Double) {
-    override fun toString(): String = "$value m/s"
+data class Speed(val mps: Double) {
+    override fun toString(): String = "$mps m/s"
 }
 
 data class Celsius(val value: Double) {
