@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -38,63 +39,64 @@ import kotlin.math.floor
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MetarTaf(metarTaf: MetarTaf?) = Collapsible(header = "Metar/Taf", expanded = false) {
-    val clipboardManager = LocalClipboardManager.current
-    val metar = metarTaf?.latestMetar
-    val taf = metarTaf?.latestTaf
-    val pageState = rememberPagerState { 2 }
-    val scope = rememberCoroutineScope()
+fun MetarTaf(state: LoadingState<MetarTaf?>) =
+    LoadingCollapsible(state, header = "Metar/Taf", expanded = false) { metarTaf ->
+        val clipboardManager = LocalClipboardManager.current
+        val metar = metarTaf?.latestMetar
+        val taf = metarTaf?.latestTaf
+        val pageState = rememberPagerState { 2 }
+        val scope = rememberCoroutineScope()
 
-    TabRow(selectedTabIndex = pageState.currentPage) {
-        Tab(selected = pageState.currentPage == 0,
-            onClick = { scope.launch { pageState.animateScrollToPage(0) } },
-            text = { Text("Raw") })
-        Tab(selected = pageState.currentPage == 1,
-            onClick = { scope.launch { pageState.animateScrollToPage(1) } },
-            text = { Text("Decoded") })
+        TabRow(selectedTabIndex = pageState.currentPage) {
+            Tab(selected = pageState.currentPage == 0,
+                onClick = { scope.launch { pageState.animateScrollToPage(0) } },
+                text = { Text("Raw") })
+            Tab(selected = pageState.currentPage == 1,
+                onClick = { scope.launch { pageState.animateScrollToPage(1) } },
+                text = { Text("Decoded") })
 
-    }
-    HorizontalPager(state = pageState) { index ->
-        when (index) {
-            0 -> {
-                Column {
-                    Text(text = "METAR:", fontWeight = FontWeight.Bold)
+        }
+        HorizontalPager(state = pageState) { index ->
+            when (index) {
+                0 -> {
+                    Column {
+                        Text(text = "METAR:", fontWeight = FontWeight.Bold)
+                        if (metar != null) {
+                            Text(text = metar.text, modifier = Modifier.clickable {
+                                clipboardManager.setText(
+                                    AnnotatedString(metar.text)
+                                )
+                            })
+                        } else {
+                            Text("No METAR available")
+                        }
+                        if (taf != null) {
+                            Text(text = "TAF:", fontWeight = FontWeight.Bold)
+                            Text(text = taf.text, modifier = Modifier.clickable {
+                                clipboardManager.setText(
+                                    AnnotatedString(taf.text)
+                                )
+                            })
+                        } else {
+                            Text("No Taf available")
+                        }
+                    }
+                }
+
+                1 -> {
                     if (metar != null) {
-                        Text(text = metar.text, modifier = Modifier.clickable {
-                            clipboardManager.setText(
-                                AnnotatedString(metar.text)
-                            )
-                        })
+                        Card {
+                            MetarDecode(metar = metar.text)
+                        }
+
                     } else {
                         Text("No METAR available")
                     }
-                    if (taf != null) {
-                        Text(text = "TAF:", fontWeight = FontWeight.Bold)
-                        Text(text = taf.text, modifier = Modifier.clickable {
-                            clipboardManager.setText(
-                                AnnotatedString(taf.text)
-                            )
-                        })
-                    } else {
-                        Text("No Taf available")
-                    }
                 }
             }
 
-            1 -> {
-                if (metar != null) {
-                    Card {
-                        MetarDecode(metar = metar.text)
-                    }
-
-                } else {
-                    Text("No METAR available")
-                }
-            }
         }
-
     }
-}
 
 @Composable
 fun MetarDecode(metar: String) {

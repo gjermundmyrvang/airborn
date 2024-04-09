@@ -17,23 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.model.Area
-import no.uio.ifi.in2000.team18.airborn.model.Sigchart
-import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.FlightBrief
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
-import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefViewModel.AirportUiState
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefViewModel.UiState
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Weathersection
 
 @Preview(showSystemUi = true)
@@ -46,11 +37,7 @@ fun TestFlightBrief() {
 fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
 
-    when (val flightBrief = state.flightBrief) {
-        is LoadingState.Loading -> LoadingScreen()
-        is LoadingState.Error -> Text("Error", color = Color.Red)
-        is LoadingState.Success -> FlightBriefScreenContent(flightBrief = flightBrief.value)
-    }
+    FlightBriefScreenContent(state = state)
 }
 
 @Composable
@@ -64,7 +51,7 @@ fun LoadingScreen() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FlightBriefScreenContent(flightBrief: FlightBrief) = Column {
+fun FlightBriefScreenContent(state: UiState) = Column {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
@@ -80,26 +67,27 @@ fun FlightBriefScreenContent(flightBrief: FlightBrief) = Column {
     }
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
-            0 -> AirportBriefTab(flightBrief.departure)
-            1 -> flightBrief.arrival?.let { AirportBriefTab(it) }
-            2 -> OverallInfoTab(flightBrief = flightBrief)
+            0 -> AirportBriefTab(state.departure)
+            1 -> state.arrival?.let { AirportBriefTab(it) }
+            2 -> OverallInfoTab(state)
         }
     }
 }
 
 @Composable
-fun AirportBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier.fillMaxSize()) {
-    val sections: List<@Composable () -> Unit> = listOf(
-        { AirportBriefHeader(airportBrief.airport) },
-        { MetarTaf(airportBrief.metarTaf) },
-        { IsobaricData(airportBrief.isobaric) },
-        { Turbulence(airportBrief.turbulence) },
-        { Weathersection(airportBrief.weather) },
-    )
-    items(sections) { section ->
-        section()
+fun AirportBriefTab(airport: AirportUiState) =
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        val sections: List<@Composable () -> Unit> = listOf(
+            // { AirportBriefHeader(airportBrief.airport) },
+            { MetarTaf(airport.metarTaf) },
+            { IsobaricData(airport.isobaric) },
+            { Turbulence(airport.turbulence) },
+            { Weathersection(airport.weather) },
+        )
+        items(sections) { section ->
+            section()
+        }
     }
-}
 
 @Composable
 fun AirportBriefHeader(airport: Airport) = Column {
@@ -112,35 +100,14 @@ fun AirportBriefHeader(airport: Airport) = Column {
 }
 
 @Composable
-fun OverallInfoTab(flightBrief: FlightBrief) {
+fun OverallInfoTab(state: UiState) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { Collapsible(header = "Sigchart") { Sigchart(flightBrief.sigchart) } }
+        item { Sigchart(state.sigcharts) }
     }
 }
 
 
-@Preview(showSystemUi = true)
-@Composable
-fun LightPreviewFlightBrief() {
-    FlightBriefScreenContent(
-        flightBrief = FlightBrief(
-            departure = AirportBrief(
-                airport = Airport(
-                    icao = Icao("ENGM"), name = "Gardermoen", Position(0.0, 0.0)
-                ),
-                metarTaf = MetarTaf(listOf(Metar("")), listOf()),
-                turbulence = null,
-                isobaric = null,
-                weather = listOf()
-            ), arrival = null, altArrivals = listOf(), sigchart = Sigchart(
-                params = SigchartParameters(area = Area.Norway, time = ""),
-                updated = "",
-                uri = "",
-            )
-        )
-    )
-}
 
 

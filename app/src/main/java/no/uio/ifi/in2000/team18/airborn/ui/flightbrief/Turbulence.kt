@@ -27,48 +27,50 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.TurbulenceMapAndCross
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun Turbulence(turbulence: TurbulenceMapAndCross?) = Collapsible(header = "Turbulence") {
-    var selectedTime by rememberSaveable { mutableStateOf(turbulence?.currentTurbulenceTime()) }
-    var selectedDay by rememberSaveable { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
+fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>) =
+    LoadingCollapsible(state, header = "Turbulence") { turbulence ->
+        var selectedTime by rememberSaveable { mutableStateOf(turbulence?.currentTurbulenceTime()) }
+        var selectedDay by rememberSaveable { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
 
-    val mapDict = turbulence?.mapDict
-    val crossDict = turbulence?.crossSectionDict
+        val mapDict = turbulence?.mapDict
+        val crossDict = turbulence?.crossSectionDict
 
-    val timeMap = turbulence?.allTurbulenceTimes()
-    val times = timeMap?.get(selectedDay)
+        val timeMap = turbulence?.allTurbulenceTimes()
+        val times = timeMap?.get(selectedDay)
 
-    if (times == null || selectedTime == null) {
-        Text(text = "Turbulence not available")
-        return@Collapsible
+        if (times == null || selectedTime == null) {
+            Text(text = "Turbulence not available")
+            return@LoadingCollapsible
+        }
+
+        MultiToggleButton(currentSelection = selectedDay, toggleStates = timeMap.keys.toList()) {
+            selectedDay = it
+        }
+
+        TurbulenceTimecardRow(selectedTime!!, times) { onCardClicked ->
+            selectedTime = onCardClicked
+        }
+
+        mapDict?.get(selectedTime)?.let { TurbulenceImage(uri = it) } ?: run {
+            Text("Image not available for time:\n $selectedTime")
+        }
+
+        HorizontalDivider(
+            modifier = Modifier.padding(all = 5.dp),
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        crossDict?.get(selectedTime)?.let { TurbulenceImage(uri = it) } ?: run {
+            Text("Image not available for time:\n $selectedTime")
+        }
     }
-
-    MultiToggleButton(currentSelection = selectedDay, toggleStates = timeMap.keys.toList()) {
-        selectedDay = it
-    }
-
-    TurbulenceTimecardRow(selectedTime!!, times) { onCardClicked ->
-        selectedTime = onCardClicked
-    }
-
-    mapDict?.get(selectedTime)?.let { TurbulenceImage(uri = it) } ?: run {
-        Text("Image not available for time:\n $selectedTime")
-    }
-
-    HorizontalDivider(
-        modifier = Modifier.padding(all = 5.dp),
-        thickness = 1.dp,
-        color = MaterialTheme.colorScheme.onBackground
-    )
-
-    crossDict?.get(selectedTime)?.let { TurbulenceImage(uri = it) } ?: run {
-        Text("Image not available for time:\n $selectedTime")
-    }
-}
 
 
 @Composable

@@ -18,32 +18,35 @@ import coil.request.ImageRequest
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Composable
-fun Sigchart(sigchart: Sigchart) {
-    val zoomState = rememberZoomState()
-    SubcomposeAsyncImage(modifier = Modifier
-        .fillMaxWidth()
-        .graphicsLayer { clip = true }
-        .zoomable(zoomState),
-        contentScale = ContentScale.FillWidth,
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(sigchart.uri)
-            .setHeader("User-Agent", "Team18")
-            .crossfade(500)
-            .build(),
-        loading = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(30.dp),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    strokeWidth = 1.dp
-                )
-            }
-        },
-        contentDescription = "Image of sigchart. Updated at ${sigchart.updated}"
-    )
-}
+fun Sigchart(state: LoadingState<List<Sigchart>>) =
+    LoadingCollapsible(state, header = "Sigchart") { sigcharts ->
+        val sigchart = sigcharts.last()
+        val zoomState = rememberZoomState()
+        SubcomposeAsyncImage(modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer { clip = true }
+            .zoomable(zoomState),
+            contentScale = ContentScale.FillWidth,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(sigchart.uri)
+                .setHeader("User-Agent", "Team18")
+                .crossfade(500)
+                .build(),
+            loading = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(30.dp),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        strokeWidth = 1.dp
+                    )
+                }
+            },
+            contentDescription = "Image of sigchart. Updated at ${sigchart.updated}"
+        )
+    }
