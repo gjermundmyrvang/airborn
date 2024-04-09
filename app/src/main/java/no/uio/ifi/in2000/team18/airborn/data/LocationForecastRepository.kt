@@ -62,7 +62,9 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
         "snowandthunder" to "Snow and thunder",
         "heavysnowandthunder" to "Heavy snow and thunder",
         "fog" to "Fog",
-    )/*private val bokmål = mapOf(
+    )
+
+    /*private val bokmål = mapOf(
         "clearsky" to "Klarvær",
         "fair" to "Lettskyet",
         "partlycloudy" to "Delvis skyet",
@@ -105,7 +107,9 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
         "heavysnowandthunder" to "Kraftig snø og torden",
         "fog" to "Tåke",
     )
-     *//*
+     */
+
+    /*
     private val nynorsk = mapOf(
         "clearsky" to "Klårvêr",
         "fair" to "Lettskya",
