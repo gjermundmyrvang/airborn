@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class LocationForecastDataSource @Inject constructor(val client: HttpClient) {
     suspend fun fetchForecast(airport: Airport): LocationData {
-        return client.get("weatherapi/locationforecast/2.0/compact?lat=${airport.position.latitude}&lon=${airport.position.longitude}")
+        return client.get("weatherapi/locationforecast/2.0/complete?lat=${airport.position.latitude}&lon=${airport.position.longitude}")
             .body()
     }
 }

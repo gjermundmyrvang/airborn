@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -52,9 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -65,20 +61,18 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.launch
-import kotlinx.datetime.format
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.SigchartParameters
-import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
-import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.AirportBrief
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.FlightBrief
@@ -87,6 +81,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Weathersection
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -106,12 +101,9 @@ fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
 
     when (val flightBrief = state.flightBrief) {
-        is LoadingState.Loading -> {
-            LoadingScreen()
-        }
-
+        is LoadingState.Loading -> LoadingScreen()
         is LoadingState.Error -> Text("Error", color = Color.Red)
-        is LoadingState.Success -> FlightBreifScreenContent(flightBrief = flightBrief.value)
+        is LoadingState.Success -> FlightBriefScreenContent(flightBrief = flightBrief.value)
     }
 }
 
@@ -126,7 +118,7 @@ fun LoadingScreen() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FlightBreifScreenContent(flightBrief: FlightBrief) = Column {
+fun FlightBriefScreenContent(flightBrief: FlightBrief) = Column {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
@@ -207,14 +199,8 @@ fun DepartureBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifi
         }
     }
     item {
-        Collapsible(header = "Weather") {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                WeatherDayCard(
-                    weatherDay = airportBrief.weather[0]
-                )
-            }
+        Collapsible(header = "Weather", padding = 0.dp) {
+            Weathersection(weather = airportBrief.weather)
         }
     }
 }
@@ -275,15 +261,12 @@ fun ArrivalBriefTab(airportBrief: AirportBrief) = LazyColumn(modifier = Modifier
         }
     }
     item {
-        Collapsible(header = "Weather") {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                WeatherDayCard(weatherDay = airportBrief.weather[0])
-            }
+        Collapsible(header = "Weather", padding = 0.dp) {
+            Weathersection(weather = airportBrief.weather)
         }
     }
 }
+
 
 @Composable
 fun OverallInfoTab(flightBrief: FlightBrief) {
@@ -299,8 +282,10 @@ fun OverallInfoTab(flightBrief: FlightBrief) {
                     .zoomable(zoomState),
                     contentScale = ContentScale.FillWidth,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(flightBrief.sigchart.uri).setHeader("User-Agent", "Team18")
-                        .crossfade(500).build(),
+                        .data(flightBrief.sigchart.uri)
+                        .setHeader("User-Agent", "Team18")
+                        .crossfade(500)
+                        .build(),
                     loading = {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -531,7 +516,11 @@ fun MetarDecode(metar: String) {
 
 @Composable
 fun Collapsible(
-    header: String, expanded: Boolean = false, content: @Composable BoxScope.() -> Unit
+    modifier: Modifier = Modifier,
+    padding: Dp = 16.dp,
+    header: String,
+    expanded: Boolean = false,
+    content: @Composable BoxScope.() -> Unit
 ) {
     var open by rememberSaveable {
         mutableStateOf(expanded)
@@ -561,7 +550,7 @@ fun Collapsible(
         }
         if (open) {
             Box(
-                modifier = Modifier.padding(16.dp),
+                modifier = modifier.padding(padding),
                 content = content,
             )
         }
@@ -575,79 +564,10 @@ fun Collapsible(
     }
 }
 
-@Composable
-fun WeatherDayCard(weatherDay: WeatherDay) {
-    var expand by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    val originalHourList = weatherDay.weather
-    val groupedHourList = weatherDay.weather.chunked(6)
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(5.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Text(
-            text = weatherDay.date,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.End)
-        )
-        groupedHourList.forEach { hour ->
-            val firstHourInterval = hour.first()
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(5.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "${firstHourInterval.hour}-${hour.last().hour}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.air_temperature}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.air_pressure_at_sea_level}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.wind_speed}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.relative_humidity}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.cloud_area_fraction}")
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "${firstHourInterval.weatherDetails.wind_from_direction}")
-            }
-            HorizontalDivider(
-                modifier = Modifier.padding(start = 5.dp, end = 5.dp),
-                thickness = 2.dp,
-                color = MaterialTheme.colorScheme.outline
-            )
-        }
-    }
-}
-
-@Composable
-fun WeatherHourScreen(weatherHour: WeatherHour) {
-    Card(
-        modifier = Modifier.padding(16.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-
-        }
-    }
-}
-
 @Preview(showSystemUi = true)
 @Composable
 fun LightPreviewFlightBrief() {
-    FlightBreifScreenContent(
+    FlightBriefScreenContent(
         flightBrief = FlightBrief(
             departure = AirportBrief(
                 airport = Airport(
