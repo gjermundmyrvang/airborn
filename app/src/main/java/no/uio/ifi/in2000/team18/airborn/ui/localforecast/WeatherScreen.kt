@@ -38,7 +38,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.model.Celsius
+import no.uio.ifi.in2000.team18.airborn.model.CloudFraction
+import no.uio.ifi.in2000.team18.airborn.model.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.model.FogAreaFraction
+import no.uio.ifi.in2000.team18.airborn.model.Hpa
+import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
+import no.uio.ifi.in2000.team18.airborn.model.Speed
+import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
@@ -285,7 +293,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
 }
 
 @Composable
-fun WindCard(windSpeed: MetersPerSecond, fromDegrees: Double) {
+fun WindCard(windSpeed: Speed, fromDegrees: Double) {
     val direction = when {
         fromDegrees < 90.0 -> "NE"
         fromDegrees < 180.0 -> "SE"
@@ -324,7 +332,7 @@ fun WindCard(windSpeed: MetersPerSecond, fromDegrees: Double) {
 @Preview(showBackground = true)
 @Composable
 fun TestWindCard() {
-    WindCard(windSpeed = MetersPerSecond(25.89), fromDegrees = 228.43)
+    WindCard(windSpeed = Speed(25.89), fromDegrees = 228.43)
 }
 
 @Composable
@@ -358,7 +366,7 @@ fun TestWeatherSection() {
             airTemperature = Celsius(18.0),
             cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
             humidity = Humidity(65.98),
-            windSpeed = MetersPerSecond(23.65),
+            windSpeed = Speed(23.65),
             windDirection = DirectionInDegrees(236.98),
             dewPointTemperature = Celsius(23.9),
             fogAreaFraction = FogAreaFraction(89.9),
@@ -395,7 +403,7 @@ fun TestWeatherNowSection() {
             airTemperature = Celsius(18.0),
             cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
             humidity = Humidity(65.98),
-            windSpeed = MetersPerSecond(23.65),
+            windSpeed = Speed(23.65),
             windDirection = DirectionInDegrees(236.98),
             dewPointTemperature = Celsius(23.9),
             fogAreaFraction = FogAreaFraction(89.9),

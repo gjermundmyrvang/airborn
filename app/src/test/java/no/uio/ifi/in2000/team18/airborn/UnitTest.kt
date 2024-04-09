@@ -1,13 +1,12 @@
 package no.uio.ifi.in2000.team18.airborn
 
 import junit.framework.TestCase.assertEquals
+import no.uio.ifi.in2000.team18.airborn.model.Celsius
+import no.uio.ifi.in2000.team18.airborn.model.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.model.Hpa
+import no.uio.ifi.in2000.team18.airborn.model.Humidity
+import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Celsius
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.CloudFraction
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.DirectionInDegrees
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Hpa
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Humidity
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.MetersPerSecond
 import org.junit.Test
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -28,7 +27,7 @@ class UnitTest {
 
     @Test
     fun testMetersPerSecond() {
-        val mps = MetersPerSecond(10.2)
+        val mps = Speed(10.2)
         assertEquals("10.2 m/s", "$mps")
     }
 
@@ -43,7 +42,7 @@ class UnitTest {
         val direction = DirectionInDegrees(45.0)
         assertEquals("45.0 degrees", "$direction")
     }
-    
+
     @Test
     fun testToLocalDateTime() {
         val isoDateTime = "2024-04-04T11:36:16Z"

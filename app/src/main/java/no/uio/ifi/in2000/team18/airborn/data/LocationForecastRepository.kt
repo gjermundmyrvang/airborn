@@ -1,22 +1,22 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.model.Celsius
+import no.uio.ifi.in2000.team18.airborn.model.CloudFraction
 import no.uio.ifi.in2000.team18.airborn.model.Details
+import no.uio.ifi.in2000.team18.airborn.model.DirectionInDegrees
+import no.uio.ifi.in2000.team18.airborn.model.FogAreaFraction
+import no.uio.ifi.in2000.team18.airborn.model.Hpa
+import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
+import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
+import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Celsius
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.CloudFraction
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.DirectionInDegrees
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.FogAreaFraction
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Hpa
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Humidity
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.MetersPerSecond
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.UvIndex
 import javax.inject.Inject
 
 class LocationForecastRepository @Inject constructor(private val locationForecastDataSource: LocationForecastDataSource) {
@@ -212,7 +212,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
             ),
             humidity = Humidity(details.relative_humidity),
             windDirection = DirectionInDegrees(details.wind_from_direction),
-            windSpeed = MetersPerSecond(details.wind_speed),
+            windSpeed = Speed(details.wind_speed),
             dewPointTemperature = Celsius(details.dew_point_temperature),
             fogAreaFraction = FogAreaFraction(details.fog_area_fraction),
             uvIndex = UvIndex(details.ultraviolet_index_clear_sky)
