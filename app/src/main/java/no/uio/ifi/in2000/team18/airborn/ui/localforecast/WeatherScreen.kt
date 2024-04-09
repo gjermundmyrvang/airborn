@@ -51,10 +51,11 @@ import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.Collapsible
 
 
 @Composable
-fun Weathersection(weather: List<WeatherDay>) {
+fun Weathersection(weather: List<WeatherDay>) = Collapsible(header = "Weather", padding = 0.dp) {
     var selectedDay by rememberSaveable {
         mutableIntStateOf(0)
     }
