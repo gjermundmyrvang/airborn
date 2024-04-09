@@ -38,8 +38,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
+import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
+import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 
 
 @Composable
@@ -51,8 +54,7 @@ fun Weathersection(weather: List<WeatherDay>) {
         modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         WeatherNowSection(
-            weatherDay = weather[selectedDay],
-            today = weather[selectedDay] == weather.first()
+            weatherDay = weather[selectedDay], today = weather[selectedDay] == weather.first()
         )
         WeatherTodaySection(weatherDay = weather[selectedDay])
         WeatherWeekSection(weatherDays = weather) { day ->
@@ -79,6 +81,7 @@ fun WeatherWeekSection(
                 WeatherDayCard(
                     weatherDay = day, selected = weatherDays[selectedDay], today = true
                 ) {
+                    selectedDay = i
                     onDaySelected(i)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
@@ -269,8 +272,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
                 fontSize = 12.sp
             )
             Text(
-                text = weatherHour.weatherDetails.cloudFraction.toString(),
-                fontSize = 12.sp
+                text = weatherHour.weatherDetails.cloudFraction.toString(), fontSize = 12.sp
             )
             Text(
                 text = "Dewpoint temp: ${weatherHour.weatherDetails.dewPointTemperature}",
@@ -295,8 +297,7 @@ fun WindCard(windSpeed: MetersPerSecond, fromDegrees: Double) {
         border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline)
     ) {
         Row(
-            modifier = Modifier
-                .padding(5.dp),
+            modifier = Modifier.padding(5.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -346,39 +347,32 @@ fun RotatableArrowIcon(
             colorFilter = ColorFilter.tint(iconColor)
         )
     }
-}/*
+}
+
 @Preview(showSystemUi = true)
 @Composable
 fun TestWeatherSection() {
     val hour = WeatherHour(
-        time = "12:00",
-        weatherDetails = WeatherDetails(
+        time = "12:00", weatherDetails = WeatherDetails(
             airPressureSeaLevel = Hpa(1001.98),
             airTemperature = Celsius(18.0),
-            cloudFraction = CloudFraction(46.9),
+            cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
             humidity = Humidity(65.98),
             windSpeed = MetersPerSecond(23.65),
-            windDirection = DirectionInDegrees(236.98)
-        ),
-        nextOneHour = NextHourDetails(
-            symbol_code = "Partly Cloudy",
-            icon = R.drawable.partlycloudy_day,
-            chanceOfRain = 22.98
-        ),
-        nextSixHour = NextHourDetails(
-            symbol_code = "Sunny",
-            icon = R.drawable.clearsky_day,
-            chanceOfRain = null
-        ),
-        nextTwelweHour = NextHourDetails(
-            symbol_code = "Partly Cloudy",
-            icon = R.drawable.partlycloudy_day,
-            chanceOfRain = 22.98
+            windDirection = DirectionInDegrees(236.98),
+            dewPointTemperature = Celsius(23.9),
+            fogAreaFraction = FogAreaFraction(89.9),
+            uvIndex = UvIndex(2.0)
+        ), nextOneHour = NextHourDetails(
+            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+        ), nextSixHour = NextHourDetails(
+            symbol_code = "Sunny", icon = R.drawable.clearsky_day, chanceOfRain = null
+        ), nextTwelweHour = NextHourDetails(
+            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
         )
     )
     val day = WeatherDay(
-        date = "12222",
-        weather = listOf(
+        date = DateTime("2024-04-09T09:44:36Z"), weather = listOf(
             hour, hour, hour, hour
         )
     )
@@ -391,44 +385,33 @@ fun TestWeatherSection() {
         Weathersection(weather = weatherdays)
     }
 }
- */
 
-/*
 @Preview(showSystemUi = true)
 @Composable
 fun TestWeatherNowSection() {
     val hour = WeatherHour(
-        time = "12:00",
-        weatherDetails = WeatherDetails(
+        time = "12:00", weatherDetails = WeatherDetails(
             airPressureSeaLevel = Hpa(1001.98),
             airTemperature = Celsius(18.0),
-            cloudFraction = CloudFraction(46.9),
+            cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
             humidity = Humidity(65.98),
             windSpeed = MetersPerSecond(23.65),
-            windDirection = DirectionInDegrees(236.98)
-        ),
-        nextOneHour = NextHourDetails(
-            symbol_code = "Partly Cloudy",
-            icon = R.drawable.partlycloudy_day,
-            chanceOfRain = 22.98
-        ),
-        nextSixHour = NextHourDetails(
-            symbol_code = "Sunny",
-            icon = R.drawable.clearsky_day,
-            chanceOfRain = null
-        ),
-        nextTwelweHour = NextHourDetails(
-            symbol_code = "Partly Cloudy",
-            icon = R.drawable.partlycloudy_day,
-            chanceOfRain = 22.98
+            windDirection = DirectionInDegrees(236.98),
+            dewPointTemperature = Celsius(23.9),
+            fogAreaFraction = FogAreaFraction(89.9),
+            uvIndex = UvIndex(2.0)
+        ), nextOneHour = NextHourDetails(
+            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+        ), nextSixHour = NextHourDetails(
+            symbol_code = "Sunny", icon = R.drawable.clearsky_day, chanceOfRain = null
+        ), nextTwelweHour = NextHourDetails(
+            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
         )
     )
     val day = WeatherDay(
-        date = "torsdag 5. april",
-        weather = listOf(
+        date = DateTime("2024-04-09T09:44:36Z"), weather = listOf(
             hour, hour, hour
         )
     )
     WeatherNowSection(weatherDay = day, true)
 }
- */
