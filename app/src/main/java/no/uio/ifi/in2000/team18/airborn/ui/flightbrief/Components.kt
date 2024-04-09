@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 @Composable
 fun Error(
@@ -66,12 +66,15 @@ fun Error(
 
 @Preview
 @Composable
-fun PreviewError() {
-    Surface {
-        Box(modifier = Modifier
-            .padding(16.dp)
-            .width(500.dp)) {
-            Error("Failed to load Metar/Taf: Unresolved Address")
+fun PreviewError() = Column {
+    AirbornTheme(darkTheme = false) {
+        Surface {
+            Error("Description here", modifier = Modifier.padding(8.dp))
+        }
+    }
+    AirbornTheme(darkTheme = true) {
+        Surface {
+            Error("Description here", modifier = Modifier.padding(8.dp))
         }
     }
 }
@@ -140,7 +143,10 @@ fun <T> LoadingCollapsible(
             CircularProgressIndicator(modifier = Modifier.padding(start = 16.dp))
         }
 
-        is LoadingState.Error -> Error("failed to load ${header}: ${value.message}", modifier = Modifier.padding(16.dp, 8.dp))
+        is LoadingState.Error -> Error(
+            "failed to load ${header}: ${value.message}",
+            modifier = Modifier.padding(16.dp, 8.dp)
+        )
     }
 }
 
