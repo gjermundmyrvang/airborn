@@ -55,6 +55,8 @@ fun Error(
                 BorderStroke(width = 2.dp, color = Color.Red),
                 shape = RoundedCornerShape(6.dp),
             )
+            .clip(shape = RoundedCornerShape(6.dp)) // Make sure there is no background outside the border
+            .background(color = Color.hsv(0.0f, 1.0f, 1.0f, 0.3f))
             .padding(8.dp)
     ) {
         Text(text = "ERROR")
