@@ -51,26 +51,29 @@ import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
-import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.Collapsible
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LoadingCollapsible
 
 
 @Composable
-fun Weathersection(weather: List<WeatherDay>) = Collapsible(header = "Weather", padding = 0.dp) {
-    var selectedDay by rememberSaveable {
-        mutableIntStateOf(0)
-    }
-    Column(
-        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        WeatherNowSection(
-            weatherDay = weather[selectedDay], today = weather[selectedDay] == weather.first()
-        )
-        WeatherTodaySection(weatherDay = weather[selectedDay])
-        WeatherWeekSection(weatherDays = weather) { day ->
-            selectedDay = day
+fun Weathersection(state: LoadingState<List<WeatherDay>>) =
+    LoadingCollapsible(state, header = "Weather", padding = 0.dp) { weather ->
+        var selectedDay by rememberSaveable {
+            mutableIntStateOf(0)
+        }
+        Column(
+            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            WeatherNowSection(
+                weatherDay = weather[selectedDay], today = weather[selectedDay] == weather.first()
+            )
+            WeatherTodaySection(weatherDay = weather[selectedDay])
+            WeatherWeekSection(weatherDays = weather) { day ->
+                selectedDay = day
+            }
         }
     }
-}
 
 @Composable
 fun WeatherWeekSection(
@@ -391,7 +394,7 @@ fun TestWeatherSection() {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Weathersection(weather = weatherdays)
+        Weathersection(state = weatherdays.toSuccess())
     }
 }
 

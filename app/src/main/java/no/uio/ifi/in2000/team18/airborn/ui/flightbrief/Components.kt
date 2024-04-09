@@ -5,8 +5,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -20,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Composable
 fun MultiToggleButton(
@@ -78,6 +78,34 @@ fun MultiToggleButton(
 }
 
 
+@Composable
+fun <T> LoadingCollapsible(
+    value: LoadingState<T>,
+    header: String,
+    padding: Dp = 16.dp,
+    expanded: Boolean = false,
+    content: @Composable ColumnScope.(T) -> Unit
+) {
+    when (value) {
+        is LoadingState.Success -> Collapsible(
+            header = header,
+            padding = padding,
+            expanded = expanded,
+            content = { content(value.value) },
+        )
+
+        is LoadingState.Loading -> Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(header)
+            CircularProgressIndicator(modifier = Modifier.padding(start = 16.dp))
+        }
+
+        is LoadingState.Error -> Text("ERROR")
+    }
+}
+
 
 @Composable
 fun Collapsible(
@@ -114,7 +142,7 @@ fun Collapsible(
             }
         }
         if (open) {
-            Column (
+            Column(
                 modifier = modifier.padding(padding),
                 content = content,
             )

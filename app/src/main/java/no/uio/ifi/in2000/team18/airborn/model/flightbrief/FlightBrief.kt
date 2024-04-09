@@ -1,28 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
-import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
-import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
-import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-
-data class FlightBrief(
-    val departure: AirportBrief,
-    val arrival: AirportBrief?,
-    val altArrivals: List<AirportBrief>,
-    val sigchart: Sigchart,
-)
-
-data class AirportBrief(
-    val airport: Airport,
-    val metarTaf: MetarTaf?,
-    val turbulence: TurbulenceMapAndCross?,
-    val isobaric: IsobaricData?,
-    val weather: List<WeatherDay>,
-)
-
 
 data class MetarTaf(
     val metars: List<Metar>,

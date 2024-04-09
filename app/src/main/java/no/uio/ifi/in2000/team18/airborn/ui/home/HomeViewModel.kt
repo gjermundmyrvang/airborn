@@ -8,16 +8,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
-import no.uio.ifi.in2000.team18.airborn.data.FlightBriefRepository
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val airportDataSource: AirportDataSource,
-    private val flightBriefRepository: FlightBriefRepository,
 ) : ViewModel() {
     data class UiState(
         val departureAirportInput: String = "",
@@ -61,11 +57,4 @@ class HomeViewModel @Inject constructor(
 
     fun selectArrivalAirport(airport: String) =
         _state.update { it.copy(arrivalAirportInput = airport) }
-
-
-    suspend fun generateFlightBrief(): String = flightBriefRepository.createFlightBrief(
-        Icao(state.value.departureAirportInput),
-        if (state.value.arrivalAirportInput.isEmpty()) null else Icao(state.value.arrivalAirportInput),
-        LocalDateTime.now()
-    )
 }

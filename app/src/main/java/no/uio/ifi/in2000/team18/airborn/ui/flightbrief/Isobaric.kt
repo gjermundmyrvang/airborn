@@ -11,29 +11,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 
 @Composable
-fun IsobaricData(isobaric: IsobaricData?) = Collapsible(header = "Isobaric data") {
-    // data from isobaric layers, includes height TODO: a table or chart would be nice
-    Text(text = "${isobaric?.time}")
-    Spacer(modifier = Modifier.height(16.dp))
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("height", fontWeight = FontWeight.Bold)
-        Text("temperature", fontWeight = FontWeight.Bold)
-        Text("pressure", fontWeight = FontWeight.Bold)
-    }
-    isobaric?.data?.forEach {
+fun IsobaricData(state: LoadingState<IsobaricData?>) =
+    LoadingCollapsible(state, header = "Isobaric data") { isobaric ->
+        // data from isobaric layers, includes height TODO: a table or chart would be nice
+        Text(text = "${isobaric?.time}")
+        Spacer(modifier = Modifier.height(16.dp))
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("%.0f m".format(it.height))
-            Text("%.1f c".format(it.temperature - 273.15))
-            Text("%.0f hPa".format(it.pressure))
+            Text("height", fontWeight = FontWeight.Bold)
+            Text("temperature", fontWeight = FontWeight.Bold)
+            Text("pressure", fontWeight = FontWeight.Bold)
+        }
+        isobaric?.data?.forEach {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("%.0f m".format(it.height))
+                Text("%.1f c".format(it.temperature - 273.15))
+                Text("%.0f hPa".format(it.pressure))
+            }
         }
     }
-}
