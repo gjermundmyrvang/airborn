@@ -24,6 +24,7 @@ import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import java.nio.channels.UnresolvedAddressException
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -76,8 +77,8 @@ class FlightBriefViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val sigcharts = sigchartDataSource.fetchSigcharts()
-            _state.update { it.copy(sigcharts = sigcharts.toSuccess()) }
+            val sigcharts = load { sigchartDataSource.fetchSigcharts() }
+            _state.update { it.copy(sigcharts = sigcharts) }
         }
     }
 
@@ -87,25 +88,35 @@ class FlightBriefViewModel @Inject constructor(
         update { it.copy(airport = airport.toSuccess()) }
 
         viewModelScope.launch {
-            val weather = locationForecastRepository.getWeatherDays(airport)
-            update { it.copy(weather = weather.toSuccess()) }
+            val weather = load { locationForecastRepository.getWeatherDays(airport) }
+            update { it.copy(weather = weather) }
         }
 
         viewModelScope.launch {
-            val airportIsobaric = isobaricRepository.getIsobaricData(
-                position = airport.position, LocalDateTime.now()
-            )
-            update { it.copy(isobaric = airportIsobaric.toSuccess()) }
+            val airportIsobaric = load {
+                isobaricRepository.getIsobaricData(position = airport.position, LocalDateTime.now())
+            }
+            update { it.copy(isobaric = airportIsobaric) }
         }
 
         viewModelScope.launch {
-            val airportMetarTaf = tafMetarDataSource.fetchTafMetar(airport.icao).toSuccess()
+            val airportMetarTaf = load { tafMetarDataSource.fetchTafMetar(airport.icao) }
             update { it.copy(metarTaf = airportMetarTaf) }
         }
 
         viewModelScope.launch {
-            val airportTurbulence = turbulenceDataSource.createTurbulence(airport.icao).toSuccess()
+            val airportTurbulence = load { turbulenceDataSource.createTurbulence(airport.icao) }
             update { it.copy(turbulence = airportTurbulence) }
+        }
+    }
+
+    suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+        return try {
+            f().toSuccess()
+        } catch (e: UnresolvedAddressException) {
+            LoadingState.Error(message = "Unresolved Address")
+        } catch (e: Exception) {
+            LoadingState.Error(message = "Unknown Error")
         }
     }
 }
