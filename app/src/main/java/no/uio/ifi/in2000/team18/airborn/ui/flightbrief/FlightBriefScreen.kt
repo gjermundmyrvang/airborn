@@ -336,7 +336,7 @@ fun MetarTaf(metarTaf: MetarTaf?) {
             text = { Text("Raw") })
         Tab(selected = pageState.currentPage == 1,
             onClick = { scope.launch { pageState.animateScrollToPage(1) } },
-            text = { Text("Decode") })
+            text = { Text("Decoded") })
 
     }
     HorizontalPager(state = pageState) { index ->
