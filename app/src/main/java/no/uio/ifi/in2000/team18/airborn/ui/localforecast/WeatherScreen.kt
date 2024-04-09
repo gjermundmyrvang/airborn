@@ -269,9 +269,15 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
                 fontSize = 12.sp
             )
             Text(
-                text = "Cloud fraction: ${weatherHour.weatherDetails.cloudFraction}",
+                text = weatherHour.weatherDetails.cloudFraction.toString(),
                 fontSize = 12.sp
             )
+            Text(
+                text = "Dewpoint temp: ${weatherHour.weatherDetails.dewPointTemperature}",
+                fontSize = 12.sp
+            )
+            Text(text = "Fog area: ${weatherHour.weatherDetails.fogAreaFraction}", fontSize = 12.sp)
+            Text(text = "UV: ${weatherHour.weatherDetails.uvIndex}", fontSize = 12.sp)
         }
     }
 }
