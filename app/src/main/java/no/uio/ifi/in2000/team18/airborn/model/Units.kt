@@ -66,6 +66,15 @@ data class UvIndex(val uv: Double) {
     override fun toString(): String = "$uv"
 }
 
+data class Distance(val meters: Double) {
+    override fun toString(): String = if (meters < 1) "${meters * 1000} mm"
+    else if (meters < 1000) "${meters} m"
+    else "${meters / 1000} km"
+
+    val feet get() = meters * 3.2808399
+    val nauticalMiles get() = meters * 0.000539956803
+}
+
 data class Fraction(val fraction: Double) {
     override fun toString(): String = "$fraction %"
 }
