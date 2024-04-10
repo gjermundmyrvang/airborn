@@ -2,7 +2,7 @@ package no.uio.ifi.in2000.team18.airborn
 
 import junit.framework.TestCase.assertEquals
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
-import no.uio.ifi.in2000.team18.airborn.model.celcius
+import no.uio.ifi.in2000.team18.airborn.model.celsius
 import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.model.hpa
 import no.uio.ifi.in2000.team18.airborn.model.mps
@@ -33,7 +33,7 @@ class UnitTest {
 
     @Test
     fun testCelsius() {
-        val celsius = 20.5.celcius
+        val celsius = 20.5.celsius
         assertEquals("20.5 ℃", "$celsius")
     }
 
