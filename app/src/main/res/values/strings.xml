@@ -1,3 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Airborn</string>
+    <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">pk.eyJ1IjoiZ2plcnJ5MTAiLCJhIjoiY2x1dHRja3B4MDEzcTJrcng1N2x1bDN4aCJ9.Buam3askSKTNBaQJa1Dk-A</string>
 </resources>

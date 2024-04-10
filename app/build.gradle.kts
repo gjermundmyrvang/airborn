@@ -86,7 +86,8 @@ dependencies {
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("androidx.navigation:navigation-compose:$navVersion")
-
+    implementation("com.mapbox.maps:android:11.2.2")
+    implementation("com.mapbox.extension:maps-compose:11.2.2")
     implementation("io.github.alexmaryin.metarkt:parser:1.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0-RC.2")
 
