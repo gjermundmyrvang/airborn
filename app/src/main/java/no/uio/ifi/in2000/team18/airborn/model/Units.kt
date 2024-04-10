@@ -42,6 +42,8 @@ class FractionAdapter : TypeAdapter<Fraction>() {
 
 data class Pressure(val hpa: Double) {
     override fun toString(): String = "$hpa hPa"
+    operator fun times(x: Number) = Pressure(hpa = hpa * x.toDouble())
+    operator fun plus(x: Pressure) = Pressure(hpa + x.hpa)
 }
 
 data class Humidity(val humidity: Double) {
@@ -52,6 +54,8 @@ data class Speed(val mps: Double) {
     override fun toString(): String = "$mps m/s"
     val kmh get() = this.mps * 3.6
     val knots get() = this.mps * 1.9438452
+    operator fun times(x: Number) = Speed(mps = mps * x.toDouble())
+    operator fun plus(x: Speed) = Speed(mps + x.mps)
 }
 
 data class Temperature(val celsius: Double) {
@@ -73,6 +77,9 @@ data class Distance(val meters: Double) {
 
     val feet get() = meters * 3.2808399
     val nauticalMiles get() = meters * 0.000539956803
+
+    operator fun times(x: Number) = Distance(meters = meters * x.toDouble())
+    operator fun plus(x: Distance) = Distance(meters + x.meters)
 }
 
 data class Fraction(val fraction: Double) {
@@ -82,15 +89,20 @@ data class Fraction(val fraction: Double) {
 val Double.mps get() = Speed(mps = this)
 val Int.mps get() = this.toDouble().mps
 
+// Speed
+private operator fun Number.times(s: Speed) = s * this
 val Double.kmph get() = Speed(mps = this / 3.6)
 val Int.kmph get() = this.toDouble().kmph
-
 val Double.knots get() = Speed(mps = 0.51444424416 * this)
 val Int.knots get() = this.toDouble().knots
 
+
+// Temperature
 val Double.celsius get() = Temperature(celsius = this)
 val Int.celsius get() = this.toDouble().celsius
 
+// Pressure
+private operator fun Number.times(s: Pressure) = s * this
 val Double.hpa get() = Pressure(hpa = this)
 val Int.hpa get() = this.toDouble().hpa
 val Double.pa get() = Pressure(hpa = this / 10.0)
@@ -107,3 +119,6 @@ val Int.humidity get() = this.toDouble().humidity
 
 val Double.fraction get() = Fraction(fraction = this)
 val Int.fraction get() = this.toDouble().fraction
+
+// Distance
+private operator fun Number.times(m: Distance) = m * this
