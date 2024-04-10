@@ -1,19 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
 import no.uio.ifi.in2000.team18.airborn.R
-import no.uio.ifi.in2000.team18.airborn.model.CloudFraction
-import no.uio.ifi.in2000.team18.airborn.model.Details
-import no.uio.ifi.in2000.team18.airborn.model.Direction
-import no.uio.ifi.in2000.team18.airborn.model.FogAreaFraction
-import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
-import no.uio.ifi.in2000.team18.airborn.model.Pressure
-import no.uio.ifi.in2000.team18.airborn.model.Speed
-import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
-import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
-import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
@@ -167,7 +157,7 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
                 weather = timeSeriesList.map { timeSeries ->
                     WeatherHour(
                         time = DateTime(isoDateTime = timeSeries.time).time,
-                        weatherDetails = mapDetailsToWeatherDetails(timeSeries.data.instant.details),
+                        weatherDetails = timeSeries.data.instant.details,
                         nextOneHour = if (timeSeries.data.next_1_hours != null) english[timeSeries.data.next_1_hours.summary.symbol_code.substringBefore(
                             "_"
                         )]?.let {
@@ -198,25 +188,6 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
                     )
                 })
         }
-    }
-
-    private fun mapDetailsToWeatherDetails(details: Details): WeatherDetails {
-        return WeatherDetails(
-            airPressureSeaLevel = Pressure(details.air_pressure_at_sea_level),
-            airTemperature = Temperature(details.air_temperature),
-            cloudFraction = CloudFraction(
-                cloudFraction = details.cloud_area_fraction,
-                cloudFractionHigh = details.cloud_area_fraction_high,
-                cloudFractionMedium = details.cloud_area_fraction_medium,
-                cloudFractionLow = details.cloud_area_fraction_low
-            ),
-            humidity = Humidity(details.relative_humidity),
-            windDirection = Direction(details.wind_from_direction),
-            windSpeed = Speed(details.wind_speed),
-            dewPointTemperature = Temperature(details.dew_point_temperature),
-            fogAreaFraction = FogAreaFraction(details.fog_area_fraction),
-            uvIndex = UvIndex(details.ultraviolet_index_clear_sky)
-        )
     }
 
     private fun iconMapper(iconAsString: String): Int {

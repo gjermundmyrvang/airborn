@@ -38,9 +38,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.R
-import no.uio.ifi.in2000.team18.airborn.model.CloudFraction
+import no.uio.ifi.in2000.team18.airborn.model.Details
 import no.uio.ifi.in2000.team18.airborn.model.Direction
-import no.uio.ifi.in2000.team18.airborn.model.FogAreaFraction
+import no.uio.ifi.in2000.team18.airborn.model.Fraction
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
@@ -48,12 +48,13 @@ import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
-import no.uio.ifi.in2000.team18.airborn.model.WeatherDetails
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LoadingCollapsible
+import kotlin.math.roundToInt
+import kotlin.random.Random
 
 
 @Composable
@@ -93,7 +94,7 @@ fun WeatherWeekSection(
                 WeatherDayCard(
                     weatherDay = day, selected = weatherDays[selectedDay], today = true
                 ) {
-                    selectedDay = i
+                    selectedDay = 0
                     onDaySelected(i)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
@@ -122,9 +123,9 @@ fun WeatherDayCard(
     val weatherHours = weatherDay.weather
     val hourNow = weatherHours.first()
     val highestTemp =
-        weatherHours.maxByOrNull { it.weatherDetails.airTemperature.celcius }!!.weatherDetails.airTemperature.celcius
+        weatherHours.maxByOrNull { it.weatherDetails.airTemperature.celsius }!!.weatherDetails.airTemperature.celsius
     val lowestTemp =
-        weatherHours.minByOrNull { it.weatherDetails.airTemperature.celcius }!!.weatherDetails.airTemperature.celcius
+        weatherHours.minByOrNull { it.weatherDetails.airTemperature.celsius }!!.weatherDetails.airTemperature.celsius
     val isSelected = selected == weatherDay
     val borderColor =
         if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
@@ -262,7 +263,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
             Spacer(modifier = Modifier.height(16.dp))
             WindCard(
                 windSpeed = weatherHour.weatherDetails.windSpeed,
-                fromDegrees = weatherHour.weatherDetails.windDirection.degrees
+                fromDegrees = weatherHour.weatherDetails.windFromDirection.degrees
             )
         }
         Column {
@@ -277,21 +278,38 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
                 text = "Rain: ${weatherHour.nextTwelweHour?.chanceOfRain} %", fontSize = 12.sp
             )
             Text(
-                text = "Relative Humidity: ${weatherHour.weatherDetails.humidity}", fontSize = 12.sp
-            )
-            Text(
-                text = "Pressure: ${weatherHour.weatherDetails.airPressureSeaLevel}",
+                text = "Relative Humidity: ${weatherHour.weatherDetails.relativeHumidity}",
                 fontSize = 12.sp
             )
             Text(
-                text = weatherHour.weatherDetails.cloudFraction.toString(), fontSize = 12.sp
+                text = "Pressure: ${weatherHour.weatherDetails.airPressureAtSeaLevel}",
+                fontSize = 12.sp
             )
+            Text(
+                text = "Cloud fraction: ${weatherHour.weatherDetails.cloudAreaFraction}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Cloud fraction high: ${weatherHour.weatherDetails.cloudAreaFractionHigh}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Cloud fraction medium: ${weatherHour.weatherDetails.cloudAreaFractionMedium}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Cloud fraction low: ${weatherHour.weatherDetails.cloudAreaFractionLow}",
+                fontSize = 12.sp
+            )
+            Text(text = "Fog area: ${weatherHour.weatherDetails.fogAreaFraction}", fontSize = 12.sp)
             Text(
                 text = "Dewpoint temp: ${weatherHour.weatherDetails.dewPointTemperature}",
                 fontSize = 12.sp
             )
-            Text(text = "Fog area: ${weatherHour.weatherDetails.fogAreaFraction}", fontSize = 12.sp)
-            Text(text = "UV: ${weatherHour.weatherDetails.uvIndex}", fontSize = 12.sp)
+            Text(
+                text = "UV: ${weatherHour.weatherDetails.ultravioletIndexClearSky}",
+                fontSize = 12.sp
+            )
         }
     }
 }
@@ -314,7 +332,11 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row {
-                Text(text = "$windSpeed", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Text(
+                    text = "${windSpeed.knots.roundToInt()} kt",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp
+                )
                 Image(
                     painter = painterResource(id = R.drawable.air_icon),
                     contentDescription = "airIcon",
@@ -365,16 +387,21 @@ fun RotatableArrowIcon(
 @Composable
 fun TestWeatherSection() {
     val hour = WeatherHour(
-        time = "12:00", weatherDetails = WeatherDetails(
-            airPressureSeaLevel = Pressure(1001.98),
-            airTemperature = Temperature(18.0),
-            cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
-            humidity = Humidity(65.98),
-            windSpeed = Speed(23.65),
-            windDirection = Direction(236.98),
-            dewPointTemperature = Temperature(23.9),
-            fogAreaFraction = FogAreaFraction(89.9),
-            uvIndex = UvIndex(2.0)
+        time = "12:00", weatherDetails = Details(
+            airPressureAtSeaLevel = Pressure(Random.nextDouble(950.0, 1050.0)),
+            airTemperature = Temperature(Random.nextDouble(-10.0, 30.0)),
+            airTemperatureMax = Temperature(Random.nextDouble(-5.0, 35.0)),
+            airTemperatureMin = Temperature(Random.nextDouble(-15.0, 25.0)),
+            cloudAreaFraction = Fraction(Random.nextDouble(0.0, 1.0)),
+            cloudAreaFractionHigh = Fraction(Random.nextDouble(0.0, 0.5)),
+            cloudAreaFractionLow = Fraction(Random.nextDouble(0.0, 0.3)),
+            cloudAreaFractionMedium = Fraction(Random.nextDouble(0.0, 0.7)),
+            dewPointTemperature = Temperature(Random.nextDouble(-15.0, 25.0)),
+            fogAreaFraction = Fraction(Random.nextDouble(0.0, 0.1)),
+            relativeHumidity = Humidity(Random.nextDouble(0.0, 100.9)),
+            ultravioletIndexClearSky = UvIndex(Random.nextDouble(0.0, 10.0)),
+            windFromDirection = Direction(Random.nextDouble(0.0, 360.0)),
+            windSpeed = Speed(Random.nextDouble(0.0, 20.0))
         ), nextOneHour = NextHourDetails(
             symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
         ), nextSixHour = NextHourDetails(
@@ -402,16 +429,21 @@ fun TestWeatherSection() {
 @Composable
 fun TestWeatherNowSection() {
     val hour = WeatherHour(
-        time = "12:00", weatherDetails = WeatherDetails(
-            airPressureSeaLevel = Pressure(1001.98),
-            airTemperature = Temperature(18.0),
-            cloudFraction = CloudFraction(46.9, 78.9, 76.6, 80.5),
-            humidity = Humidity(65.98),
-            windSpeed = Speed(23.65),
-            windDirection = Direction(236.98),
-            dewPointTemperature = Temperature(23.9),
-            fogAreaFraction = FogAreaFraction(89.9),
-            uvIndex = UvIndex(2.0)
+        time = "12:00", weatherDetails = Details(
+            airPressureAtSeaLevel = Pressure(Random.nextDouble(950.0, 1050.0)),
+            airTemperature = Temperature(Random.nextDouble(-10.0, 30.0)),
+            airTemperatureMax = Temperature(Random.nextDouble(-5.0, 35.0)),
+            airTemperatureMin = Temperature(Random.nextDouble(-15.0, 25.0)),
+            cloudAreaFraction = Fraction(Random.nextDouble(0.0, 1.0)),
+            cloudAreaFractionHigh = Fraction(Random.nextDouble(0.0, 0.5)),
+            cloudAreaFractionLow = Fraction(Random.nextDouble(0.0, 0.3)),
+            cloudAreaFractionMedium = Fraction(Random.nextDouble(0.0, 0.7)),
+            dewPointTemperature = Temperature(Random.nextDouble(-15.0, 25.0)),
+            fogAreaFraction = Fraction(Random.nextDouble(0.0, 0.1)),
+            relativeHumidity = Humidity(Random.nextDouble(0.0, 100.9)),
+            ultravioletIndexClearSky = UvIndex(Random.nextDouble(0.0, 10.0)),
+            windFromDirection = Direction(Random.nextDouble(0.0, 360.0)),
+            windSpeed = Speed(Random.nextDouble(0.0, 20.0))
         ), nextOneHour = NextHourDetails(
             symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
         ), nextSixHour = NextHourDetails(

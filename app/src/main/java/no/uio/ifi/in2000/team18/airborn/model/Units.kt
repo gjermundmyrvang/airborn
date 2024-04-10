@@ -1,11 +1,51 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
+import com.google.gson.TypeAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
+
+class CelsiusAdapter : TypeAdapter<Temperature>() {
+    override fun write(writer: JsonWriter, value: Temperature) = writer.value(value.celsius).let {}
+    override fun read(reader: JsonReader): Temperature = Temperature(reader.nextDouble())
+}
+
+class MpsAdapter : TypeAdapter<Speed>() {
+    override fun write(writer: JsonWriter, value: Speed) = writer.value(value.mps).let {}
+    override fun read(reader: JsonReader): Speed = reader.nextDouble().mps
+}
+
+class DirectionAdapter : TypeAdapter<Direction>() {
+    override fun write(writer: JsonWriter, value: Direction) = writer.value(value.degrees).let {}
+    override fun read(reader: JsonReader): Direction = reader.nextDouble().degrees
+}
+
+class UvAdapter : TypeAdapter<UvIndex>() {
+    override fun write(writer: JsonWriter, value: UvIndex) = writer.value(value.uv).let {}
+    override fun read(reader: JsonReader): UvIndex = reader.nextDouble().uv
+}
+
+class PressureAdapter : TypeAdapter<Pressure>() {
+    override fun write(writer: JsonWriter, value: Pressure) = writer.value(value.hpa).let {}
+    override fun read(reader: JsonReader): Pressure = reader.nextDouble().hpa
+}
+
+class HumidityAdapter : TypeAdapter<Humidity>() {
+    override fun write(writer: JsonWriter, value: Humidity) = writer.value(value.humidity).let {}
+    override fun read(reader: JsonReader): Humidity = reader.nextDouble().humidity
+}
+
+class FractionAdapter : TypeAdapter<Fraction>() {
+    override fun write(writer: JsonWriter, value: Fraction) = writer.value(value.fraction).let {}
+    override fun read(reader: JsonReader): Fraction = reader.nextDouble().fraction
+}
+
+
 data class Pressure(val hpa: Double) {
     override fun toString(): String = "$hpa hPa"
 }
 
-data class Humidity(val value: Double) {
-    override fun toString(): String = "$value %"
+data class Humidity(val humidity: Double) {
+    override fun toString(): String = "$humidity %"
 }
 
 data class Speed(val mps: Double) {
@@ -14,31 +54,20 @@ data class Speed(val mps: Double) {
     val knots get() = this.mps * 1.9438452
 }
 
-data class Temperature(val celcius: Double) {
-    override fun toString(): String = "$celcius \u2103"
+data class Temperature(val celsius: Double) {
+    override fun toString(): String = "$celsius \u2103"
 }
 
 data class Direction(val degrees: Double) {
     override fun toString(): String = "$degrees degrees"
 }
 
-data class CloudFraction(
-    val cloudFraction: Double,
-    val cloudFractionHigh: Double,
-    val cloudFractionMedium: Double,
-    val cloudFractionLow: Double,
-) {
-    override fun toString(): String {
-        return "Cloud fraction: $cloudFraction%\nCloud fraction high: $cloudFractionHigh%\nCloud fraction medium: $cloudFractionLow%\nCloud fraction low: $cloudFractionLow%"
-    }
+data class UvIndex(val uv: Double) {
+    override fun toString(): String = "$uv"
 }
 
-data class FogAreaFraction(val value: Double) {
-    override fun toString(): String = "$value %"
-}
-
-data class UvIndex(val value: Double) {
-    override fun toString(): String = "$value"
+data class Fraction(val fraction: Double) {
+    override fun toString(): String = "$fraction %"
 }
 
 val Double.mps get() = Speed(mps = this)
@@ -50,8 +79,8 @@ val Int.kmph get() = this.toDouble().kmph
 val Double.knots get() = Speed(mps = 0.51444424416 * this)
 val Int.knots get() = this.toDouble().knots
 
-val Double.celcius get() = Temperature(celcius = this)
-val Int.celcius get() = this.toDouble().knots
+val Double.celsius get() = Temperature(celsius = this)
+val Int.celsius get() = this.toDouble().celsius
 
 val Double.hpa get() = Pressure(hpa = this)
 val Int.hpa get() = this.toDouble().hpa
@@ -60,3 +89,12 @@ val Int.pa get() = this.toDouble().pa
 
 val Double.degrees get() = Direction(degrees = this)
 val Int.degrees get() = this.toDouble().degrees
+
+val Double.uv get() = UvIndex(uv = this)
+val Int.uv get() = this.toDouble().uv
+
+val Double.humidity get() = Humidity(humidity = this)
+val Int.humidity get() = this.toDouble().humidity
+
+val Double.fraction get() = Fraction(fraction = this)
+val Int.fraction get() = this.toDouble().fraction
