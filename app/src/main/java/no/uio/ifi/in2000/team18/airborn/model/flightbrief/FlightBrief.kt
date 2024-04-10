@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -20,14 +21,19 @@ data class TurbulenceMapAndCross(
 ) {
 
     val mapDict: Map<ZonedDateTime, String>? = if (map.isNotEmpty()) {
-        map.associate { ZonedDateTime.parse(it.params.time) to it.uri }
+        map.associate {
+            ZonedDateTime.parse(it.params.time)
+                .withZoneSameInstant(ZoneId.systemDefault()) to it.uri
+        }
     } else {
         null
     }
 
-    val crossSectionDict
-            : Map<ZonedDateTime, String>? = if (crossSection.isNotEmpty()) {
-        crossSection.associate { ZonedDateTime.parse(it.params.time) to it.uri }
+    val crossSectionDict: Map<ZonedDateTime, String>? = if (crossSection.isNotEmpty()) {
+        crossSection.associate {
+            ZonedDateTime.parse(it.params.time)
+                .withZoneSameInstant(ZoneId.systemDefault()) to it.uri
+        }
     } else {
         null
     }
@@ -37,12 +43,14 @@ data class TurbulenceMapAndCross(
             if (it.minute > 30) it.plusHours(1) else it
         }
         val formattedTime = time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:00'Z'"))
-        return ZonedDateTime.parse(formattedTime)
+        return ZonedDateTime.parse(formattedTime).withZoneSameInstant(ZoneId.systemDefault())
     }
 
     fun allTurbulenceTimes(): Map<String, List<ZonedDateTime>>? {
         val turbulenceTimes = if (map.isNotEmpty()) {
-            map.map { ZonedDateTime.parse(it.params.time) }
+            map.map {
+                ZonedDateTime.parse(it.params.time).withZoneSameInstant(ZoneId.systemDefault())
+            }
         } else {
             null
         }
