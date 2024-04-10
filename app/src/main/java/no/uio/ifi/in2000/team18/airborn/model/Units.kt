@@ -42,6 +42,8 @@ class FractionAdapter : TypeAdapter<Fraction>() {
 
 data class Pressure(val hpa: Double) {
     override fun toString(): String = "$hpa hPa"
+    operator fun times(x: Number) = Pressure(hpa = hpa * x.toDouble())
+    operator fun plus(x: Pressure) = Pressure(hpa + x.hpa)
 }
 
 data class Humidity(val humidity: Double) {
@@ -52,6 +54,8 @@ data class Speed(val mps: Double) {
     override fun toString(): String = "$mps m/s"
     val kmh get() = this.mps * 3.6
     val knots get() = this.mps * 1.9438452
+    operator fun times(x: Number) = Speed(mps = mps * x.toDouble())
+    operator fun plus(x: Speed) = Speed(mps + x.mps)
 }
 
 data class Temperature(val celsius: Double) {
@@ -66,35 +70,51 @@ data class UvIndex(val uv: Double) {
     override fun toString(): String = "$uv"
 }
 
+data class Distance(val meters: Double) {
+    override fun toString(): String = if (meters < 1) "${meters * 1000} mm"
+    else if (meters < 1000) "${meters} m"
+    else "${meters / 1000} km"
+
+    val feet get() = meters * 3.2808399
+    val nauticalMiles get() = meters * 0.000539956803
+
+    operator fun times(x: Number) = Distance(meters = meters * x.toDouble())
+    operator fun plus(x: Distance) = Distance(meters + x.meters)
+}
+
 data class Fraction(val fraction: Double) {
     override fun toString(): String = "$fraction %"
 }
 
-val Double.mps get() = Speed(mps = this)
-val Int.mps get() = this.toDouble().mps
 
-val Double.kmph get() = Speed(mps = this / 3.6)
-val Int.kmph get() = this.toDouble().kmph
+// Speed
+private operator fun Number.times(s: Speed) = s * this
+val Number.mps get() = Speed(mps = this.toDouble())
+val Number.kmph get() = this * (1 / 3.6).mps
+val Number.knots get() = this * 0.51444424416.mps
 
-val Double.knots get() = Speed(mps = 0.51444424416 * this)
-val Int.knots get() = this.toDouble().knots
+// Temperature
+val Number.celsius get() = Temperature(celsius = this.toDouble())
 
-val Double.celsius get() = Temperature(celsius = this)
-val Int.celsius get() = this.toDouble().celsius
 
-val Double.hpa get() = Pressure(hpa = this)
-val Int.hpa get() = this.toDouble().hpa
-val Double.pa get() = Pressure(hpa = this / 10.0)
-val Int.pa get() = this.toDouble().pa
+// Pressure
+private operator fun Number.times(s: Pressure) = s * this
+val Number.hpa get() = Pressure(hpa = this.toDouble())
+val Number.pa get() = this * 0.1.hpa
 
-val Double.degrees get() = Direction(degrees = this)
-val Int.degrees get() = this.toDouble().degrees
 
-val Double.uv get() = UvIndex(uv = this)
-val Int.uv get() = this.toDouble().uv
+// Directions
+val Number.degrees get() = Direction(degrees = this.toDouble())
 
-val Double.humidity get() = Humidity(humidity = this)
-val Int.humidity get() = this.toDouble().humidity
 
-val Double.fraction get() = Fraction(fraction = this)
-val Int.fraction get() = this.toDouble().fraction
+val Number.uv get() = UvIndex(uv = this.toDouble())
+val Number.humidity get() = Humidity(humidity = this.toDouble())
+val Number.fraction get() = Fraction(fraction = this.toDouble())
+
+// Distance
+private operator fun Number.times(m: Distance) = m * this
+val Number.m get() = Distance(meters = this.toDouble())
+val Number.km get() = this * 1000.m
+val Number.mm get() = this * 0.001.m
+val Number.feet get() = this * 0.3048.m
+val Number.nauticalMiles get() = this * 1852.m
