@@ -1,5 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
+import com.google.gson.annotations.JsonAdapter
+import com.google.gson.annotations.SerializedName
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 
 
@@ -14,7 +16,7 @@ data class WeatherDay(
 
 data class WeatherHour(
     val time: String,
-    val weatherDetails: WeatherDetails,
+    val weatherDetails: Details,
     val nextOneHour: NextHourDetails? = null,
     val nextSixHour: NextHourDetails? = null,
     val nextTwelweHour: NextHourDetails? = null,
@@ -61,33 +63,22 @@ data class InstantData(
     val details: Details
 )
 
-data class WeatherDetails(
-    val airPressureSeaLevel: Pressure,
-    val airTemperature: Temperature,
-    val cloudFraction: CloudFraction,
-    val humidity: Humidity,
-    val windDirection: Direction,
-    val windSpeed: Speed,
-    val dewPointTemperature: Temperature,
-    val fogAreaFraction: FogAreaFraction,
-    val uvIndex: UvIndex,
-)
 
 data class Details(
-    val air_pressure_at_sea_level: Double,
-    val air_temperature: Double,
-    val air_temperature_max: Double,
-    val air_temperature_min: Double,
-    val cloud_area_fraction: Double,
-    val cloud_area_fraction_high: Double,
-    val cloud_area_fraction_low: Double,
-    val cloud_area_fraction_medium: Double,
-    val dew_point_temperature: Double,
-    val fog_area_fraction: Double,
-    val relative_humidity: Double,
-    val ultraviolet_index_clear_sky: Double,
-    val wind_from_direction: Double,
-    val wind_speed: Double
+    @SerializedName("air_pressure_at_sea_level") @JsonAdapter(PressureAdapter::class) val airPressureAtSeaLevel: Pressure,
+    @SerializedName("air_temperature") @JsonAdapter(CelsiusAdapter::class) val airTemperature: Temperature,
+    @SerializedName("air_temperature_max") @JsonAdapter(CelsiusAdapter::class) val airTemperatureMax: Temperature,
+    @SerializedName("air_temperature_min") @JsonAdapter(CelsiusAdapter::class) val airTemperatureMin: Temperature,
+    @SerializedName("cloud_area_fraction") @JsonAdapter(FractionAdapter::class) val cloudAreaFraction: Fraction,
+    @SerializedName("cloud_area_fraction_high") @JsonAdapter(FractionAdapter::class) val cloudAreaFractionHigh: Fraction,
+    @SerializedName("cloud_area_fraction_low") @JsonAdapter(FractionAdapter::class) val cloudAreaFractionLow: Fraction,
+    @SerializedName("cloud_area_fraction_medium") @JsonAdapter(FractionAdapter::class) val cloudAreaFractionMedium: Fraction,
+    @SerializedName("dew_point_temperature") @JsonAdapter(CelsiusAdapter::class) val dewPointTemperature: Temperature,
+    @SerializedName("fog_area_fraction") @JsonAdapter(FractionAdapter::class) val fogAreaFraction: Fraction,
+    @SerializedName("relative_humidity") @JsonAdapter(HumidityAdapter::class) val relativeHumidity: Humidity,
+    @SerializedName("ultraviolet_index_clear_sky") @JsonAdapter(UvAdapter::class) val ultravioletIndexClearSky: UvIndex,
+    @SerializedName("wind_from_direction") @JsonAdapter(DirectionAdapter::class) val windFromDirection: Direction,
+    @SerializedName("wind_speed") @JsonAdapter(MpsAdapter::class) val windSpeed: Speed
 )
 
 enum class SymbolCode {
