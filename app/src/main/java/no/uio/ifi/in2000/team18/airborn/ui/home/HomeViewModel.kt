@@ -35,20 +35,18 @@ class HomeViewModel @Inject constructor(
     }
 
     fun filterDepartureAirports(input: String) {
-        _state.update {
-            it.copy(
-                departureAirportInput = input,
-                airports = airportDataSource.search(input),
-            )
+        _state.update { it.copy(departureAirportInput = input) }
+        viewModelScope.launch {
+            val result = airportDataSource.search(input)
+            _state.update { it.copy(airports = result) }
         }
     }
 
     fun filterArrivalAirports(input: String) {
-        _state.update {
-            it.copy(
-                arrivalAirportInput = input,
-                airports = airportDataSource.search(input),
-            )
+        _state.update { it.copy(arrivalAirportInput = input) }
+        viewModelScope.launch {
+            val result = airportDataSource.search(input)
+            _state.update { it.copy(airports = result) }
         }
     }
 
