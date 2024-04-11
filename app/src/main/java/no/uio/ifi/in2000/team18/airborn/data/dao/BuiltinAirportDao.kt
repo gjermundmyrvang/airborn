@@ -6,6 +6,15 @@ import no.uio.ifi.in2000.team18.airborn.data.entity.BuiltinAirport
 
 @Dao
 interface BuiltinAirportDao {
-    @Query("SELECT * FROM builtin_airport WHERE icao LIKE '%' || :q || '%' OR name LIKE '%' || :q || '%'")
+    @Query(
+        """
+        SELECT *
+        FROM builtin_airport
+        WHERE icao LIKE '%' || :q || '%' OR name LIKE '%' || :q || '%'
+        """
+    )
     fun search(q: String): List<BuiltinAirport>
+
+    @Query("SELECT * FROM builtin_airport WHERE icao = :icao")
+    fun getByIcao(icao: String): BuiltinAirport?
 }
