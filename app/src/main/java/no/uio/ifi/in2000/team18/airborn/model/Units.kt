@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team18.airborn.model
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import kotlin.math.atan2
 
 class CelsiusAdapter : TypeAdapter<Temperature>() {
     override fun write(writer: JsonWriter, value: Temperature) = writer.value(value.celsius).let {}
@@ -64,6 +65,26 @@ data class Temperature(val celsius: Double) {
 
 data class Direction(val degrees: Double) {
     override fun toString(): String = "$degrees degrees"
+
+    companion object {
+        val EAST: Direction = 90.degrees
+        val WEST: Direction = 270.degrees
+        val NORTH: Direction = 0.degrees
+        val SOUTH: Direction = 180.degrees
+
+        fun fromWindUV(u: Double, v: Double) = atan2(-u, -v).radians
+    }
+
+    override fun equals(other: Any?) =
+        when (other) {
+            is Direction ->
+                Math.floorMod(this.degrees.toInt(), 360) == Math.floorMod(
+                    other.degrees.toInt(),
+                    360
+                )
+
+            else -> false
+        }
 }
 
 data class UvIndex(val uv: Double) {
@@ -105,6 +126,7 @@ val Number.pa get() = this * 0.1.hpa
 
 // Directions
 val Number.degrees get() = Direction(degrees = this.toDouble())
+val Number.radians get() = (this.toDouble() / Math.PI * 180).degrees
 
 
 val Number.uv get() = UvIndex(uv = this.toDouble())

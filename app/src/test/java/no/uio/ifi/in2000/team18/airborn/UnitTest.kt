@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn
 
 import junit.framework.TestCase.assertEquals
+import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.celsius
 import no.uio.ifi.in2000.team18.airborn.model.degrees
@@ -74,5 +75,25 @@ class UnitTest {
         val expectedTime = "13:36"
 
         assertEquals(expectedTime, dateTime.time)
+    }
+
+    @Test
+    fun testWindDirectionFromUVWest() {
+        val u = 1.0
+        val v = 0.0
+        val direction = Direction.fromWindUV(u, v)
+        val expectedDirection = Direction.WEST
+
+        assertEquals(direction, expectedDirection)
+    }
+
+    @Test
+    fun testWindDirectionFromUVSouth() {
+        val u = 0.0
+        val v = 1.0
+        val direction = Direction.fromWindUV(u, v)
+        val expectedDirection = Direction.SOUTH
+
+        assertEquals(direction, expectedDirection)
     }
 }
