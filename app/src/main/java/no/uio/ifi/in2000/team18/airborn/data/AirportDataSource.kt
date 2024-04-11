@@ -1,20 +1,27 @@
 package no.uio.ifi.in2000.team18.airborn.data
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import no.uio.ifi.in2000.team18.airborn.data.dao.BuiltinAirportDao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
-class AirportDataSource @Inject constructor() {
+class AirportDataSource @Inject constructor(
+    val builtinAirportDao: BuiltinAirportDao
+) {
     fun getByIcao(icao: Icao) = airports.find { it.icao == icao }
 
-    fun search(query: String) = airports.filter {
-        it.icao.code.startsWith(
-            query, ignoreCase = true
-        ) || it.name.contains(
-            query, ignoreCase = true
-        )
+    suspend fun search(query: String): List<Airport> = withContext(Dispatchers.IO) {
+        builtinAirportDao.search(query).map {
+            Airport(
+                icao = Icao(it.icao),
+                name = it.name,
+                position = Position(latitude = it.lat, longitude = it.lon)
+            )
+        }
     }
 
     /**
@@ -25,9 +32,9 @@ class AirportDataSource @Inject constructor() {
      * */
     fun getAirportsNearby(airport: Airport) = airports.filter {
         val pos = airport.position
-        it.position != pos &&
-                it.position.latitude.minus(pos.latitude).absoluteValue < 1 &&
-                it.position.longitude.minus(pos.longitude).absoluteValue < 2
+        it.position != pos && it.position.latitude.minus(pos.latitude).absoluteValue < 1 && it.position.longitude.minus(
+            pos.longitude
+        ).absoluteValue < 2
     }
 
     val airports = listOf(
