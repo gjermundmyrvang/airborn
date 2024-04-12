@@ -2,7 +2,7 @@ package no.uio.ifi.in2000.team18.airborn
 
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
-import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import org.junit.Test
 
 /**

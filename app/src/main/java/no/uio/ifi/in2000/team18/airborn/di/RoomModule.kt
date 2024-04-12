@@ -7,7 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import no.uio.ifi.in2000.team18.airborn.data.AppDatabase
+import no.uio.ifi.in2000.team18.airborn.data.datasource.AppDatabase
 import no.uio.ifi.in2000.team18.airborn.data.dao.BuiltinAirportDao
 import javax.inject.Singleton
 
