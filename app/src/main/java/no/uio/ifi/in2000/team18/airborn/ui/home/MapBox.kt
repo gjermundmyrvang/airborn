@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,8 +38,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
+import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
+import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
@@ -54,16 +56,17 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
         var selectedAirport by remember { mutableStateOf(airports.first()) }
         var showInfoBox by remember { mutableStateOf(false) }
         Box {
+            val mapViewportState = rememberMapViewportState {
+                setCameraOptions {
+                    zoom(7.0)
+                    center(Point.fromLngLat(startPos.longitude, startPos.latitude))
+                    pitch(0.0)
+                    bearing(0.0)
+                }
+            }
             MapboxMap(
                 Modifier.fillMaxSize(),
-                mapViewportState = MapViewportState().apply {
-                    setCameraOptions {
-                        zoom(7.0)
-                        center(Point.fromLngLat(startPos.longitude, startPos.latitude))
-                        pitch(0.0)
-                        bearing(0.0)
-                    }
-                },
+                mapViewportState = mapViewportState
             ) {
                 airports.forEach { airport ->
                     Annotation(airport) {
@@ -71,6 +74,8 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
                         selectedAirport = it
                     }
                 }
+                Polygon(points = osloPolygon)
+                Polygon(points = norskekystenPolygon)
             }
             if (showInfoBox) {
                 InfoBox(airport = selectedAirport) {
@@ -79,6 +84,37 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
             }
         }
     }
+
+val osloPolygon = listOf(
+    listOf(
+        Point.fromLngLat(10.580, 59.890),
+        Point.fromLngLat(11.360, 59.890),
+        Point.fromLngLat(11.360, 60.150),
+        Point.fromLngLat(10.580, 60.150),
+        Point.fromLngLat(10.580, 59.890)
+    )
+)
+val norskekystenPolygon = listOf(
+    listOf(
+        Point.fromLngLat(4.842, 58.931),
+        Point.fromLngLat(5.400, 60.216),
+        Point.fromLngLat(9.840, 60.990),
+        Point.fromLngLat(11.974, 58.631),
+        Point.fromLngLat(6.470, 56.775),
+        Point.fromLngLat(4.842, 58.931)
+    )
+)
+
+@OptIn(MapboxExperimental::class)
+@Composable
+fun Polygon(points: List<List<Point>>) {
+    PolygonAnnotation(
+        points = points,
+        fillOutlineColorInt = Color.Black.toArgb(),
+        fillColorInt = Color.Cyan.toArgb(),
+        fillOpacity = 0.3
+    )
+}
 
 
 @OptIn(MapboxExperimental::class)
