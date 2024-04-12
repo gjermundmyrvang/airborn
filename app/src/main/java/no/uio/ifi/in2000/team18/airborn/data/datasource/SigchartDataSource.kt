@@ -1,10 +1,10 @@
-package no.uio.ifi.in2000.team18.airborn.data
+package no.uio.ifi.in2000.team18.airborn.data.datasource
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 
@@ -14,7 +14,9 @@ class SigchartDataSource @Inject constructor(val client: HttpClient) {
         return res.body()
     }
 
-    suspend fun findSigchart(time: LocalDateTime): Sigchart {
-        return fetchSigcharts().last() // TODO: find correct sigchart
+    suspend fun getSigcharts(): Map<Area, List<Sigchart>> {
+        val sigcharts = fetchSigcharts()
+        val sigMap = sigcharts.groupBy { it.params.area }
+        return sigMap
     }
 }

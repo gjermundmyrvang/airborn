@@ -8,12 +8,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
-import no.uio.ifi.in2000.team18.airborn.data.IsobaricRepository
-import no.uio.ifi.in2000.team18.airborn.data.LocationForecastRepository
-import no.uio.ifi.in2000.team18.airborn.data.SigchartDataSource
-import no.uio.ifi.in2000.team18.airborn.data.TafmetarDataSource
-import no.uio.ifi.in2000.team18.airborn.data.TurbulenceDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
+import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastRepository
+import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
+import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -53,7 +54,7 @@ class FlightBriefViewModel @Inject constructor(
     data class UiState(
         val departure: AirportUiState,
         val arrival: AirportUiState?,
-        val sigcharts: LoadingState<List<Sigchart>> = Loading,
+        val sigcharts: LoadingState<Map<Area, List<Sigchart>>> = Loading,
     )
 
     private val _state = MutableStateFlow(
@@ -77,7 +78,7 @@ class FlightBriefViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val sigcharts = load { sigchartDataSource.fetchSigcharts() }
+            val sigcharts = load { sigchartDataSource.getSigcharts() }
             _state.update { it.copy(sigcharts = sigcharts) }
         }
     }

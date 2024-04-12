@@ -1,6 +1,7 @@
-package no.uio.ifi.in2000.team18.airborn.data
+package no.uio.ifi.in2000.team18.airborn.data.repository
 
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.data.AirportDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import javax.inject.Inject
 
