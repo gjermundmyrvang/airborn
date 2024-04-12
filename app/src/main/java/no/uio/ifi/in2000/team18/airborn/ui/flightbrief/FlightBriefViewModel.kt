@@ -8,15 +8,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team18.airborn.data.WebcamDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
-import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
-import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastRepository
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
+import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
+import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
@@ -43,12 +45,15 @@ class FlightBriefViewModel @Inject constructor(
     val arrivalIcao =
         savedStateHandle.get<String>("arrivalIcao")?.let { if (it == "null") null else Icao(it) }
 
+    val webcamDataSource = WebcamDataSource()
+
     data class AirportUiState(
         val airport: LoadingState<Airport> = Loading,
         val metarTaf: LoadingState<MetarTaf> = Loading,
         val isobaric: LoadingState<IsobaricData> = Loading,
         val turbulence: LoadingState<TurbulenceMapAndCross?> = Loading,
         val weather: LoadingState<List<WeatherDay>> = Loading,
+        val webcams: LoadingState<List<Webcam>> = Loading,
     )
 
     data class UiState(
@@ -108,6 +113,11 @@ class FlightBriefViewModel @Inject constructor(
         viewModelScope.launch {
             val airportTurbulence = load { turbulenceDataSource.createTurbulence(airport.icao) }
             update { it.copy(turbulence = airportTurbulence) }
+        }
+
+        viewModelScope.launch {
+            val webcams = load { webcamDataSource.fetchImage(airport) }
+            update { it.copy(webcams = webcams) }
         }
     }
 

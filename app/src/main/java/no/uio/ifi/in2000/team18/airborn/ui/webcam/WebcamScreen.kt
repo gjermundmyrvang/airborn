@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -22,8 +22,8 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,75 +42,80 @@ import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LoadingCollapsible
 
 @Composable
-fun WebcamSection(webcams: List<Webcam>) {
-    if (webcams.isEmpty()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "No webcams available in 20km radius", fontSize = 30.sp
-            )
-        }
-    } else {
-        var currentWebcam by remember { mutableStateOf(webcams.first()) }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            SubcomposeAsyncImage(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(),
-                contentScale = ContentScale.FillWidth,
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(currentWebcam.images.current.preview).build(),
-                loading = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(30.dp),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            strokeWidth = 1.dp
-                        )
-                    }
-                },
-                contentDescription = "Webcam image"
-            )
-            Text(text = "last updated: ${currentWebcam.lastUpdatedOn}")
-            HyperlinkText(
-                fullText = "Webcams provided by windy.com — add a webcam",
-                linkText = listOf("windy.com", "add a webcam"),
-                hyperlinks = listOf("https://www.windy.com/", "https://www.windy.com/webcams/add")
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+fun WebcamSection(state: LoadingState<List<Webcam>>) =
+    LoadingCollapsible(state, header = "Webcams") { webcams ->
+        if (webcams.isEmpty()) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "No webcams available in 20km radius", fontSize = 30.sp
+                )
+            }
+        } else {
+            var selectedWebcam by rememberSaveable { mutableIntStateOf(0) }
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(500.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                LazyColumn(content = {
-                    items(webcams) { webcam ->
-                        NearbyWebcam(
-                            webcam = webcam,
-                            current = currentWebcam
-                        ) { clickedWebcam ->
-                            currentWebcam = clickedWebcam
+                SubcomposeAsyncImage(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(webcams[selectedWebcam].images.current.preview).build(),
+                    loading = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(30.dp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                strokeWidth = 1.dp
+                            )
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
-                    }
-                })
+                    },
+                    contentDescription = "Webcam image"
+                )
+                Text(text = "last updated: ${webcams[selectedWebcam].lastUpdatedOn}")
+                HyperlinkText(
+                    fullText = "Webcams provided by windy.com — add a webcam",
+                    linkText = listOf("windy.com", "add a webcam"),
+                    hyperlinks = listOf(
+                        "https://www.windy.com/",
+                        "https://www.windy.com/webcams/add"
+                    )
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(500.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LazyColumn(content = {
+                        itemsIndexed(webcams) { index, webcam ->
+                            NearbyWebcam(
+                                webcam = webcam, current = webcams[selectedWebcam]
+                            ) {
+                                selectedWebcam = index
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+                    })
+                }
             }
         }
     }
-}
 
 @Composable
 fun NearbyWebcam(

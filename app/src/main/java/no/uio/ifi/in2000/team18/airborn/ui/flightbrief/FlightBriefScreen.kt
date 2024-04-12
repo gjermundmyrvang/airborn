@@ -26,6 +26,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefViewModel.AirportUiState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefViewModel.UiState
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Weathersection
+import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 
 @Preview(showSystemUi = true)
 @Composable
@@ -83,6 +84,7 @@ fun AirportBriefTab(airport: AirportUiState) =
             { IsobaricData(airport.isobaric) },
             { Turbulence(airport.turbulence) },
             { Weathersection(airport.weather) },
+            { WebcamSection(airport.webcams) }
         )
         items(sections) { section ->
             section()
