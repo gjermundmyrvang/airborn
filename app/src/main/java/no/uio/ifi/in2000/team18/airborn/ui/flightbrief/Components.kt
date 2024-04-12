@@ -37,10 +37,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
@@ -199,6 +206,32 @@ fun Collapsible(
             color = MaterialTheme.colorScheme.onBackground
         )
     }
+}
+
+@Composable
+fun ImageComposable(uri: String, contentDescription: String) {
+    val zoomState = rememberZoomState()
+    SubcomposeAsyncImage(modifier = Modifier
+        .fillMaxWidth()
+        .graphicsLayer { clip = true }
+        .zoomable(zoomState),
+        contentScale = ContentScale.FillWidth,
+        model = ImageRequest.Builder(LocalContext.current).data(uri)
+            .setHeader("User-Agent", "Team18").crossfade(500).build(),
+        loading = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(30.dp),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    strokeWidth = 1.dp
+                )
+            }
+        },
+        contentDescription = contentDescription
+    )
 }
 
 
