@@ -136,7 +136,7 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
         },
     ) {
         Image(
-            painter = painterResource(id = R.drawable.red_marker),
+            painter = painterResource(id = R.drawable.local_airport_24),
             contentDescription = "Marker",
             modifier = Modifier
                 .size(20.dp)
