@@ -28,7 +28,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    airports = airportDataSource.airports
+                    airports = airportDataSource.all()
                 )
             }
         }
