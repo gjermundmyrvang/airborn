@@ -30,11 +30,4 @@ class WebcamDataSource {
                 .body()
         return response.webcams
     }
-
-    fun increaseRadius(increment: Int) {
-        if (radius + increment > 200) {
-            return
-        }
-        radius += increment
-    }
 }
