@@ -117,7 +117,7 @@ class FlightBriefViewModel @Inject constructor(
         } catch (e: UnresolvedAddressException) {
             LoadingState.Error(message = "Unresolved Address")
         } catch (e: Exception) {
-            LoadingState.Error(message = "Unknown Error")
+            LoadingState.Error(message = "Unknown Error: $e")
         }
     }
 }
