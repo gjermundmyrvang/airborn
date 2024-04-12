@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team18.airborn.data
+package no.uio.ifi.in2000.team18.airborn.data.datasource
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
