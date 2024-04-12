@@ -26,4 +26,6 @@ class AirportDataSource @Inject constructor(
             )
         }
     }
+
+    suspend fun all(): List<Airport> = search("")
 }
