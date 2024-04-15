@@ -53,7 +53,6 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
         val state by homeViewModel.state.collectAsState()
         val airports = state.airports
         var selectedAirport by remember { mutableStateOf<Airport?>(null) }
-        var showInfoBox by remember { mutableStateOf(false) }
         val osloPolygon = listOf(
             listOf(
                 Point.fromLngLat(10.580, 59.890),
@@ -78,19 +77,16 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
             ) {
                 airports.forEach { airport ->
                     Annotation(airport) {
-                        showInfoBox = true
                         selectedAirport = it
                     }
                 }
                 // TODO give Polygon composable real sigmet/airmet coordinates
                 Polygon(points = osloPolygon)
             }
-            if (showInfoBox) {
-                when (val airport = selectedAirport) {
-                    null -> {}
-                    else -> InfoBox(airport = airport) {
-                        showInfoBox = false
-                    }
+            when (val airport = selectedAirport) {
+                null -> {}
+                else -> InfoBox(airport = airport) {
+                    selectedAirport = null
                 }
             }
         }
