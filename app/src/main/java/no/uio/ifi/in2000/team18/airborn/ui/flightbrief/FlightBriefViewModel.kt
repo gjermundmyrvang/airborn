@@ -8,12 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastRepository
-import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
-import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
-import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
@@ -32,11 +29,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FlightBriefViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val sigchartDataSource: SigchartDataSource,
-    private val airportDataSource: AirportDataSource,
-    private val tafMetarDataSource: TafmetarDataSource,
+    private val airportRepository: AirportRepository,
     private val isobaricRepository: IsobaricRepository,
-    private val turbulenceDataSource: TurbulenceDataSource,
     private val locationForecastRepository: LocationForecastRepository,
 ) : ViewModel() {
     val departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!)
@@ -67,8 +61,8 @@ class FlightBriefViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val departure = airportDataSource.getByIcao(departureIcao)!!
-            val arrival = arrivalIcao?.let { airportDataSource.getByIcao(it)!! }
+            val departure = airportRepository.getByIcao(departureIcao)!!
+            val arrival = arrivalIcao?.let { airportRepository.getByIcao(it)!! }
             initAirport(departure) {
                 _state.update { state -> state.copy(departure = it(state.departure)) }
             }
@@ -78,7 +72,7 @@ class FlightBriefViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val sigcharts = load { sigchartDataSource.getSigcharts() }
+            val sigcharts = load { airportRepository.getSigcharts() }
             _state.update { it.copy(sigcharts = sigcharts) }
         }
     }
@@ -101,12 +95,12 @@ class FlightBriefViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val airportMetarTaf = load { tafMetarDataSource.fetchTafMetar(airport.icao) }
+            val airportMetarTaf = load { airportRepository.fetchTafMetar(airport.icao) }
             update { it.copy(metarTaf = airportMetarTaf) }
         }
 
         viewModelScope.launch {
-            val airportTurbulence = load { turbulenceDataSource.createTurbulence(airport.icao) }
+            val airportTurbulence = load { airportRepository.createTurbulence(airport.icao) }
             update { it.copy(turbulence = airportTurbulence) }
         }
     }
