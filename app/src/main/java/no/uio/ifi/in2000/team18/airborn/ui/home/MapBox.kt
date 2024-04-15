@@ -52,14 +52,22 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
     Column(modifier = Modifier.fillMaxSize()) {
         val state by homeViewModel.state.collectAsState()
         val airports = state.airports
-        val startPos = airports.first().position
-        var selectedAirport by remember { mutableStateOf(airports.first()) }
+        var selectedAirport by remember { mutableStateOf<Airport?>(null) }
         var showInfoBox by remember { mutableStateOf(false) }
+        val osloPolygon = listOf(
+            listOf(
+                Point.fromLngLat(10.580, 59.890),
+                Point.fromLngLat(11.360, 59.890),
+                Point.fromLngLat(11.360, 60.150),
+                Point.fromLngLat(10.580, 60.150),
+                Point.fromLngLat(10.580, 59.890)
+            )
+        )
         Box {
             val mapViewportState = rememberMapViewportState {
                 setCameraOptions {
                     zoom(7.0)
-                    center(Point.fromLngLat(startPos.longitude, startPos.latitude))
+                    center(Point.fromLngLat(11.93, 59.97))
                     pitch(0.0)
                     bearing(0.0)
                 }
@@ -78,8 +86,11 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
                 Polygon(points = norskekystenPolygon)
             }
             if (showInfoBox) {
-                InfoBox(airport = selectedAirport) {
-                    showInfoBox = false
+                when (val airport = selectedAirport) {
+                    null -> {}
+                    else -> InfoBox(airport = airport) {
+                        showInfoBox = false
+                    }
                 }
             }
         }
