@@ -15,6 +15,8 @@ import io.ktor.client.request.header
 import io.ktor.serialization.gson.gson
 import no.uio.ifi.in2000.team18.airborn.data.dao.BuiltinAirportDao
 import no.uio.ifi.in2000.team18.airborn.data.datasource.AppDatabase
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.NetworkConnectivityObserver
 import javax.inject.Singleton
 
 @Module
@@ -45,4 +47,9 @@ class AppModule {
     @Singleton
     fun provideBuiltinAirportDao(database: AppDatabase): BuiltinAirportDao =
         database.builtinAirportDao
+
+    @Provides
+    @Singleton
+    fun provideConnectivityObserver(@ApplicationContext context: Context): ConnectivityObserver =
+        NetworkConnectivityObserver(context)
 }
