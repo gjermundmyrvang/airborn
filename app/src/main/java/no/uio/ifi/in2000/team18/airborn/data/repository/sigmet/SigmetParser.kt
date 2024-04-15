@@ -1,0 +1,157 @@
+package no.uio.ifi.in2000.team18.airborn.data.repository.sigmet
+
+import no.uio.ifi.in2000.team18.airborn.model.AltitudeReference
+import no.uio.ifi.in2000.team18.airborn.model.AltitudeReferenceType
+import no.uio.ifi.in2000.team18.airborn.model.Sigmet
+import no.uio.ifi.in2000.team18.airborn.model.SigmetDateTime
+import no.uio.ifi.in2000.team18.airborn.model.SigmetType
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
+
+
+private val metParser = Unit.let {
+    data class SigmetHeader(
+        val issuingAuthority: String, val location: String, val dateTime: SigmetDateTime
+    )
+
+    data class SigmetSigmeta(
+        val regionCode: String,
+        val type: SigmetType,
+        val identifier: Pair<Char, Int>,
+        val timeRange: Pair<SigmetDateTime, SigmetDateTime>,
+        val location: String,
+        val extra: String?,
+    )
+
+    data class SigmetBody(
+        val message: List<String>,
+        val coordinates: List<Position>,
+        val altitude: Pair<AltitudeReference, AltitudeReference>?,
+    )
+
+
+    // Generic stuff
+    val digit = char { it.isDigit() }.map { it.digitToInt() }
+    val twoDigitNumber = pair(digit, digit).map { it.first * 10 + it.second }
+    val threeDigitNumber = lift(digit, digit, digit) { a, b, c -> 100 * a + 10 * b + c }
+    val number = chars1("a number") { it.isDigit() }.map { it.toInt() }
+
+    // Sigmet stuff
+    val metTime = lift(twoDigitNumber, twoDigitNumber, twoDigitNumber) { day, hour, minute ->
+        SigmetDateTime(day, hour, minute)
+    }
+
+    val issuingAuthority = chars1("an authority code") { it.isLetter() or it.isDigit() }
+    val locationIndicator = chars1("a location indicator") { it.isLetter() }
+    val metHeader = lift(
+        issuingAuthority.skipSpace(), locationIndicator.skipSpace(), metTime
+    ) { authority, location, time ->
+        SigmetHeader(authority, location, time)
+    }
+
+    val regionCode = chars1("a region code") { it.isLetter() }
+    val metType =
+        word("AIRMET").map { SigmetType.Airmet }.or(word("SIGMET").map { SigmetType.Sigmet })
+            .skipSpace()
+    val metIdentifier = pair(char { it.isLetter() }, twoDigitNumber)
+    val metSigmeta = lift(
+        regionCode.skipSpace(),
+        metType.skipSpace(),
+        metIdentifier.skipSpace().skip(word("VALID")).skipSpace(),
+        pair(metTime.skip(word("/")), metTime).skipSpace(),
+        locationIndicator.skip(word("-")),
+        chars1("") { it != '\n' }.optional()
+    ) { region, t, i, tr, loc, ex ->
+        SigmetSigmeta(
+            region, t, i, tr, loc, ex
+        )
+    }
+
+    val metRegion = lift(
+        word("ENOR").skipSpace(),
+        word("POLARIS").or(word("...")).skipSpace(),
+        word("FIR"),
+    ) { _, _, _ ->
+    }
+
+    val lat = lift(
+        word("N").or(word("S")),
+        twoDigitNumber,
+        chars { it.isDigit() }) { dir, whole, decimal ->
+        (if (dir == "N") 1 else -1) * ("$whole.$decimal").toDouble()
+    }
+    val lon = lift(
+        word("E").or(word("W")),
+        threeDigitNumber,
+        chars { it.isDigit() }) { dir, whole, decimal ->
+        (if (dir == "E") 1 else -1) * ("$whole.$decimal").toDouble()
+    }
+    val coordinate = lift(lat.skipSpace(), lon) { a, b -> Position(a, b) }
+    val coordinateList = sepBy(
+        coordinate.skipSpace(), word("-").skipSpace()
+    )
+
+    val flAltitudeReference =
+        lift(word("FL"), number) { _, n -> AltitudeReference(AltitudeReferenceType.FlightLevel, n) }
+    val ftAltitudeReference =
+        lift(number, word("FT")) { n, _ -> AltitudeReference(AltitudeReferenceType.Feet, n) }
+    val numberAltitudeReference =
+        number.map { AltitudeReference(AltitudeReferenceType.Unknown, it) }
+    val altitudeReference = ftAltitudeReference.or(flAltitudeReference).or(numberAltitudeReference)
+    val alititudeRange = lift(altitudeReference.skip(word("/")), altitudeReference) { r1, r2 ->
+        Pair(r1, if (r2.typ == AltitudeReferenceType.Unknown) r2.copy(typ = r1.typ) else r2)
+    }
+
+
+    val messagePart = chars1("a word") { it.isLetter() }.skip(word(" ")).skipSpace()
+    val message = many(messagePart)
+
+    val metBody = lift(
+        metRegion.skipSpace(), message, coordinateList.skipSpace(), alititudeRange.optional()
+    ) { _, m, c, r ->
+        SigmetBody(
+            message = m,
+            coordinates = c,
+            altitude = r,
+        )
+    }
+
+
+    val met = pure(Unit).skipSpace().skip(word("ZCZC")).skip(word("\n")).bind {
+        lift(
+            metHeader.skip(word("\n")),
+            metSigmeta.skip(word("\n")),
+            metBody,
+        ) { header, meta, body ->
+            Sigmet(
+                header.issuingAuthority,
+                header.location,
+                header.dateTime,
+                meta.regionCode,
+                meta.type,
+                meta.identifier,
+                meta.timeRange,
+                meta.location,
+                meta.extra,
+                body.message,
+                body.coordinates,
+                body.altitude,
+            )
+        }
+    }.skip(
+        chars { it != '=' }
+    ).skip(char('=').optional())
+
+
+    met
+}
+
+val metsParser = many(
+    metParser.skipSpace()
+)
+
+fun parseSigmet(source: String): ParseResult<Sigmet> = metParser.parse(source)
+
+fun parseSigmets(source: String): List<Sigmet> = when (val result = metsParser.parse(source)) {
+    is ParseResult.Ok -> result.value
+    is ParseResult.Error -> listOf()
+}
