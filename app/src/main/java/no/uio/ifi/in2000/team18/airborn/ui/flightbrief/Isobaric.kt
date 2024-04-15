@@ -17,7 +17,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Composable
 fun IsobaricData(state: LoadingState<IsobaricData?>) =
-    LoadingCollapsible(state, header = "Isobaric data") { isobaric ->
+    LoadingCollapsible(state, header = "Winds Aloft") { isobaric ->
         // data from isobaric layers, includes height TODO: a table or chart would be nice
         Text(text = "${isobaric?.time}")
         Spacer(modifier = Modifier.height(16.dp))
@@ -25,10 +25,10 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("height", fontWeight = FontWeight.Bold)
-            Text("temp", fontWeight = FontWeight.Bold)
-            Text("speed", fontWeight = FontWeight.Bold)
-            Text("dir", fontWeight = FontWeight.Bold)
+            Text("Height", fontWeight = FontWeight.Bold)
+            Text("Temp", fontWeight = FontWeight.Bold)
+            Text("Speed", fontWeight = FontWeight.Bold)
+            Text("From", fontWeight = FontWeight.Bold)
         }
         isobaric?.data?.forEach {
             Log.d(
@@ -39,10 +39,10 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("%.0f m".format(it.height))
-                Text("%.1f C".format(it.temperature - 273.15))
-                Text("$it.windSpeed?.knots")
-                Text("$it.windFromDirection?.degrees")
+                it.height?.let { h -> Text(h.toStringAsFeet()) }
+                Text(it.temperature.toString())
+                Text(it.windSpeed.toString())
+                Text(it.windFromDirection.toString())
             }
         }
     }

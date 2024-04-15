@@ -3,7 +3,10 @@ package no.uio.ifi.in2000.team18.airborn.data.repository
 import android.util.Log
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.Distance
+import no.uio.ifi.in2000.team18.airborn.model.Pressure
 import no.uio.ifi.in2000.team18.airborn.model.Speed
+import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
@@ -42,22 +45,20 @@ class IsobaricRepository @Inject constructor(
 
         val layers = windsAloft.map { (key, value) ->
             val layer = IsobaricLayer(
-                pressure = key.toDouble(), // TODO: as pressure?
-                temperature = value[0], // TODO: as temperature?
+                pressure = Pressure(key.toDouble()),
+                temperature = Temperature(value[0]),
                 uWind = value[1],
                 vWind = value[2]
             )
-            // TODO: use direction-method, delete obsolete code
-            // layer.windFromDirection = calculateWindDirection(layer.uWind, layer.vWind)?.times(1.0)
             layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
             layer.windSpeed =
                 calculateWindSpeed(layer.uWind, layer.vWind)
-            layer.height = calculateHeight(layer) // TODO: use unit, fix comparison
+            layer.height = Distance(calculateHeight(layer))
             layer
         }.filter {
             val h = it.height
             val maxHeight = 15000
-            val result = if (h != null) (h <= maxHeight) else false
+            val result = if (h != null) (h.feet <= maxHeight) else false
             result
         }
         return IsobaricData(position, time, layers)
@@ -76,9 +77,9 @@ class IsobaricRepository @Inject constructor(
         layer: IsobaricLayer,
         refTemperature: Double = 288.15,
         pressureLevelZero: Double = 1013.25,
-    ) = layer.height ?: (refTemperature * (1 - (layer.pressure / pressureLevelZero).pow(
+    ) = refTemperature * (1 - (layer.pressure.toDouble() / pressureLevelZero).pow(
         PRESSURE_CALCULATION_EXPONENT
-    )) / TEMPERATURE_LAPSE_RATE)
+    )) / TEMPERATURE_LAPSE_RATE
 }
 
 fun GridDatatype.sampleAtPosition(position: Position, layer: Int, time: Int = 0): Float {

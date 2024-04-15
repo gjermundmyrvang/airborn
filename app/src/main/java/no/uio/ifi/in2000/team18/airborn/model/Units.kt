@@ -4,6 +4,7 @@ import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import kotlin.math.atan2
+import kotlin.math.round
 
 class CelsiusAdapter : TypeAdapter<Temperature>() {
     override fun write(writer: JsonWriter, value: Temperature) = writer.value(value.celsius).let {}
@@ -45,6 +46,7 @@ data class Pressure(val hpa: Double) {
     override fun toString(): String = "$hpa hPa"
     operator fun times(x: Number) = Pressure(hpa = hpa * x.toDouble())
     operator fun plus(x: Pressure) = Pressure(hpa + x.hpa)
+    fun toDouble(): Double = hpa
 }
 
 data class Humidity(val humidity: Double) {
@@ -52,19 +54,26 @@ data class Humidity(val humidity: Double) {
 }
 
 data class Speed(val mps: Double) {
-    override fun toString(): String = "$mps m/s"
+    override fun toString(): String = "%.0f kn".format(knots)
     val kmh get() = this.mps * 3.6
     val knots get() = this.mps * 1.9438452
     operator fun times(x: Number) = Speed(mps = mps * x.toDouble())
     operator fun plus(x: Speed) = Speed(mps + x.mps)
 }
 
-data class Temperature(val celsius: Double) {
-    override fun toString(): String = "$celsius \u2103"
+data class Temperature(val kelvin: Double) {
+    override fun toString(): String = "%.0f\u2103".format(celsius)
+
+    val celsius get() = this.kelvin - 273.15
 }
 
-data class Direction(val degrees: Double) {
-    override fun toString(): String = "$degrees degrees"
+data class Direction(var degrees: Double) {
+
+    init {
+        degrees = Math.floorMod(this.degrees.toInt(), 360).toDouble()
+    }
+
+    override fun toString(): String = "%.0f\u00B0".format(degrees)
 
     companion object {
         val EAST: Direction = 90.degrees
@@ -75,6 +84,7 @@ data class Direction(val degrees: Double) {
         fun fromWindUV(u: Double, v: Double) = atan2(-u, -v).radians
     }
 
+    // TODO: is this unnecessary? Or at least use new property after added init...
     override fun equals(other: Any?) =
         when (other) {
             is Direction ->
@@ -96,6 +106,7 @@ data class Distance(val meters: Double) {
     else if (meters < 1000) "${meters} m"
     else "${meters / 1000} km"
 
+    fun toStringAsFeet(): String = "${(round(feet / 10) * 10).toInt()} ft"
     val feet get() = meters * 3.2808399
     val nauticalMiles get() = meters * 0.000539956803
 
@@ -115,7 +126,7 @@ val Number.kmph get() = this * (1 / 3.6).mps
 val Number.knots get() = this * 0.51444424416.mps
 
 // Temperature
-val Number.celsius get() = Temperature(celsius = this.toDouble())
+val Number.celsius get() = Temperature(kelvin = this.toDouble() + 273.15)
 
 
 // Pressure
