@@ -2,16 +2,16 @@ package no.uio.ifi.in2000.team18.airborn.data.repository
 
 import android.util.Log
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
+import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
+import no.uio.ifi.in2000.team18.airborn.model.mps
 import ucar.nc2.dt.GridDatatype
 import java.time.LocalDateTime
 import javax.inject.Inject
-import kotlin.math.PI
-import kotlin.math.atan2
 import kotlin.math.pow
-import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 
@@ -42,35 +42,29 @@ class IsobaricRepository @Inject constructor(
 
         val layers = windsAloft.map { (key, value) ->
             val layer = IsobaricLayer(
-                pressure = key.toDouble(),
-                temperature = value[0],
+                pressure = key.toDouble(), // TODO: as pressure?
+                temperature = value[0], // TODO: as temperature?
                 uWind = value[1],
                 vWind = value[2]
             )
-            layer.windFromDirection = calculateWindDirection(layer.uWind, layer.vWind)?.times(1.0)
+            // TODO: use direction-method, delete obsolete code
+            // layer.windFromDirection = calculateWindDirection(layer.uWind, layer.vWind)?.times(1.0)
+            layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
             layer.windSpeed =
-                calculateWindSpeed(layer.uWind, layer.vWind) // TODO: use direction-method
-            layer.height = calculateHeight(layer)
+                calculateWindSpeed(layer.uWind, layer.vWind)
+            layer.height = calculateHeight(layer) // TODO: use unit, fix comparison
             layer
         }.filter {
             val h = it.height
-            val maxHeight = 5000 // only include data below this height
+            val maxHeight = 15000
             val result = if (h != null) (h <= maxHeight) else false
             result
         }
         return IsobaricData(position, time, layers)
     }
 
-    // TODO: replace these with direction-method elsewhere and delete obsolete stuff
-    private fun calculateWindDirection(uWind: Double, vWind: Double): Int? =
-        if ((uWind != 0.0) and (vWind != 0.0)) {
-            toDegrees(atan2(-uWind, -vWind))
-        } else null
-
-    private fun toDegrees(radians: Double) = Math.floorMod((radians * 180 / PI).roundToInt(), 360)
-
-    private fun calculateWindSpeed(uWind: Double, vWind: Double): Double =
-        sqrt(uWind.pow(2) + vWind.pow(2))
+    private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
+        (sqrt(uWind.pow(2) + vWind.pow(2))).mps
 
     /**
      * Calculate height of isobaric layer

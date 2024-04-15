@@ -41,8 +41,8 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
             ) {
                 Text("%.0f m".format(it.height))
                 Text("%.1f C".format(it.temperature - 273.15))
-                Text("%.0f m/s?".format(it.windSpeed))
-                Text("%.0f".format(it.windFromDirection))
+                Text("$it.windSpeed?.knots")
+                Text("$it.windFromDirection?.degrees")
             }
         }
     }
