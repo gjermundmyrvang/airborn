@@ -9,11 +9,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
 import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastRepository
-import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
-import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
-import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.TafmetarRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
@@ -34,7 +34,7 @@ class FlightBriefViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sigchartDataSource: SigchartDataSource,
     private val airportDataSource: AirportDataSource,
-    private val tafMetarDataSource: TafmetarDataSource,
+    private val tafmetarRepository: TafmetarRepository,
     private val isobaricRepository: IsobaricRepository,
     private val turbulenceDataSource: TurbulenceDataSource,
     private val locationForecastRepository: LocationForecastRepository,
@@ -101,7 +101,7 @@ class FlightBriefViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val airportMetarTaf = load { tafMetarDataSource.fetchTafMetar(airport.icao) }
+            val airportMetarTaf = load { tafmetarRepository.fetchTafMetar(airport.icao) }
             update { it.copy(metarTaf = airportMetarTaf) }
         }
 
