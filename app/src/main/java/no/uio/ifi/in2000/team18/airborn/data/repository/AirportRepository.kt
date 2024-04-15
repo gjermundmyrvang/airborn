@@ -20,9 +20,12 @@ class AirportRepository @Inject constructor(
     private val sigchartDataSource: SigchartDataSource,
     private val turbulenceDataSource: TurbulenceDataSource,
 ) {
+    // Airport logic
     suspend fun getByIcao(icao: Icao): Airport? = airportDataSource.getByIcao(icao)
     suspend fun search(query: String): List<Airport> = airportDataSource.search(query)
     suspend fun all(): List<Airport> = airportDataSource.all()
+
+    // TAF/METAR logic
     suspend fun fetchTafMetar(icao: Icao): MetarTaf {
         val tafList: List<Taf> =
             tafmetarDataSource.fetchTaf(icao).lines().filter { it.isNotEmpty() }.map { Taf(it) }
@@ -31,12 +34,14 @@ class AirportRepository @Inject constructor(
         return MetarTaf(metars = metarList, tafs = tafList)
     }
 
+    // Sigchart logic
     suspend fun getSigcharts(): Map<Area, List<Sigchart>> {
         val sigcharts = sigchartDataSource.fetchSigcharts()
         val sigMap = sigcharts.groupBy { it.params.area }
         return sigMap
     }
 
+    // Turbulence logic
     suspend fun createTurbulence(icao: Icao): TurbulenceMapAndCross? {
         val map = turbulenceDataSource.fetchTurbulenceMap(icao)
         val crossSection = turbulenceDataSource.fetchTurbulenceCrossSection(icao)
