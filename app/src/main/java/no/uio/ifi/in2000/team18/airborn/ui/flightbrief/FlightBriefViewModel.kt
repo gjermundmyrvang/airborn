@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.TafmetarRepository
@@ -33,7 +33,7 @@ import javax.inject.Inject
 class FlightBriefViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sigchartDataSource: SigchartDataSource,
-    private val airportDataSource: AirportDataSource,
+    private val airportRepository: AirportRepository,
     private val tafmetarRepository: TafmetarRepository,
     private val isobaricRepository: IsobaricRepository,
     private val turbulenceDataSource: TurbulenceDataSource,
@@ -67,8 +67,8 @@ class FlightBriefViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val departure = airportDataSource.getByIcao(departureIcao)!!
-            val arrival = arrivalIcao?.let { airportDataSource.getByIcao(it)!! }
+            val departure = airportRepository.getByIcao(departureIcao)!!
+            val arrival = arrivalIcao?.let { airportRepository.getByIcao(it)!! }
             initAirport(departure) {
                 _state.update { state -> state.copy(departure = it(state.departure)) }
             }
