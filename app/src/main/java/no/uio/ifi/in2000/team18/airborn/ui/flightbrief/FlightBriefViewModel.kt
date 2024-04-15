@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.data.datasource.WebcamDataSource
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastRepository
@@ -38,8 +37,6 @@ class FlightBriefViewModel @Inject constructor(
     private val departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!)
     private val arrivalIcao =
         savedStateHandle.get<String>("arrivalIcao")?.let { if (it == "null") null else Icao(it) }
-
-    private val webcamDataSource = WebcamDataSource()
 
     data class AirportUiState(
         val airport: LoadingState<Airport> = Loading,
@@ -110,7 +107,7 @@ class FlightBriefViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val webcams = load { webcamDataSource.fetchImage(airport) }
+            val webcams = load { airportRepository.fetchWebcamImages(airport) }
             update { it.copy(webcams = webcams) }
         }
     }
