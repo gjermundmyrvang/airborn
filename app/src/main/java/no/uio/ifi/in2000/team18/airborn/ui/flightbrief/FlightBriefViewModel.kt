@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
@@ -31,7 +30,6 @@ import javax.inject.Inject
 @HiltViewModel
 class FlightBriefViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val sigchartDataSource: SigchartDataSource,
     private val airportRepository: AirportRepository,
     private val isobaricRepository: IsobaricRepository,
     private val turbulenceDataSource: TurbulenceDataSource,
@@ -76,7 +74,7 @@ class FlightBriefViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val sigcharts = load { sigchartDataSource.getSigcharts() }
+            val sigcharts = load { airportRepository.getSigcharts() }
             _state.update { it.copy(sigcharts = sigcharts) }
         }
     }
