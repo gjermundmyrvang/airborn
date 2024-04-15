@@ -83,16 +83,10 @@ data class Direction(var degrees: Double) {
 
         fun fromWindUV(u: Double, v: Double) = atan2(-u, -v).radians
     }
-
-    // TODO: is this unnecessary? Or at least use new property after added init...
+    
     override fun equals(other: Any?) =
         when (other) {
-            is Direction ->
-                Math.floorMod(this.degrees.toInt(), 360) == Math.floorMod(
-                    other.degrees.toInt(),
-                    360
-                )
-
+            is Direction -> this.degrees.toInt() == other.degrees.toInt()
             else -> false
         }
 }
