@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,17 +26,23 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("height", fontWeight = FontWeight.Bold)
-            Text("temperature", fontWeight = FontWeight.Bold)
-            Text("pressure", fontWeight = FontWeight.Bold)
+            Text("temp", fontWeight = FontWeight.Bold)
+            Text("speed", fontWeight = FontWeight.Bold)
+            Text("dir", fontWeight = FontWeight.Bold)
         }
         isobaric?.data?.forEach {
+            Log.d(
+                "windsAloft",
+                "height: ${it.height}, uWind: ${it.uWind}, vWind: ${it.vWind}"
+            )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("%.0f m".format(it.height))
-                Text("%.1f c".format(it.temperature - 273.15))
-                Text("%.0f hPa".format(it.pressure))
+                Text("%.1f C".format(it.temperature - 273.15))
+                Text("%.0f m/s?".format(it.windSpeed))
+                Text("%.0f".format(it.windFromDirection))
             }
         }
     }
