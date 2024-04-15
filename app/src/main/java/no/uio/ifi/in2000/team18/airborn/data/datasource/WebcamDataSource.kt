@@ -11,8 +11,9 @@ import io.ktor.serialization.gson.gson
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.WebcamResponse
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import javax.inject.Inject
 
-class WebcamDataSource {
+class WebcamDataSource @Inject constructor() {
     private var radius: Int = 50
     private val apiKey = "titERHFlGOLQGIILEUnufyWHQYcAlbDO"
     val client: HttpClient = HttpClient(CIO) {

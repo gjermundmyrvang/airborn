@@ -21,9 +21,8 @@ class AirportRepository @Inject constructor(
     private val tafmetarDataSource: TafmetarDataSource,
     private val sigchartDataSource: SigchartDataSource,
     private val turbulenceDataSource: TurbulenceDataSource,
+    private val webcamDataSource: WebcamDataSource,
 ) {
-    private val webcamDataSource: WebcamDataSource = WebcamDataSource()
-
     // Airport logic
     suspend fun getByIcao(icao: Icao): Airport? = airportDataSource.getByIcao(icao)
     suspend fun search(query: String): List<Airport> = airportDataSource.search(query)
