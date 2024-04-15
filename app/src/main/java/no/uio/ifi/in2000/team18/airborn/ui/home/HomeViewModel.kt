@@ -7,13 +7,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val airportDataSource: AirportDataSource,
+    private val airportRepository: AirportRepository,
 ) : ViewModel() {
     data class UiState(
         val departureAirportInput: String = "",
@@ -28,7 +28,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    airports = airportDataSource.all()
+                    airports = airportRepository.all()
                 )
             }
         }
@@ -37,7 +37,7 @@ class HomeViewModel @Inject constructor(
     fun filterDepartureAirports(input: String) {
         _state.update { it.copy(departureAirportInput = input) }
         viewModelScope.launch {
-            val result = airportDataSource.search(input)
+            val result = airportRepository.search(input)
             _state.update { it.copy(airports = result) }
         }
     }
@@ -45,7 +45,7 @@ class HomeViewModel @Inject constructor(
     fun filterArrivalAirports(input: String) {
         _state.update { it.copy(arrivalAirportInput = input) }
         viewModelScope.launch {
-            val result = airportDataSource.search(input)
+            val result = airportRepository.search(input)
             _state.update { it.copy(airports = result) }
         }
     }
