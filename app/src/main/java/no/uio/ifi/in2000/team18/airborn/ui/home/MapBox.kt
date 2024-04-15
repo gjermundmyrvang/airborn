@@ -82,8 +82,8 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
                         selectedAirport = it
                     }
                 }
+                // TODO give Polygon composable real sigmet/airmet coordinates
                 Polygon(points = osloPolygon)
-                Polygon(points = norskekystenPolygon)
             }
             if (showInfoBox) {
                 when (val airport = selectedAirport) {
@@ -96,29 +96,9 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
         }
     }
 
-val osloPolygon = listOf(
-    listOf(
-        Point.fromLngLat(10.580, 59.890),
-        Point.fromLngLat(11.360, 59.890),
-        Point.fromLngLat(11.360, 60.150),
-        Point.fromLngLat(10.580, 60.150),
-        Point.fromLngLat(10.580, 59.890)
-    )
-)
-val norskekystenPolygon = listOf(
-    listOf(
-        Point.fromLngLat(4.842, 58.931),
-        Point.fromLngLat(5.400, 60.216),
-        Point.fromLngLat(9.840, 60.990),
-        Point.fromLngLat(11.974, 58.631),
-        Point.fromLngLat(6.470, 56.775),
-        Point.fromLngLat(4.842, 58.931)
-    )
-)
-
 @OptIn(MapboxExperimental::class)
 @Composable
-fun Polygon(points: List<List<Point>>) {
+fun Polygon(points: List<List<Point>>) { // TODO implement onclick functionality and display sigmet/airmet information
     PolygonAnnotation(
         points = points,
         fillOutlineColorInt = Color.Black.toArgb(),
