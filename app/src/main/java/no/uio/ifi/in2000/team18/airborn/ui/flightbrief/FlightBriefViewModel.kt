@@ -41,11 +41,11 @@ class FlightBriefViewModel @Inject constructor(
     private val turbulenceDataSource: TurbulenceDataSource,
     private val locationForecastRepository: LocationForecastRepository,
 ) : ViewModel() {
-    val departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!)
-    val arrivalIcao =
+    private val departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!)
+    private val arrivalIcao =
         savedStateHandle.get<String>("arrivalIcao")?.let { if (it == "null") null else Icao(it) }
 
-    val webcamDataSource = WebcamDataSource()
+    private val webcamDataSource = WebcamDataSource()
 
     data class AirportUiState(
         val airport: LoadingState<Airport> = Loading,
@@ -121,7 +121,7 @@ class FlightBriefViewModel @Inject constructor(
         }
     }
 
-    suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+    private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
         return try {
             f().toSuccess()
         } catch (e: UnresolvedAddressException) {
