@@ -5,7 +5,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.TurbulenceMapAndCross
 import javax.inject.Inject
 
 /**
@@ -25,16 +24,6 @@ class TurbulenceDataSource @Inject constructor(
         val url = "weatherapi/turbulence/2.0/available.json?type=map&icao=$icao"
         val res = client.get(url)
         return if (res.status.value >= 400) null else res.body()
-    }
-
-    suspend fun createTurbulence(icao: Icao): TurbulenceMapAndCross? {
-        val map = fetchTurbulenceMap(icao)
-        val crossSection = fetchTurbulenceCrossSection(icao)
-        if (map == null || crossSection == null) return null
-        return TurbulenceMapAndCross(
-            map,
-            crossSection,
-        )
     }
 }
 
