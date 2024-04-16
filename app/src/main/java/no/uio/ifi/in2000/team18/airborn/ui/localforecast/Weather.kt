@@ -163,7 +163,8 @@ fun WeatherDayCard(
             )
             Image(
                 modifier = Modifier.size(50.dp), painter = painterResource(
-                    id = icon ?: R.drawable.image_not_availeable
+                    id = icon ?: hourNow.nextOneHour?.icon ?: hourNow.nextSixHour?.icon
+                    ?: hourNow.nextTwelweHour?.icon ?: R.drawable.image_not_availeable
                 ), contentDescription = "Weathericon"
             )
             Text(
@@ -251,7 +252,12 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
             Row {
                 Column {
                     Text(
-                        text = if (today) "Now" else weatherDay.date.dayNumberMonth,
+                        text = if (today) "Today" else weatherDay.date.dayNumberMonth,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Text(
+                        text = weatherHour.time,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
