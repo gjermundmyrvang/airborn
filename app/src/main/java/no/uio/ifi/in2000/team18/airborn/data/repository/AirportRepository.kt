@@ -4,8 +4,10 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.WebcamDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
+import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
@@ -19,6 +21,7 @@ class AirportRepository @Inject constructor(
     private val tafmetarDataSource: TafmetarDataSource,
     private val sigchartDataSource: SigchartDataSource,
     private val turbulenceDataSource: TurbulenceDataSource,
+    private val webcamDataSource: WebcamDataSource,
 ) {
     // Airport logic
     suspend fun getByIcao(icao: Icao): Airport? = airportDataSource.getByIcao(icao)
@@ -51,4 +54,7 @@ class AirportRepository @Inject constructor(
             crossSection,
         )
     }
+
+    suspend fun fetchWebcamImages(airport: Airport): List<Webcam> =
+        webcamDataSource.fetchImage(airport)
 }

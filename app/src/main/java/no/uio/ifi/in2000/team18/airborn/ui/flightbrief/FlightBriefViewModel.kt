@@ -14,6 +14,7 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastReposito
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
+import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
@@ -33,8 +34,8 @@ class FlightBriefViewModel @Inject constructor(
     private val isobaricRepository: IsobaricRepository,
     private val locationForecastRepository: LocationForecastRepository,
 ) : ViewModel() {
-    val departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!)
-    val arrivalIcao =
+    private val departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!)
+    private val arrivalIcao =
         savedStateHandle.get<String>("arrivalIcao")?.let { if (it == "null") null else Icao(it) }
 
     data class AirportUiState(
@@ -43,6 +44,7 @@ class FlightBriefViewModel @Inject constructor(
         val isobaric: LoadingState<IsobaricData> = Loading,
         val turbulence: LoadingState<TurbulenceMapAndCross?> = Loading,
         val weather: LoadingState<List<WeatherDay>> = Loading,
+        val webcams: LoadingState<List<Webcam>> = Loading,
     )
 
     data class UiState(
@@ -103,9 +105,14 @@ class FlightBriefViewModel @Inject constructor(
             val airportTurbulence = load { airportRepository.createTurbulence(airport.icao) }
             update { it.copy(turbulence = airportTurbulence) }
         }
+
+        viewModelScope.launch {
+            val webcams = load { airportRepository.fetchWebcamImages(airport) }
+            update { it.copy(webcams = webcams) }
+        }
     }
 
-    suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+    private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
         return try {
             f().toSuccess()
         } catch (e: UnresolvedAddressException) {
