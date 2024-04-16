@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team18.airborn.ui.localforecast
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -71,7 +73,9 @@ fun WeatherSection(state: LoadingState<List<WeatherDay>>) =
                 today = weather[selectedDay] == weather.first(),
                 weatherHour = weather[selectedDay].weather[selectedHour]
             )
-            WeatherTodaySection(weatherDay = weather[selectedDay]) { hour ->
+            WeatherTodaySection(
+                weatherDay = weather[selectedDay], weather[selectedDay].weather[selectedHour]
+            ) { hour ->
                 selectedHour = hour
             }
             WeatherWeekSection(weatherDays = weather) { day ->
@@ -176,7 +180,9 @@ fun WeatherDayCard(
 }
 
 @Composable
-fun WeatherTodaySection(weatherDay: WeatherDay, onHourSelected: (Int) -> Unit) {
+fun WeatherTodaySection(
+    weatherDay: WeatherDay, selectedHour: WeatherHour, onHourSelected: (Int) -> Unit
+) {
     val weatherHours = weatherDay.weather
     Box {
         LazyRow(
@@ -188,7 +194,7 @@ fun WeatherTodaySection(weatherDay: WeatherDay, onHourSelected: (Int) -> Unit) {
                 Spacer(modifier = Modifier.width(10.dp))
             }
             itemsIndexed(weatherHours) { i, hour ->
-                WeatherHourColumn(weatherHour = hour) {
+                WeatherHourColumn(weatherHour = hour, selectedHour = selectedHour) {
                     onHourSelected(i)
                 }
             }
@@ -200,11 +206,13 @@ fun WeatherTodaySection(weatherDay: WeatherDay, onHourSelected: (Int) -> Unit) {
 }
 
 @Composable
-fun WeatherHourColumn(weatherHour: WeatherHour, onClick: () -> Unit) {
+fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onClick: () -> Unit) {
     val precipitationAmount = weatherHour.nextOneHour?.chanceOfRain
+    val isSelected = weatherHour == selectedHour
     Column(
         modifier = Modifier
             .padding(5.dp)
+            .width(60.dp)
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -234,6 +242,15 @@ fun WeatherHourColumn(weatherHour: WeatherHour, onClick: () -> Unit) {
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
         )
+        Box(
+            modifier = Modifier
+                .height(5.dp)
+                .fillMaxWidth()
+                .background(
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    shape = RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp)
+                )
+        )
     }
 }
 
@@ -257,9 +274,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                         fontSize = 18.sp
                     )
                     Text(
-                        text = weatherHour.time,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        text = weatherHour.time, fontWeight = FontWeight.Bold, fontSize = 18.sp
                     )
                     Text(
                         text = "${weatherHour.weatherDetails.airTemperature}",
