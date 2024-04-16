@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team18.airborn.ui.localforecast
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -60,16 +60,19 @@ import kotlin.random.Random
 @Composable
 fun WeatherSection(state: LoadingState<List<WeatherDay>>) =
     LoadingCollapsible(state, header = "Weather", padding = 0.dp) { weather ->
-        var selectedDay by rememberSaveable {
-            mutableIntStateOf(0)
-        }
+        var selectedDay by rememberSaveable { mutableIntStateOf(0) }
+        var selectedHour by rememberSaveable { mutableIntStateOf(0) }
         Column(
             modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             WeatherNowSection(
-                weatherDay = weather[selectedDay], today = weather[selectedDay] == weather.first()
+                weatherDay = weather[selectedDay],
+                today = weather[selectedDay] == weather.first(),
+                weatherHour = weather[selectedDay].weather[selectedHour]
             )
-            WeatherTodaySection(weatherDay = weather[selectedDay])
+            WeatherTodaySection(weatherDay = weather[selectedDay]) { hour ->
+                selectedHour = hour
+            }
             WeatherWeekSection(weatherDays = weather) { day ->
                 selectedDay = day
             }
@@ -170,7 +173,7 @@ fun WeatherDayCard(
 }
 
 @Composable
-fun WeatherTodaySection(weatherDay: WeatherDay) {
+fun WeatherTodaySection(weatherDay: WeatherDay, onHourSelected: (Int) -> Unit) {
     val weatherHours = weatherDay.weather
     Box {
         LazyRow(
@@ -181,8 +184,10 @@ fun WeatherTodaySection(weatherDay: WeatherDay) {
             item {
                 Spacer(modifier = Modifier.width(10.dp))
             }
-            items(weatherHours) { hour ->
-                WeatherHourColumn(weatherHour = hour)
+            itemsIndexed(weatherHours) { i, hour ->
+                WeatherHourColumn(weatherHour = hour) {
+                    onHourSelected(i)
+                }
             }
             item {
                 Spacer(modifier = Modifier.width(10.dp))
@@ -192,10 +197,12 @@ fun WeatherTodaySection(weatherDay: WeatherDay) {
 }
 
 @Composable
-fun WeatherHourColumn(weatherHour: WeatherHour) {
+fun WeatherHourColumn(weatherHour: WeatherHour, onClick: () -> Unit) {
     val precipitationAmount = weatherHour.nextOneHour?.chanceOfRain
     Column(
-        modifier = Modifier.padding(5.dp),
+        modifier = Modifier
+            .padding(5.dp)
+            .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -228,11 +235,10 @@ fun WeatherHourColumn(weatherHour: WeatherHour) {
 }
 
 @Composable
-fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean) {
-    val weatherHour = weatherDay.weather.first()
-    val nextHours = if (today) weatherHour.nextOneHour else weatherHour.nextTwelweHour
-    val icon =
-        if (today) weatherHour.nextOneHour?.icon else weatherHour.nextTwelweHour?.icon // if today we want to show current weather, but for the rest of the week we want a overview
+fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: WeatherHour) {
+    val nextHours = weatherHour.nextOneHour
+    val icon = weatherHour.nextOneHour?.icon ?: weatherHour.nextSixHour?.icon
+    ?: weatherHour.nextTwelweHour?.icon
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -457,5 +463,5 @@ fun TestWeatherNowSection() {
             hour, hour, hour
         )
     )
-    WeatherNowSection(weatherDay = day, true)
+    WeatherNowSection(weatherDay = day, true, hour)
 }
