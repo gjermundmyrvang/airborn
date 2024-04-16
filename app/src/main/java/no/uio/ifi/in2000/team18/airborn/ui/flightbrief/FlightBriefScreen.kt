@@ -76,21 +76,19 @@ fun FlightBriefScreenContent(state: UiState) = Column {
 }
 
 @Composable
-fun AirportBriefTab(airport: AirportUiState) =
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        val sections: List<@Composable () -> Unit> = listOf(
-            // { AirportBriefHeader(airportBrief.airport) },
-            { MetarTaf(airport.metarTaf) },
-            { IsobaricData(airport.isobaric) },
-            { Turbulence(airport.turbulence) },
-            { WebcamSection(airport.webcams) },
-            { WeatherSection(airport.weather) },
-
-            )
-        items(sections) { section ->
-            section()
-        }
+fun AirportBriefTab(airport: AirportUiState) = LazyColumn(modifier = Modifier.fillMaxSize()) {
+    val sections: List<@Composable () -> Unit> = listOf(
+        // { AirportBriefHeader(airportBrief.airport) },
+        { MetarTaf(airport.metarTaf) },
+        { IsobaricData(airport.isobaric) },
+        { Turbulence(airport.turbulence) },
+        { WebcamSection(airport.webcams) },
+        { WeatherSection(airport.weather) },
+    )
+    items(sections) { section ->
+        section()
     }
+}
 
 @Composable
 fun AirportBriefHeader(airport: Airport) = Column {
