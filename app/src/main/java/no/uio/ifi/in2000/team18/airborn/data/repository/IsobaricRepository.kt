@@ -2,13 +2,20 @@ package no.uio.ifi.in2000.team18.airborn.data.repository
 
 import android.util.Log
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
+import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.Distance
+import no.uio.ifi.in2000.team18.airborn.model.Pressure
+import no.uio.ifi.in2000.team18.airborn.model.Speed
+import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
+import no.uio.ifi.in2000.team18.airborn.model.mps
 import ucar.nc2.dt.GridDatatype
 import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 const val TEMPERATURE_LAPSE_RATE: Double = 0.0065 // in (K/m)
@@ -19,7 +26,7 @@ class IsobaricRepository @Inject constructor(
 ) {
     suspend fun getIsobaricData(position: Position, time: LocalDateTime): IsobaricData {
         val gribFiles = gribDataSource.availableGribFiles()
-        val pressureTemperaturePairs = gribDataSource.useGribFile(gribFiles.last()) { dataset ->
+        val windsAloft = gribDataSource.useGribFile(gribFiles.last()) { dataset ->
             val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
             val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
             val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
@@ -27,21 +34,38 @@ class IsobaricRepository @Inject constructor(
             Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
 
             temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
-                Pair((named.name.trim().toInt() / 100), temperature.sampleAtPosition(position, i))
-            }
+                (named.name.trim().toInt() / 100) to listOf(
+                    temperature.sampleAtPosition(position, i).toDouble(),
+                    windU.sampleAtPosition(position, i).toDouble(),
+                    windV.sampleAtPosition(position, i).toDouble(),
+                )
+            }.toMap()
         }
 
-        val data: List<IsobaricLayer> = pressureTemperaturePairs.map { pair ->
+
+        val layers = windsAloft.map { (key, value) ->
             val layer = IsobaricLayer(
-                pressure = pair.first.toDouble(),
-                temperature = pair.second.toDouble(),
-                height = null // TODO: better refTemperature and pressureLevelZero
+                pressure = Pressure(key.toDouble()),
+                temperature = Temperature(value[0] - 273.15),
+                uWind = value[1],
+                vWind = value[2]
             )
-            layer.height = calculateHeight(layer)
+            layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
+            layer.windSpeed =
+                calculateWindSpeed(layer.uWind, layer.vWind)
+            layer.height = Distance(calculateHeight(layer))
             layer
+        }.filter {
+            val h = it.height
+            val maxHeight = 15000
+            val result = if (h != null) (h.feet <= maxHeight) else false
+            result
         }
-        return IsobaricData(position, time, data)
+        return IsobaricData(position, time, layers)
     }
+
+    private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
+        (sqrt(uWind.pow(2) + vWind.pow(2))).mps
 
     /**
      * Calculate height of isobaric layer
@@ -53,9 +77,9 @@ class IsobaricRepository @Inject constructor(
         layer: IsobaricLayer,
         refTemperature: Double = 288.15,
         pressureLevelZero: Double = 1013.25,
-    ) = layer.height ?: (refTemperature * (1 - (layer.pressure / pressureLevelZero).pow(
+    ) = refTemperature * (1 - (layer.pressure.toDouble() / pressureLevelZero).pow(
         PRESSURE_CALCULATION_EXPONENT
-    )) / TEMPERATURE_LAPSE_RATE)
+    )) / TEMPERATURE_LAPSE_RATE
 }
 
 fun GridDatatype.sampleAtPosition(position: Position, layer: Int, time: Int = 0): Float {

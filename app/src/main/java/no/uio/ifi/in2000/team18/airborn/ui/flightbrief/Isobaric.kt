@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +17,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Composable
 fun IsobaricData(state: LoadingState<IsobaricData?>) =
-    LoadingCollapsible(state, header = "Isobaric data") { isobaric ->
+    LoadingCollapsible(state, header = "Winds Aloft") { isobaric ->
         // data from isobaric layers, includes height TODO: a table or chart would be nice
         Text(text = "${isobaric?.time}")
         Spacer(modifier = Modifier.height(16.dp))
@@ -24,18 +25,24 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("height", fontWeight = FontWeight.Bold)
-            Text("temperature", fontWeight = FontWeight.Bold)
-            Text("pressure", fontWeight = FontWeight.Bold)
+            Text("Height", fontWeight = FontWeight.Bold)
+            Text("Temp", fontWeight = FontWeight.Bold)
+            Text("Speed", fontWeight = FontWeight.Bold)
+            Text("From", fontWeight = FontWeight.Bold)
         }
         isobaric?.data?.forEach {
+            Log.d(
+                "windsAloft",
+                "height: ${it.height}, uWind: ${it.uWind}, vWind: ${it.vWind}"
+            )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("%.0f m".format(it.height))
-                Text("%.1f c".format(it.temperature - 273.15))
-                Text("%.0f hPa".format(it.pressure))
+                it.height?.let { h -> Text(h.toStringAsFeet()) }
+                Text(it.temperature.toString())
+                Text(it.windSpeed.toString())
+                Text(it.windFromDirection.toString())
             }
         }
     }
