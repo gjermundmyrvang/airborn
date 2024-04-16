@@ -46,7 +46,7 @@ class IsobaricRepository @Inject constructor(
         val layers = windsAloft.map { (key, value) ->
             val layer = IsobaricLayer(
                 pressure = Pressure(key.toDouble()),
-                temperature = Temperature(value[0]),
+                temperature = Temperature(value[0] - 273.15),
                 uWind = value[1],
                 vWind = value[2]
             )

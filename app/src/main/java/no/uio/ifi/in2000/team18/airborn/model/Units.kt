@@ -61,10 +61,10 @@ data class Speed(val mps: Double) {
     operator fun plus(x: Speed) = Speed(mps + x.mps)
 }
 
-data class Temperature(val kelvin: Double) {
+data class Temperature(val celsius: Double) {
     override fun toString(): String = "%.0f\u2103".format(celsius)
 
-    val celsius get() = this.kelvin - 273.15
+    val kelvin get() = this.celsius + 273.15
 }
 
 data class Direction(var degrees: Double) {
@@ -83,7 +83,7 @@ data class Direction(var degrees: Double) {
 
         fun fromWindUV(u: Double, v: Double) = atan2(-u, -v).radians
     }
-    
+
     override fun equals(other: Any?) =
         when (other) {
             is Direction -> this.degrees.toInt() == other.degrees.toInt()
@@ -120,7 +120,7 @@ val Number.kmph get() = this * (1 / 3.6).mps
 val Number.knots get() = this * 0.51444424416.mps
 
 // Temperature
-val Number.celsius get() = Temperature(kelvin = this.toDouble() + 273.15)
+val Number.kelvin get() = Temperature(celsius = this.toDouble() - 273.15)
 
 
 // Pressure
