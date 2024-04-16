@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefViewModel.AirportUiState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefViewModel.UiState
-import no.uio.ifi.in2000.team18.airborn.ui.localforecast.Weathersection
+import no.uio.ifi.in2000.team18.airborn.ui.localforecast.WeatherSection
 import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 
 @Preview(showSystemUi = true)
@@ -83,9 +83,10 @@ fun AirportBriefTab(airport: AirportUiState) =
             { MetarTaf(airport.metarTaf) },
             { IsobaricData(airport.isobaric) },
             { Turbulence(airport.turbulence) },
-            { Weathersection(airport.weather) },
-            { WebcamSection(airport.webcams) }
-        )
+            { WebcamSection(airport.webcams) },
+            { WeatherSection(airport.weather) },
+
+            )
         items(sections) { section ->
             section()
         }
