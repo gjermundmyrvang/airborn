@@ -1,16 +1,95 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
+import android.util.Log
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
+import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
+import no.uio.ifi.in2000.team18.airborn.model.Pressure
+import no.uio.ifi.in2000.team18.airborn.model.Speed
+import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
+import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
+import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
+import no.uio.ifi.in2000.team18.airborn.model.mps
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import ucar.nc2.dt.GridDatatype
+import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.math.pow
+import kotlin.math.sqrt
 
-class LocationForecastRepository @Inject constructor(private val locationForecastDataSource: LocationForecastDataSource) {
+const val TEMPERATURE_LAPSE_RATE: Double = 0.0065 // in (K/m)
+const val PRESSURE_CALCULATION_EXPONENT: Double = 1 / 5.25579
+
+
+class WeatherRepository @Inject constructor(
+    private val locationForecastDataSource: LocationForecastDataSource,
+    private val gribDataSource: GribDataSource,
+) {
+    suspend fun getIsobaricData(position: Position, time: LocalDateTime): IsobaricData {
+        val gribFiles = gribDataSource.availableGribFiles()
+        val windsAloft = gribDataSource.useGribFile(gribFiles.last()) { dataset ->
+            val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
+            val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
+            val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
+
+            Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
+
+            temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
+                (named.name.trim().toInt() / 100) to listOf(
+                    temperature.sampleAtPosition(position, i).toDouble(),
+                    windU.sampleAtPosition(position, i).toDouble(),
+                    windV.sampleAtPosition(position, i).toDouble(),
+                )
+            }.toMap()
+        }
+
+
+        val layers = windsAloft.map { (key, value) ->
+            val layer = IsobaricLayer(
+                pressure = Pressure(key.toDouble()),
+                temperature = Temperature(value[0] - 273.15),
+                uWind = value[1],
+                vWind = value[2]
+            )
+            layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
+            layer.windSpeed =
+                calculateWindSpeed(layer.uWind, layer.vWind)
+            layer.height = Distance(calculateHeight(layer))
+            layer
+        }.filter {
+            val h = it.height
+            val maxHeight = 15000
+            val result = if (h != null) (h.feet <= maxHeight) else false
+            result
+        }
+        return IsobaricData(position, time, layers)
+    }
+
+    private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
+        (sqrt(uWind.pow(2) + vWind.pow(2))).mps
+
+    /**
+     * Calculate height of isobaric layer
+     *
+     * @param refTemperature todo: what is this
+     * @param pressureLevelZero the pressure at sea level
+     */
+    fun calculateHeight(
+        layer: IsobaricLayer,
+        refTemperature: Double = 288.15,
+        pressureLevelZero: Double = 1013.25,
+    ) = refTemperature * (1 - (layer.pressure.toDouble() / pressureLevelZero).pow(
+        PRESSURE_CALCULATION_EXPONENT
+    )) / TEMPERATURE_LAPSE_RATE
+
     private val english = mapOf(
         "clearsky" to "Clear sky",
         "fair" to "Fair",
@@ -54,97 +133,6 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
         "heavysnowandthunder" to "Heavy snow and thunder",
         "fog" to "Fog",
     )
-
-    /*private val bokmål = mapOf(
-        "clearsky" to "Klarvær",
-        "fair" to "Lettskyet",
-        "partlycloudy" to "Delvis skyet",
-        "cloudy" to "Skyet",
-        "lightrainshowers" to "Lette regnbyger",
-        "rainshowers" to "Regnbyger",
-        "heavyrainshowers" to "Kraftige regnbyger",
-        "lightrainshowersandthunder" to "Lette regnbyger og torden",
-        "rainshowersandthunder" to "Regnbyger og torden",
-        "heavyrainshowersandthunder" to "Kraftige regnbyger og torden",
-        "lightsleetshowers" to "Lette sluddbyger",
-        "sleetshowers" to "Sluddbyger",
-        "heavysleetshowers" to "Kraftige sluddbyger",
-        "lightssleetshowersandthunder " to "Lette sluddbyger og torden",
-        "sleetshowersandthunder" to "Sluddbyger og torden",
-        "heavysleetshowersandthunder" to "Kraftige sluddbyger og torden",
-        "lightsnowshowers" to "Lette snøbyger",
-        "snowshowers" to "Snøbyger",
-        "heavysnowshowers" to "Kraftige snøbyger",
-        "lightssnowshowersandthunder" to "Lette snøbyger og torden",
-        "snowshowersandthunder" to "Snøbyger og torden",
-        "heavysnowshowersandthunder" to "Kraftige snøbyger og torden",
-        "lightrain" to "Lett regn",
-        "rain" to "Regn",
-        "heavyrain" to "Kraftig regn",
-        "lightrainandthunder" to "Lett regn og torden",
-        "rainandthunder" to "Regn og torden",
-        "heavyrainandthunder" to "Kraftig regn og torden",
-        "lightsleet" to "Lett sludd",
-        "sleet" to "Sludd",
-        "heavysleet" to "Kraftig sludd",
-        "lightsleetandthunder" to "Lett sludd og torden",
-        "sleetandthunder" to "Sludd og torden",
-        "heavysleetandthunder" to "Kraftig sludd og torden",
-        "lightsnow" to "Lett snø",
-        "snow" to "Snø",
-        "heavysnow" to "Kraftig snø",
-        "lightsnowandthunder" to "Lett snø og torden",
-        "snowandthunder" to "Snø og torden",
-        "heavysnowandthunder" to "Kraftig snø og torden",
-        "fog" to "Tåke",
-    )
-     */
-
-    /*
-    private val nynorsk = mapOf(
-        "clearsky" to "Klårvêr",
-        "fair" to "Lettskya",
-        "partlycloudy" to "Delvis skya",
-        "cloudy" to "Skya",
-        "lightrainshowers" to "Lette regnbyer",
-        "rainshowers" to "Regnbyer",
-        "heavyrainshowers" to "Kraftige regnbyer",
-        "lightrainshowersandthunder" to "Lette regnbyer og torevêr",
-        "rainshowersandthunder" to "Regnbyer og torevêr",
-        "heavyrainshowersandthunder" to "Kraftige regnbyer og torevêr",
-        "lightsleetshowers" to "Lette sluddbyer",
-        "sleetshowers" to "Sluddbyer",
-        "heavysleetshowers" to "Kraftige sluddbyer",
-        "lightssleetshowersandthunder " to "Lette sluddbyer og torevêr",
-        "sleetshowersandthunder" to "Sluddbyer og torevêr",
-        "heavysleetshowersandthunder" to "Kraftige sluddbyer og torevêr ",
-        "lightsnowshowers" to "Lette snøbyer",
-        "snowshowers" to "Snøbyer",
-        "heavysnowshowers" to "Kraftige snøbyer",
-        "lightssnowshowersandthunder" to "Lette snøbyer og torevêr",
-        "snowshowersandthunder" to "Snøbyer og torevêr",
-        "heavysnowshowersandthunder" to "Kraftige snøbyer og torevêr",
-        "lightrain" to "Lett regn",
-        "rain" to "Regn",
-        "heavyrain" to "Kraftig regn",
-        "lightrainandthunder" to "Lett regn og torevêr",
-        "rainandthunder" to "Regn og torevêr",
-        "heavyrainandthunder" to "Kraftig regn og torevêr",
-        "lightsleet" to "Lett sludd",
-        "sleet" to "Sludd",
-        "heavysleet" to "Kraftig sludd",
-        "lightsleetandthunder" to "Lett sludd og torevêr",
-        "sleetandthunder" to "Sludd og torevêr",
-        "heavysleetandthunder" to "Kraftig sludd og torevêr",
-        "lightsnow" to "Lett snø",
-        "snow" to "Snø",
-        "heavysnow" to "Kraftig snø",
-        "lightsnowandthunder" to "Lett snø og torevêr",
-        "snowandthunder" to "Snø og torevêr",
-        "heavysnowandthunder" to "Kraftig snø og torevêr",
-        "fog" to "Skodde",
-    )
-     */
 
     suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
         val weatherData = locationForecastDataSource.fetchForecast(airport).properties.timeseries
@@ -281,4 +269,10 @@ class LocationForecastRepository @Inject constructor(private val locationForecas
             }
         }
     }
+}
+
+fun GridDatatype.sampleAtPosition(position: Position, layer: Int, time: Int = 0): Float {
+    val i = coordinateSystem.findXYindexFromLatLon(position.latitude, position.longitude, null)
+    val arr = readDataSlice(time, layer, i[1], i[0])
+    return arr.getFloat(0)
 }

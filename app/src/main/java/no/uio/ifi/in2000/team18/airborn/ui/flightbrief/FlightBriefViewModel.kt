@@ -9,8 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
-import no.uio.ifi.in2000.team18.airborn.data.repository.IsobaricRepository
-import no.uio.ifi.in2000.team18.airborn.data.repository.LocationForecastRepository
+import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
@@ -31,8 +30,7 @@ import javax.inject.Inject
 class FlightBriefViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val airportRepository: AirportRepository,
-    private val isobaricRepository: IsobaricRepository,
-    private val locationForecastRepository: LocationForecastRepository,
+    private val weatherRepository: WeatherRepository,
 ) : ViewModel() {
     private val departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!)
     private val arrivalIcao =
@@ -85,13 +83,13 @@ class FlightBriefViewModel @Inject constructor(
         update { it.copy(airport = airport.toSuccess()) }
 
         viewModelScope.launch {
-            val weather = load { locationForecastRepository.getWeatherDays(airport) }
+            val weather = load { weatherRepository.getWeatherDays(airport) }
             update { it.copy(weather = weather) }
         }
 
         viewModelScope.launch {
             val airportIsobaric = load {
-                isobaricRepository.getIsobaricData(position = airport.position, LocalDateTime.now())
+                weatherRepository.getIsobaricData(position = airport.position, LocalDateTime.now())
             }
             update { it.copy(isobaric = airportIsobaric) }
         }
