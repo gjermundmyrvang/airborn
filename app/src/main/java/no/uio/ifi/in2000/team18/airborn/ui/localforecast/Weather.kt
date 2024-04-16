@@ -49,6 +49,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
+import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
@@ -355,7 +356,7 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
                 horizontalAlignment = Alignment.End
             ) {
                 RotatableArrowIcon(direction = fromDegrees)
-                Text(text = "$fromDegrees $direction")
+                Text("${fromDegrees.degrees} $direction")
             }
         }
     }
@@ -383,7 +384,7 @@ fun RotatableArrowIcon(
             contentDescription = "Arrow icon",
             modifier = modifier
                 .size(iconSize)
-                .rotate(direction.toFloat()),
+                .rotate((direction - 180).toFloat()),
             colorFilter = ColorFilter.tint(iconColor)
         )
     }
