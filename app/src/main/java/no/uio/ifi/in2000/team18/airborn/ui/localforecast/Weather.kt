@@ -75,6 +75,7 @@ fun WeatherSection(state: LoadingState<List<WeatherDay>>) =
                 selectedHour = hour
             }
             WeatherWeekSection(weatherDays = weather) { day ->
+                selectedHour = 0
                 selectedDay = day
             }
         }
