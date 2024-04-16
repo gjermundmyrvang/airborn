@@ -4,12 +4,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import no.uio.ifi.in2000.team18.airborn.model.LocationData
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import javax.inject.Inject
 
 class LocationForecastDataSource @Inject constructor(val client: HttpClient) {
-    suspend fun fetchForecast(airport: Airport): LocationData {
-        return client.get("weatherapi/locationforecast/2.0/complete?lat=${airport.position.latitude}&lon=${airport.position.longitude}")
+    suspend fun fetchForecast(position: Position): LocationData {
+        return client.get("weatherapi/locationforecast/2.0/complete?lat=${position.latitude}&lon=${position.longitude}")
             .body()
     }
 }

@@ -135,7 +135,7 @@ class WeatherRepository @Inject constructor(
     )
 
     suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
-        val weatherData = locationForecastDataSource.fetchForecast(airport).properties.timeseries
+        val weatherData = locationForecastDataSource.fetchForecast(airport.position).properties.timeseries
         return mapToWeatherDay(weatherData)
     }
 
