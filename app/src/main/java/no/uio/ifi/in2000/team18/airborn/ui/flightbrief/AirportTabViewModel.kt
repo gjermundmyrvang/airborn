@@ -1,0 +1,124 @@
+package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
+import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
+import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
+import no.uio.ifi.in2000.team18.airborn.model.Webcam
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.TurbulenceMapAndCross
+import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
+import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import java.nio.channels.UnresolvedAddressException
+import java.time.LocalDateTime
+import javax.inject.Inject
+
+
+sealed class AirportTabViewModel(
+    val savedStateHandle: SavedStateHandle,
+    val airportRepository: AirportRepository,
+    val weatherRepository: WeatherRepository,
+) : ViewModel() {
+    private val _state = MutableStateFlow(AirportUiState())
+    val state = _state.asStateFlow()
+    abstract val icao: Icao?
+
+    data class AirportUiState(
+        val airport: LoadingState<Airport> = Loading,
+        val metarTaf: LoadingState<MetarTaf> = Loading,
+        val isobaric: LoadingState<IsobaricData> = Loading,
+        val turbulence: LoadingState<TurbulenceMapAndCross?> = Loading,
+        val webcams: LoadingState<List<Webcam>> = Loading,
+        val weather: LoadingState<List<WeatherDay>> = Loading,
+    )
+
+    init {
+        viewModelScope.launch {
+            val airport = load { airportRepository.getByIcao(icao!!)!! }
+            _state.update { it.copy(airport = airport) }
+        }
+    }
+
+    fun initMetarTaf() {
+        viewModelScope.launch {
+            val metarTar = load { airportRepository.fetchTafMetar(icao!!) }
+            _state.update { it.copy(metarTaf = metarTar) }
+        }
+    }
+
+    fun initIsobaric(airport: Airport) {
+        viewModelScope.launch {
+            val isobaric =
+                load { weatherRepository.getIsobaricData(airport.position, LocalDateTime.now()) }
+            _state.update { it.copy(isobaric = isobaric) }
+        }
+    }
+
+    fun initTurbulence() {
+        viewModelScope.launch {
+            val turbulence = load { airportRepository.createTurbulence(icao!!) }
+            _state.update { it.copy(turbulence = turbulence) }
+        }
+    }
+
+    fun initWebcam(airport: Airport) {
+        viewModelScope.launch {
+            val webcams = load { airportRepository.fetchWebcamImages(airport) }
+            _state.update { it.copy(webcams = webcams) }
+        }
+    }
+
+    fun initWeather(airport: Airport) {
+        viewModelScope.launch {
+            val weather = load { weatherRepository.getWeatherDays(airport) }
+            _state.update { it.copy(weather = weather) }
+        }
+    }
+
+
+    @HiltViewModel
+    class DepartureViewModel @Inject constructor(
+        savedStateHandle: SavedStateHandle,
+        airportRepository: AirportRepository, weatherRepository: WeatherRepository
+    ) : AirportTabViewModel(
+        savedStateHandle = savedStateHandle,
+        airportRepository = airportRepository,
+        weatherRepository = weatherRepository
+    ) {
+        override val icao = Icao(savedStateHandle.get<String>("departureIcao")!!)
+    }
+
+    @HiltViewModel
+    class ArrivalViewModel @Inject constructor(
+        savedStateHandle: SavedStateHandle,
+        airportRepository: AirportRepository, weatherRepository: WeatherRepository
+    ) : AirportTabViewModel(
+        savedStateHandle = savedStateHandle,
+        airportRepository = airportRepository,
+        weatherRepository = weatherRepository
+    ) {
+        override val icao = savedStateHandle.get<String>("arrivalIcao")
+            ?.let { if (it == "null") null else Icao(it) }
+    }
+
+    private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+        return try {
+            f().toSuccess()
+        } catch (e: UnresolvedAddressException) {
+            LoadingState.Error(message = "Unresolved Address")
+        } catch (e: Exception) {
+            LoadingState.Error(message = "Unknown Error: $e")
+        }
+    }
+}
