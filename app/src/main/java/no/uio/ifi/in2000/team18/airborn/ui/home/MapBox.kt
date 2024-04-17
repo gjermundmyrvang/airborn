@@ -51,10 +51,7 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
-import no.uio.ifi.in2000.team18.airborn.model.AltitudeReference
-import no.uio.ifi.in2000.team18.airborn.model.AltitudeReferenceType
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
-import no.uio.ifi.in2000.team18.airborn.model.SigmetDateTime
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
@@ -66,57 +63,10 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
     Column(modifier = Modifier.fillMaxSize()) {
         val state by homeViewModel.state.collectAsState()
         val airports = state.airports
+        val sigmets = state.sigmets
         var selectedAirport by remember { mutableStateOf<Airport?>(null) }
         var isClicked by remember { mutableStateOf(false) }
         var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
-        val sigmets = listOf(
-            Sigmet(
-                issuingAuthority = "WANO31",
-                originatingLocation = "ENMI",
-                dateTime = SigmetDateTime(17, 15, 3),
-                regionCode = "ENOR",
-                type = SigmetType.Airmet,
-                identifier = Pair('I', 9),
-                timeRange = Pair(SigmetDateTime(1, 2, 3), SigmetDateTime(1, 2, 3)),
-                location = "ENMI",
-                extra = null,
-                message = listOf("MOD", "ICE", "FCST", "WI"),
-                coordinates = listOf(
-                    Point.fromLngLat(21.3, 69.25),
-                    Point.fromLngLat(8.35, 71.1),
-                    Point.fromLngLat(32.0, 70.25),
-                    Point.fromLngLat(30.2, 69.05),
-                    Point.fromLngLat(22.4, 68.35),
-                    Point.fromLngLat(21.3, 69.25)
-                ),
-                altitude = Pair(
-                    AltitudeReference(typ = AltitudeReferenceType.Feet, number = 3000),
-                    AltitudeReference(typ = AltitudeReferenceType.FlightLevel, number = 130)
-                )
-            ), Sigmet(
-                issuingAuthority = "WANO31",
-                originatingLocation = "ENMI",
-                dateTime = SigmetDateTime(17, 15, 3),
-                regionCode = "ENOR",
-                type = SigmetType.Airmet,
-                identifier = Pair('I', 9),
-                timeRange = Pair(SigmetDateTime(1, 2, 3), SigmetDateTime(1, 2, 3)),
-                location = "ENMI",
-                extra = null,
-                message = listOf("MOD", "ICE", "FCST", "WI"),
-                coordinates = listOf(
-                    Point.fromLngLat(10.580, 59.890),
-                    Point.fromLngLat(11.360, 59.890),
-                    Point.fromLngLat(11.360, 60.150),
-                    Point.fromLngLat(10.580, 60.150),
-                    Point.fromLngLat(10.580, 59.890)
-                ),
-                altitude = Pair(
-                    AltitudeReference(typ = AltitudeReferenceType.Feet, number = 3000),
-                    AltitudeReference(typ = AltitudeReferenceType.FlightLevel, number = 130)
-                )
-            )
-        )
         Box {
             val mapViewportState = rememberMapViewportState {
                 setCameraOptions {
@@ -141,18 +91,20 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
                     }
                 }
             }
-            when (val airport = selectedAirport) {
-                null -> {}
-                else -> {
-                    homeViewModel.updateSunriseAirport(airport)
-                    InfoBox(airport = airport, state) {
-                        selectedAirport = null
+            Column {
+                when (val airport = selectedAirport) {
+                    null -> {}
+                    else -> {
+                        homeViewModel.updateSunriseAirport(airport)
+                        InfoBox(airport = airport, state) {
+                            selectedAirport = null
+                        }
                     }
                 }
-            }
-            if (isClicked) {
-                SigmetInfoBox(sigmet = sigmets[sigmetClicked]) {
-                    isClicked = false
+                if (isClicked) {
+                    SigmetInfoBox(sigmet = sigmets[sigmetClicked]) {
+                        isClicked = false
+                    }
                 }
             }
         }
@@ -166,7 +118,10 @@ fun Polygons(
     sigmets.forEachIndexed { index, sigmet ->
         PolygonAnnotation(points = listOf(sigmet.coordinates),
             fillOutlineColorInt = Color.Black.toArgb(),
-            fillColorInt = Color.Cyan.toArgb(),
+            fillColorInt = if (sigmet.type == SigmetType.Airmet) Color.Cyan.copy(alpha = 0.4f)
+                .toArgb() else Color.Yellow.copy(
+                alpha = 0.4f
+            ).toArgb(),
             fillOpacity = 0.4,
             onClick = {
                 onPolyClicked(index)
@@ -210,7 +165,11 @@ fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
         .padding(16.dp)
         .height(300.dp)
         .fillMaxWidth()
-        .background(Color.Cyan.copy(alpha = 0.4f))
+        .background(
+            color = if (sigmet.type == SigmetType.Airmet) Color.Cyan.copy(alpha = 0.4f) else Color.Yellow.copy(
+                alpha = 0.4f
+            )
+        )
         .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(5.dp))
         .clip(RoundedCornerShape(5.dp))
 ) {
@@ -225,11 +184,12 @@ fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(sigmet.issuingAuthority)
+            Text("Type: ${sigmet.type}")
             IconButton(onClick = { onClose() }) {
                 Icon(imageVector = Icons.Filled.Close, contentDescription = "Close icon")
             }
         }
+        Text(text = "Weathermessage: ${sigmet.message}")
     }
 }
 
