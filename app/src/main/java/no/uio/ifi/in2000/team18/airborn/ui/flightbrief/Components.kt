@@ -91,7 +91,11 @@ fun LoadingScreen() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "LOADING...")
+        CircularProgressIndicator(
+            modifier = Modifier,
+            color = MaterialTheme.colorScheme.primary,
+            strokeWidth = 2.dp
+        )
     }
 }
 
