@@ -1,16 +1,26 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
@@ -18,24 +28,16 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 
 @Composable
 fun IsobaricData(state: LoadingState<IsobaricData?>) =
-    LoadingCollapsible(state, header = "Winds Aloft") { isobaric ->
+    LoadingCollapsible(state, header = "Winds Aloft", padding = 0.dp) { isobaric ->
         // data from isobaric layers, includes height TODO: a table or chart would be nice
         Text(text = "${isobaric?.time}")
         Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Height", fontWeight = FontWeight.Bold)
-            Text("Temp", fontWeight = FontWeight.Bold)
-            Text("Speed", fontWeight = FontWeight.Bold)
-            Text("Direction", fontWeight = FontWeight.Bold)
-            Text("", fontWeight = FontWeight.Bold)
+        if (isobaric == null) {
+            return@LoadingCollapsible
         }
-        isobaric?.data?.forEach {
-            Log.d(
-                "windsAloft",
-                "height: ${it.height}, uWind: ${it.uWind}, vWind: ${it.vWind}"
+        TableContent(isorbaricData = isobaric)
+    }
+
 @Composable
 private fun TableContent(isorbaricData: IsobaricData) {
     LazyColumn(
