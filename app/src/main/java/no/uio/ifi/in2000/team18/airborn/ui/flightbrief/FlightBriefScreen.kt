@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefViewModel.AirportUiState
-import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.FlightBriefViewModel.UiState
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.ArrivalViewModel
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.DepartureViewModel
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.WeatherSection
 import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 
@@ -33,15 +33,13 @@ fun TestFlightBrief() {
 }
 
 @Composable
-fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
-    val state by viewModel.state.collectAsState()
-
-    FlightBriefScreenContent(state = state)
+fun FlightBriefScreen() {
+    FlightBriefScreenContent()
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FlightBriefScreenContent(state: UiState) = Column {
+fun FlightBriefScreenContent() = Column {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
@@ -57,27 +55,55 @@ fun FlightBriefScreenContent(state: UiState) = Column {
     }
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
-            0 -> AirportBriefTab(state.departure)
-            1 -> state.arrival?.let { AirportBriefTab(it) }
-            2 -> OverallInfoTab(state)
+            0 -> DepartureAirportBriefTab()
+            1 -> ArrivalAirportBriefTab()
+            2 -> OverallAirportBrieftab()
         }
     }
 }
 
 @Composable
-fun AirportBriefTab(airport: AirportUiState) = LazyColumn(modifier = Modifier.fillMaxSize()) {
-    val sections: List<@Composable () -> Unit> = listOf(
-        // { AirportBriefHeader(airportBrief.airport) },
-        { MetarTaf(airport.metarTaf) },
-        { IsobaricData(airport.isobaric) },
-        { Turbulence(airport.turbulence) },
-        { WebcamSection(airport.webcams) },
-        { WeatherSection(airport.weather) },
-    )
-    items(sections) { section ->
-        section()
+fun DepartureAirportBriefTab(
+    viewModel: DepartureViewModel = hiltViewModel(),
+) = AirportBriefTab(viewModel = viewModel)
+
+@Composable
+fun ArrivalAirportBriefTab(
+    viewModel: ArrivalViewModel = hiltViewModel(),
+) = AirportBriefTab(viewModel = viewModel)
+
+@Composable
+fun OverallAirportBrieftab(
+    viewModel: FlightBriefViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        item { Sigchart(state.sigcharts) { viewModel.initSigchart() } }
     }
 }
+
+@Composable
+fun AirportBriefTab(viewModel: AirportTabViewModel) {
+    val state by viewModel.state.collectAsState()
+    val sections: List<@Composable () -> Unit> = listOf(
+        // { AirportBriefHeader(airportBrief.airport) },
+        { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
+        { IsobaricData(state.isobaric) { /*viewModel.initIsobaric()*/ } },
+        { Turbulence(state.turbulence) { viewModel.initTurbulence() } },
+        { WebcamSection(state.webcams) { /*viewModel.initWebcam()*/ } },
+        { WeatherSection(state.weather) { /*viewModel.initWeather()*/ } },
+    )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(sections) { section ->
+            section()
+        }
+    }
+}
+
 
 @Composable
 fun AirportBriefHeader(airport: Airport) = Column {
@@ -87,15 +113,6 @@ fun AirportBriefHeader(airport: Airport) = Column {
         fontSize = 22.sp,
         lineHeight = 50.sp,
     )
-}
-
-@Composable
-fun OverallInfoTab(state: UiState) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        item { Sigchart(state.sigcharts) }
-    }
 }
 
 
