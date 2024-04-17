@@ -49,3 +49,46 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
             }
         }
     }
+
+@Composable
+fun RowScope.TableCell(
+    text: String,
+    weight: Float,
+    alignment: TextAlign = TextAlign.Center,
+    title: Boolean = false,
+) {
+    Text(
+        text = text,
+        Modifier
+            .weight(weight)
+            .padding(10.dp),
+        fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
+        textAlign = alignment,
+    )
+}
+
+@Composable
+fun RowScope.IconCell(
+    text: String,
+    weight: Float,
+    alignment: TextAlign = TextAlign.Center,
+    title: Boolean = false,
+    windDirection: Direction
+) {
+    Row(
+        Modifier
+            .weight(weight)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = text,
+            Modifier
+                .weight(weight)
+                .padding(10.dp),
+            fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
+            textAlign = alignment,
+        )
+        RotatableArrowIcon(direction = windDirection)
+    }
+}
