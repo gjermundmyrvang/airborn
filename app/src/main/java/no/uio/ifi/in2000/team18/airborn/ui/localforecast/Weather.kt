@@ -54,6 +54,7 @@ import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LoadingCollapsible
 import kotlin.math.roundToInt
@@ -388,28 +389,6 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
 @Composable
 fun TestWindCard() {
     WindCard(windSpeed = Speed(25.89), fromDegrees = 228.43)
-}
-
-@Composable
-fun RotatableArrowIcon(
-    direction: Double,
-    modifier: Modifier = Modifier,
-    iconSize: Dp = 25.dp,
-    iconColor: Color = MaterialTheme.colorScheme.onBackground
-) {
-    val arrowIcon: Painter = painterResource(id = R.drawable.arrow_up)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = arrowIcon,
-            contentDescription = "Arrow icon",
-            modifier = modifier
-                .size(iconSize)
-                .rotate((direction - 180).toFloat()),
-            colorFilter = ColorFilter.tint(iconColor)
-        )
-    }
 }
 
 @Preview(showSystemUi = true)
