@@ -36,19 +36,78 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
             Log.d(
                 "windsAloft",
                 "height: ${it.height}, uWind: ${it.uWind}, vWind: ${it.vWind}"
-            )
+@Composable
+private fun TableContent(isorbaricData: IsobaricData) {
+    LazyColumn(
+        Modifier
+            .padding(8.dp)
+            .heightIn(min = 0.dp, max = 800.dp)
+    ) {
+        val column1Weight = .3f
+        val column2Weight = .2f
+        val column3Weight = .25f
+        val column4Weight = .25f
+        item {
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                it.height?.let { h -> Text(h.toStringAsFeet()) }
-                Text(it.temperature.toString())
-                Text(it.windSpeed.toString())
-                Text(it.windFromDirection.toString())
-                it.windFromDirection?.let { direction -> RotatableArrowIcon(direction) }
+                TableCell(
+                    text = "Height",
+                    weight = column1Weight,
+                    alignment = TextAlign.Left,
+                    title = true
+                )
+                TableCell(text = "Temp", weight = column2Weight, title = true)
+                TableCell(text = "Speed", weight = column3Weight, title = true)
+                TableCell(
+                    text = "Direction",
+                    weight = column4Weight,
+                    alignment = TextAlign.Right,
+                    title = true
+                )
             }
+            HorizontalDivider(
+                modifier = Modifier
+                    .height(1.dp)
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
+                color = Color.LightGray
+            )
+        }
+        items(isorbaricData.data) { data ->
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                data.height?.let {
+                    TableCell(
+                        text = it.toStringAsFeet(),
+                        weight = column1Weight,
+                        alignment = TextAlign.Left,
+                    )
+                }
+                TableCell(text = data.temperature.toString(), weight = column2Weight)
+                TableCell(text = data.windSpeed.toString(), weight = column3Weight)
+                data.windFromDirection?.let {
+                    IconCell(
+                        text = data.windFromDirection.toString(),
+                        weight = column3Weight,
+                        alignment = TextAlign.Right,
+                        windDirection = it
+                    )
+                }
+            }
+            HorizontalDivider(
+                color = Color.LightGray,
+                modifier = Modifier
+                    .height(1.dp)
+                    .fillMaxHeight()
+                    .fillMaxWidth()
+            )
         }
     }
+}
 
 @Composable
 fun RowScope.TableCell(
