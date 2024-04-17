@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
+import no.uio.ifi.in2000.team18.airborn.data.repository.SigmetRepository
+import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
@@ -18,12 +20,14 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val airportRepository: AirportRepository,
+    private val sigmetRepository: SigmetRepository,
 ) : ViewModel() {
     data class UiState(
         val departureAirportInput: String = "",
         val arrivalAirportInput: String = "",
         val airports: List<Airport> = listOf(),
-        val sun: LoadingState<Sun?> = LoadingState.Loading,
+        val sigmets: List<Sigmet> = listOf(),
+        val sun: LoadingState<Sun?> = LoadingState.Loading
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -31,10 +35,26 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            initSigmets()
             _state.update {
                 it.copy(
-                    airports = airportRepository.all()
+                    airports = airportRepository.all(),
                 )
+            }
+        }
+    }
+
+    private fun initSigmets() {
+        viewModelScope.launch {
+            val sigmets = try {
+                sigmetRepository.fetchSigmets()
+            } catch (e: UnresolvedAddressException) {
+                listOf()
+            } catch (e: Exception) {
+                listOf()
+            }
+            _state.update {
+                it.copy(sigmets = sigmets)
             }
         }
     }
