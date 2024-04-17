@@ -16,10 +16,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.model.Direction
 
 @Composable
 fun RotatableArrowIcon(
-    direction: Double,
+    direction: Direction,
     modifier: Modifier = Modifier,
     iconSize: Dp = 25.dp,
     iconColor: Color = MaterialTheme.colorScheme.onBackground
@@ -33,7 +34,7 @@ fun RotatableArrowIcon(
             contentDescription = "Arrow icon",
             modifier = modifier
                 .size(iconSize)
-                .rotate((direction - 180).toFloat()),
+                .rotate((direction.degrees - 180).toFloat()),
             colorFilter = ColorFilter.tint(iconColor)
         )
     }

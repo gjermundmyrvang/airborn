@@ -346,6 +346,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
 
 @Composable
 fun WindCard(windSpeed: Speed, fromDegrees: Double) {
+    val fromDirection: Direction = Direction(fromDegrees)
     val direction = when {
         fromDegrees < 90.0 -> "NE"
         fromDegrees < 180.0 -> "SE"
@@ -363,7 +364,7 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
         ) {
             Row {
                 Text(
-                    text = "${windSpeed.knots.roundToInt()} kt",
+                    text = windSpeed.toString(),
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp
                 )
@@ -378,8 +379,8 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
             Column(
                 horizontalAlignment = Alignment.End
             ) {
-                RotatableArrowIcon(direction = fromDegrees)
-                Text("${fromDegrees.degrees} $direction")
+                RotatableArrowIcon(direction = fromDirection)
+                Text(fromDirection.toString() + direction)
             }
         }
     }

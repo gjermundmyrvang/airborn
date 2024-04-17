@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 
 
 @Composable
@@ -28,7 +29,8 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
             Text("Height", fontWeight = FontWeight.Bold)
             Text("Temp", fontWeight = FontWeight.Bold)
             Text("Speed", fontWeight = FontWeight.Bold)
-            Text("From", fontWeight = FontWeight.Bold)
+            Text("Direction", fontWeight = FontWeight.Bold)
+            Text("", fontWeight = FontWeight.Bold)
         }
         isobaric?.data?.forEach {
             Log.d(
@@ -43,6 +45,7 @@ fun IsobaricData(state: LoadingState<IsobaricData?>) =
                 Text(it.temperature.toString())
                 Text(it.windSpeed.toString())
                 Text(it.windFromDirection.toString())
+                it.windFromDirection?.let { direction -> RotatableArrowIcon(direction) }
             }
         }
     }
