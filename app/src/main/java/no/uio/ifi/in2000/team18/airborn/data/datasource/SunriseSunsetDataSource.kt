@@ -7,8 +7,7 @@ import no.uio.ifi.in2000.team18.airborn.model.SunriseSunset
 import javax.inject.Inject
 
 class SunriseSunsetDataSource @Inject constructor(val client: HttpClient) {
-    suspend fun fetchSunriseSunset(lat: Int, lon: Int): List<SunriseSunset> {
-        return client.get("weatherapi/sunrise/3.0/sun?lat=$lat&lon=$lon")
-            .body()
+    suspend fun fetchSunriseSunset(lat: Double, lon: Double): SunriseSunset {
+        return client.get("weatherapi/sunrise/3.0/sun?lat=$lat&lon=$lon&offset=+01:00").body()
     }
 }
