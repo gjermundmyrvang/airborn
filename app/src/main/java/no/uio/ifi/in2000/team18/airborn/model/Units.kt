@@ -54,7 +54,7 @@ data class Humidity(val humidity: Double) {
 }
 
 data class Speed(val mps: Double) {
-    override fun toString(): String = "%.0f kn".format(knots)
+    override fun toString(): String = "%.0f kt".format(knots)
     val kmh get() = this.mps * 3.6
     val knots get() = this.mps * 1.9438452
     operator fun times(x: Number) = Speed(mps = mps * x.toDouble())

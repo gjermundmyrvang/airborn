@@ -54,6 +54,7 @@ import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LoadingCollapsible
 import kotlin.math.roundToInt
@@ -345,6 +346,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
 
 @Composable
 fun WindCard(windSpeed: Speed, fromDegrees: Double) {
+    val fromDirection: Direction = Direction(fromDegrees)
     val direction = when {
         fromDegrees < 90.0 -> "NE"
         fromDegrees < 180.0 -> "SE"
@@ -362,7 +364,7 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
         ) {
             Row {
                 Text(
-                    text = "${windSpeed.knots.roundToInt()} kt",
+                    text = windSpeed.toString(),
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp
                 )
@@ -377,8 +379,8 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
             Column(
                 horizontalAlignment = Alignment.End
             ) {
-                RotatableArrowIcon(direction = fromDegrees)
-                Text("${fromDegrees.degrees} $direction")
+                RotatableArrowIcon(direction = fromDirection)
+                Text(fromDirection.toString() + direction)
             }
         }
     }
@@ -388,28 +390,6 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
 @Composable
 fun TestWindCard() {
     WindCard(windSpeed = Speed(25.89), fromDegrees = 228.43)
-}
-
-@Composable
-fun RotatableArrowIcon(
-    direction: Double,
-    modifier: Modifier = Modifier,
-    iconSize: Dp = 25.dp,
-    iconColor: Color = MaterialTheme.colorScheme.onBackground
-) {
-    val arrowIcon: Painter = painterResource(id = R.drawable.arrow_up)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = arrowIcon,
-            contentDescription = "Arrow icon",
-            modifier = modifier
-                .size(iconSize)
-                .rotate((direction - 180).toFloat()),
-            colorFilter = ColorFilter.tint(iconColor)
-        )
-    }
 }
 
 @Preview(showSystemUi = true)
