@@ -10,8 +10,7 @@ data class SunriseSunset(
 )
 
 data class Geometry(
-    val type: String,
-    val coordinates: List<Double>
+    val type: String, val coordinates: List<Double>
 )
 
 data class SunriseSunsetProperties(
@@ -23,14 +22,11 @@ data class SunriseSunsetProperties(
 )
 
 data class Solar(
-    val time: String,
-    val discCentreElevation: Double,
-    val visible: Boolean
+    val time: String, val discCentreElevation: Double, val visible: Boolean
 )
 
 data class Sun(
-    val time: String,
-    val azimuth: Double
+    val time: String, val azimuth: Double
 )
 
 data class When(
