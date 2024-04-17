@@ -134,37 +134,6 @@ fun MultiToggleButton(
     }
 }
 
-
-@Composable
-fun <T> LoadingCollapsible(
-    value: LoadingState<T>,
-    header: String,
-    padding: Dp = 16.dp,
-    expanded: Boolean = false,
-    content: @Composable ColumnScope.(T) -> Unit
-) {
-    when (value) {
-        is LoadingState.Success -> Collapsible(
-            header = header,
-            padding = padding,
-            expanded = expanded,
-            content = { content(value.value) },
-        )
-
-        is LoadingState.Loading -> Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(header)
-            CircularProgressIndicator(modifier = Modifier.padding(start = 16.dp))
-        }
-
-        is LoadingState.Error -> Error(
-            "failed to load ${header}: ${value.message}", modifier = Modifier.padding(16.dp, 8.dp)
-        )
-    }
-}
-
 @Composable
 fun <T> LazyCollapsible(
     modifier: Modifier = Modifier,
@@ -226,59 +195,7 @@ fun <T> LazyCollapsible(
 }
 
 @Composable
-fun LazyCollapsibleContent(content: @Composable ColumnScope.() -> Unit) = Column(
-    modifier = Modifier.padding(16.dp), content = content
-)
-
-@Composable
-fun Collapsible(
-    modifier: Modifier = Modifier,
-    padding: Dp = 16.dp,
-    header: String,
-    expanded: Boolean = false,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    var open by rememberSaveable {
-        mutableStateOf(expanded)
-    }
-    Column(
-        modifier = Modifier.animateContentSize(
-            animationSpec = tween(
-                durationMillis = 300, easing = LinearOutSlowInEasing
-            )
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = header, fontSize = 22.sp)
-            IconButton(onClick = { open = !open }) {
-                Icon(
-                    imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    modifier = Modifier.size(30.dp),
-                    contentDescription = if (open) "Show less" else "Show more"
-                )
-            }
-        }
-        if (open) {
-            Column(
-                modifier = modifier.padding(padding),
-                content = content,
-            )
-        }
-        HorizontalDivider(
-            modifier = Modifier
-                .padding(start = 5.dp, end = 5.dp)
-                .fillMaxWidth(),
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-}
+fun LazyCollapsibleContent(content: @Composable ColumnScope.() -> Unit) = Column(content = content)
 
 @Composable
 fun ImageComposable(uri: String, contentDescription: String) {
