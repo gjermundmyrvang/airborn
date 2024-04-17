@@ -145,6 +145,7 @@ fun <T> LazyCollapsible(
     header: String,
     expanded: Boolean = false,
     value: LoadingState<T>,
+    onExpand: () -> Unit,
     content: @Composable ColumnScope.(T) -> Unit
 ) {
     var open by rememberSaveable {
@@ -165,7 +166,10 @@ fun <T> LazyCollapsible(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = header, fontSize = 22.sp)
-            IconButton(onClick = { open = !open }) {
+            IconButton(onClick = {
+                onExpand()
+                open = !open
+            }) {
                 Icon(
                     imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                     modifier = Modifier.size(30.dp),
