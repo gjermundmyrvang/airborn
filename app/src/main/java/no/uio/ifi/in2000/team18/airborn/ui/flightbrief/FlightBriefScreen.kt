@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,15 +37,6 @@ fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
 
     FlightBriefScreenContent(state = state)
-}
-
-@Composable
-fun LoadingScreen() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-    ) {
-        Text(text = "LOADING...")
-    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

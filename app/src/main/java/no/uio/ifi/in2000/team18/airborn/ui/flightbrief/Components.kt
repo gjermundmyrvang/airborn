@@ -87,6 +87,15 @@ fun PreviewError() = Column {
 }
 
 @Composable
+fun LoadingScreen() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "LOADING...")
+    }
+}
+
+@Composable
 fun MultiToggleButton(
     currentSelection: String, toggleStates: List<String>, onToggleChange: (String) -> Unit
 ) {
@@ -151,12 +160,75 @@ fun <T> LoadingCollapsible(
         }
 
         is LoadingState.Error -> Error(
-            "failed to load ${header}: ${value.message}",
-            modifier = Modifier.padding(16.dp, 8.dp)
+            "failed to load ${header}: ${value.message}", modifier = Modifier.padding(16.dp, 8.dp)
         )
     }
 }
 
+@Composable
+fun <T> LazyCollapsible(
+    modifier: Modifier = Modifier,
+    padding: Dp = 16.dp,
+    header: String,
+    expanded: Boolean = false,
+    value: LoadingState<T>,
+    content: @Composable ColumnScope.(T) -> Unit
+) {
+    var open by rememberSaveable {
+        mutableStateOf(expanded)
+    }
+    Column(
+        modifier = Modifier.animateContentSize(
+            animationSpec = tween(
+                durationMillis = 300, easing = LinearOutSlowInEasing
+            )
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = header, fontSize = 22.sp)
+            IconButton(onClick = { open = !open }) {
+                Icon(
+                    imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    modifier = Modifier.size(30.dp),
+                    contentDescription = if (open) "Show less" else "Show more"
+                )
+            }
+        }
+        if (open) {
+            Column(
+                modifier = modifier.padding(padding),
+                content = {
+                    when (value) {
+                        is LoadingState.Success -> LazyCollapsibleContent(content = { content(value.value) })
+                        is LoadingState.Loading -> LoadingScreen()
+                        is LoadingState.Error -> Error(
+                            "failed to load ${header}: ${value.message}",
+                            modifier = Modifier.padding(16.dp, 8.dp)
+                        )
+                    }
+                },
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(start = 5.dp, end = 5.dp)
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+@Composable
+fun LazyCollapsibleContent(content: @Composable ColumnScope.() -> Unit) = Column(
+    modifier = Modifier.padding(16.dp), content = content
+)
 
 @Composable
 fun Collapsible(
