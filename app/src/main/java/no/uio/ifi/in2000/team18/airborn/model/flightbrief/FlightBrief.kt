@@ -82,3 +82,7 @@ data class Metar(val text: String) {
 data class Taf(val text: String) {
     override fun toString(): String = text
 }
+
+data class Sun(
+    val sunrise: String, val sunset: String
+)

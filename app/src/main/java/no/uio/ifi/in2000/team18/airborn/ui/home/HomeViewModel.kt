@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
+import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,6 +23,7 @@ class HomeViewModel @Inject constructor(
         val departureAirportInput: String = "",
         val arrivalAirportInput: String = "",
         val airports: List<Airport> = listOf(),
+        val sun: LoadingState<Sun?> = LoadingState.Loading,
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -55,4 +60,21 @@ class HomeViewModel @Inject constructor(
 
     fun selectArrivalAirport(airport: String) =
         _state.update { it.copy(arrivalAirportInput = airport) }
+
+    fun updateSunriseAirport(airport: Airport) {
+        viewModelScope.launch {
+            val sun = load { airportRepository.getSunriseSunset(airport) }
+            _state.update { it.copy(sun = sun) }
+        }
+    }
+
+    private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+        return try {
+            f().toSuccess()
+        } catch (e: UnresolvedAddressException) {
+            LoadingState.Error(message = "Unresolved Address")
+        } catch (e: Exception) {
+            LoadingState.Error(message = "Unknown Error: $e")
+        }
+    }
 }
