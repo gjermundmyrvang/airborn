@@ -27,16 +27,17 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 
 
 @Composable
-fun IsobaricData(state: LoadingState<IsobaricData?>, initisobaric: () -> Unit) =
-    LazyCollapsible(header = "Winds aloft", value = state, onExpand = initisobaric) { isobaric ->
-        // data from isobaric layers, includes height TODO: a table or chart would be nice
-        Text(text = "${isobaric?.time}")
-        Spacer(modifier = Modifier.height(16.dp))
-        if (isobaric == null) {
-            return@LazyCollapsible
-        }
-        TableContent(isorbaricData = isobaric)
+fun IsobaricData(state: LoadingState<IsobaricData?>, initisobaric: () -> Unit) = LazyCollapsible(
+    header = "Winds aloft", value = state, onExpand = initisobaric, padding = 0.dp
+) { isobaric ->
+    // data from isobaric layers, includes height TODO: a table or chart would be nice
+    Text(text = "${isobaric?.time}")
+    Spacer(modifier = Modifier.height(16.dp))
+    if (isobaric == null) {
+        return@LazyCollapsible
     }
+    TableContent(isorbaricData = isobaric)
+}
 
 @Composable
 private fun TableContent(isorbaricData: IsobaricData) {
@@ -45,8 +46,8 @@ private fun TableContent(isorbaricData: IsobaricData) {
             .padding(8.dp)
             .heightIn(min = 0.dp, max = 800.dp)
     ) {
-        val column1Weight = .3f
-        val column2Weight = .2f
+        val column1Weight = .25f
+        val column2Weight = .25f
         val column3Weight = .25f
         val column4Weight = .25f
         item {
@@ -139,13 +140,11 @@ fun RowScope.IconCell(
     Row(
         Modifier
             .weight(weight)
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(10.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = text,
             Modifier
-                .weight(weight)
                 .padding(10.dp),
             fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
             textAlign = alignment,
