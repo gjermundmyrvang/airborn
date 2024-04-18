@@ -146,12 +146,12 @@ fun OverallAirportBrieftab(
 fun AirportBriefTab(viewModel: AirportTabViewModel) {
     val state by viewModel.state.collectAsState()
     val sections: List<@Composable () -> Unit> = listOf(
-        // { AirportBriefHeader(airportBrief.airport) },
+        { AirportBriefHeader(state.airport) },
         { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
-        { IsobaricData(state.isobaric) { /*viewModel.initIsobaric()*/ } },
+        { IsobaricData(state.isobaric) { viewModel.initIsobaric() } },
         { Turbulence(state.turbulence) { viewModel.initTurbulence() } },
-        { WebcamSection(state.webcams) { /*viewModel.initWebcam()*/ } },
-        { WeatherSection(state.weather) { /*viewModel.initWeather()*/ } },
+        { WebcamSection(state.webcams) { viewModel.initWebcam() } },
+        { WeatherSection(state.weather) { viewModel.initWeather() } },
     )
     LazyColumn(
         modifier = Modifier.fillMaxSize()
