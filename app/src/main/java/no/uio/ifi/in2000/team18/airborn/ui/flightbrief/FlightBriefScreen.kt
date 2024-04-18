@@ -164,15 +164,27 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
 
 
 @Composable
-fun AirportBriefHeader(airport: Airport) = Column {
-    Text(
-        text = airport.name,
-        fontWeight = FontWeight.Bold,
-        fontSize = 22.sp,
-        lineHeight = 50.sp,
-    )
+fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
+    when (airportstate) {
+        is LoadingState.Loading -> Text(text = " ")
+        is LoadingState.Error -> Error(
+            message = airportstate.message, modifier = Modifier.padding(16.dp)
+        )
+
+        is LoadingState.Success -> AirportInfo(
+            name = airportstate.value.name,
+            icao = airportstate.value.icao.code,
+            pos = airportstate.value.position
+        )
+    }
 }
 
-
-
-
+@Composable
+fun AirportInfo(name: String, icao: String, pos: Position) = Column(
+    Modifier
+        .padding(16.dp)
+        .fillMaxWidth(),
+) {
+    Text(text = icao, fontWeight = FontWeight.Bold)
+    Text(text = name, fontWeight = FontWeight.Bold)
+}
