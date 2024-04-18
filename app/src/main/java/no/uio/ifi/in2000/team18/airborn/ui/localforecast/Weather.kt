@@ -56,14 +56,14 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
-import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LoadingCollapsible
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
 
 @Composable
 fun WeatherSection(state: LoadingState<List<WeatherDay>>) =
-    LoadingCollapsible(state, header = "Weather", padding = 0.dp) { weather ->
+    LazyCollapsible(header = "Weather", value = state, padding = 0.dp) { weather ->
         var selectedDay by rememberSaveable { mutableIntStateOf(0) }
         var selectedHour by rememberSaveable { mutableIntStateOf(0) }
         Column(
