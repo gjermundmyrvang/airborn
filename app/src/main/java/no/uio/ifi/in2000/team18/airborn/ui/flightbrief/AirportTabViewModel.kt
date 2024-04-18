@@ -105,7 +105,8 @@ sealed class AirportTabViewModel(
     @HiltViewModel
     class DepartureViewModel @Inject constructor(
         savedStateHandle: SavedStateHandle,
-        airportRepository: AirportRepository, weatherRepository: WeatherRepository
+        airportRepository: AirportRepository,
+        weatherRepository: WeatherRepository
     ) : AirportTabViewModel(
         savedStateHandle = savedStateHandle,
         airportRepository = airportRepository,
@@ -121,7 +122,8 @@ sealed class AirportTabViewModel(
     @HiltViewModel
     class ArrivalViewModel @Inject constructor(
         savedStateHandle: SavedStateHandle,
-        airportRepository: AirportRepository, weatherRepository: WeatherRepository
+        airportRepository: AirportRepository,
+        weatherRepository: WeatherRepository
     ) : AirportTabViewModel(
         savedStateHandle = savedStateHandle,
         airportRepository = airportRepository,
