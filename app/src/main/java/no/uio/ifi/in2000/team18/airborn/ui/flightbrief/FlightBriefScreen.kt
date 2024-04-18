@@ -74,8 +74,49 @@ fun FlightBriefScreenContent(
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureAirportBriefTab()
+            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(state) {
+                filterArrivalAirports(
+                    it
+                )
+            }
+
             2 -> OverallAirportBrieftab()
         }
+    }
+}
+
+@Composable
+fun ArrivalSelectionTab(
+    state: FlightBriefViewModel.UiState, filterArrivalAirports: (String) -> Unit
+) {
+    val airports = state.airports
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Column(
+        modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = state.arrivalAirportInput,
+            modifier = Modifier
+                .padding(start = 5.dp, end = 5.dp)
+                .fillMaxWidth(),
+            onValueChange = {
+                filterArrivalAirports(it)
+            },
+            singleLine = true,
+            label = { Text("Add an arrival airport") },
+            keyboardActions = KeyboardActions(onDone = {
+                keyboardController?.hide()
+            }),
+        )
+        val navController = LocalNavController.current
+        LazyColumn(modifier = Modifier.imePadding(), content = {
+            items(airports) { airport ->
+                AirportInfoRow(modifier = Modifier, airport) {
+                    navController.popBackStack("home", false)
+                    navController.navigate("flightBrief/${state.departureIcao}/${airport.icao.code}")
+                }
+            }
+        })
     }
 }
 
