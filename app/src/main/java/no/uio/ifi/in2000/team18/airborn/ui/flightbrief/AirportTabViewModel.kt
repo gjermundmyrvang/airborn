@@ -32,7 +32,7 @@ sealed class AirportTabViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(AirportUiState())
     val state = _state.asStateFlow()
-    abstract val icao: Icao?
+    abstract val icao: Icao
 
     data class AirportUiState(
         val airport: LoadingState<Airport> = Loading,
@@ -45,8 +45,8 @@ sealed class AirportTabViewModel(
 
     init {
         viewModelScope.launch {
-            val airport = load { airportRepository.getByIcao(icao!!)!! }
-            _state.update { it.copy(airport = airport) }
+            val airport = load { airportRepository.getByIcao(icao) }
+            _state.update { it.copy(airport = airport.map { it!! }) }
         }
     }
 
@@ -96,7 +96,11 @@ sealed class AirportTabViewModel(
         airportRepository = airportRepository,
         weatherRepository = weatherRepository
     ) {
-        override val icao = Icao(savedStateHandle.get<String>("departureIcao")!!)
+        override val icao: Icao
+            // For some reason this has to be a property. Otherwise something doesn't work.
+            // Don't ask why.
+            get() = Icao(savedStateHandle.get<String>("departureIcao")!!)
+
     }
 
     @HiltViewModel
@@ -108,8 +112,10 @@ sealed class AirportTabViewModel(
         airportRepository = airportRepository,
         weatherRepository = weatherRepository
     ) {
-        override val icao = savedStateHandle.get<String>("arrivalIcao")
-            ?.let { if (it == "null") null else Icao(it) }
+        override val icao: Icao
+            // For some reason this has to be a property. Otherwise something doesn't work.
+            // Don't ask why.
+            get() = Icao(savedStateHandle.get<String>("arrivalIcao")!!)
     }
 
     private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
