@@ -52,13 +52,18 @@ sealed class AirportTabViewModel(
 
     fun initMetarTaf() {
         viewModelScope.launch {
-            val metarTar = load { airportRepository.fetchTafMetar(icao!!) }
+            val metarTar = load { airportRepository.fetchTafMetar(icao) }
             _state.update { it.copy(metarTaf = metarTar) }
         }
     }
 
-    fun initIsobaric(airport: Airport) {
+    fun initIsobaric() {
         viewModelScope.launch {
+            val airport = airportRepository.getByIcao(icao)
+            if (airport == null) {
+                _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
+                return@launch
+            }
             val isobaric =
                 load { weatherRepository.getIsobaricData(airport.position, LocalDateTime.now()) }
             _state.update { it.copy(isobaric = isobaric) }
@@ -72,15 +77,25 @@ sealed class AirportTabViewModel(
         }
     }
 
-    fun initWebcam(airport: Airport) {
+    fun initWebcam() {
         viewModelScope.launch {
+            val airport = airportRepository.getByIcao(icao)
+            if (airport == null) {
+                _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
+                return@launch
+            }
             val webcams = load { airportRepository.fetchWebcamImages(airport) }
             _state.update { it.copy(webcams = webcams) }
         }
     }
 
-    fun initWeather(airport: Airport) {
+    fun initWeather() {
         viewModelScope.launch {
+            val airport = airportRepository.getByIcao(icao)
+            if (airport == null) {
+                _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
+                return@launch
+            }
             val weather = load { weatherRepository.getWeatherDays(airport) }
             _state.update { it.copy(weather = weather) }
         }
