@@ -27,9 +27,8 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 
 
 @Composable
-fun IsobaricData(state: LoadingState<IsobaricData?>) =
-    LazyCollapsible(header = "Winds aloft", value = state) { isobaric ->
-
+fun IsobaricData(state: LoadingState<IsobaricData?>, initisobaric: () -> Unit) =
+    LazyCollapsible(header = "Winds aloft", value = state, onExpand = initisobaric) { isobaric ->
         // data from isobaric layers, includes height TODO: a table or chart would be nice
         Text(text = "${isobaric?.time}")
         Spacer(modifier = Modifier.height(16.dp))

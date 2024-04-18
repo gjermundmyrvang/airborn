@@ -25,8 +25,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>) =
-    LazyCollapsible(header = "Sigcharts", value = state) { sigcharts ->
+fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () -> Unit) =
+    LazyCollapsible(header = "Sigcharts", value = state, onExpand = initSigchart) { sigcharts ->
         var selectedArea by rememberSaveable { mutableStateOf(Area.norway) }
         var selectedSigchart by rememberSaveable { mutableIntStateOf(0) }
 

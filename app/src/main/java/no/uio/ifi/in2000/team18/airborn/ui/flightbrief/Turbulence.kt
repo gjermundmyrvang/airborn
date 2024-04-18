@@ -24,8 +24,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>) =
-    LazyCollapsible(header = "Turbulence", value = state) { turbulence ->
+fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>, initTurbulence: () -> Unit) =
+    LazyCollapsible(header = "Turbulence", value = state, onExpand = initTurbulence) { turbulence ->
         var selectedTime by rememberSaveable { mutableStateOf(turbulence?.currentTurbulenceTime()) }
         var selectedDay by rememberSaveable { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
 
