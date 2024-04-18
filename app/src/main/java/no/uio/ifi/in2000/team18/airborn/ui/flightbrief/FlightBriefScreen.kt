@@ -41,17 +41,23 @@ import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 @Preview(showSystemUi = true)
 @Composable
 fun TestFlightBrief() {
-    FlightBriefScreen()
+    FlightBriefScreenContent(FlightBriefViewModel.UiState(
+        hasArrival = false,
+        departureIcao = Icao(""),
+    ), filterArrivalAirports = {})
 }
 
 @Composable
-fun FlightBriefScreen() {
-    FlightBriefScreenContent()
+fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
+    val state by viewModel.state.collectAsState()
+    FlightBriefScreenContent(state, filterArrivalAirports = { viewModel.filterArrivalAirports(it) })
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FlightBriefScreenContent() = Column {
+fun FlightBriefScreenContent(
+    state: FlightBriefViewModel.UiState, filterArrivalAirports: (String) -> Unit
+) = Column {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage) {
@@ -68,7 +74,6 @@ fun FlightBriefScreenContent() = Column {
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureAirportBriefTab()
-            1 -> ArrivalAirportBriefTab()
             2 -> OverallAirportBrieftab()
         }
     }
