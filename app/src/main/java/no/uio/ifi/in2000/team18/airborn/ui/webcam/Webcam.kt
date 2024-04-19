@@ -38,6 +38,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.ImageComposable
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.shadow
 
 @Composable
 fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = LazyCollapsible(
@@ -104,7 +105,13 @@ fun NearbyWebcam(
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onWebcamClicked(webcam) },
+            .clickable { onWebcamClicked(webcam) }
+            .shadow(
+                Color.LightGray,
+                offsetX = (5).dp,
+                offsetY = (5).dp,
+                blurRadius = 8.dp
+            ),
         border = BorderStroke(1.dp, color = borderColor)
     ) {
         Row(
