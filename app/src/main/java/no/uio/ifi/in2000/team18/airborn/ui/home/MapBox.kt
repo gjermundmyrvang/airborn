@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -145,7 +146,7 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
     modifier = Modifier
         .padding(16.dp)
         .fillMaxWidth()
-        .background(Color.White.copy(alpha = 0.6f))
+        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
         .border(width = 2.dp, color = Color.Gray, shape = RoundedCornerShape(5.dp))
         .clip(RoundedCornerShape(5.dp))
 ) {
@@ -157,9 +158,12 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("${airport.name} / ${airport.icao.code}", fontWeight = FontWeight.Bold)
+            Text("${airport.name} / ${airport.icao.code}", fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.background)
             IconButton(onClick = { onClose() }) {
-                Icon(imageVector = Icons.Filled.Close, contentDescription = "Close icon")
+                Icon(imageVector = Icons.Filled.Close,
+                    contentDescription = "Close icon",
+                    tint = MaterialTheme.colorScheme.background)
             }
         }
 
@@ -167,18 +171,22 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
 
             Text(
                 "Lat: ${airport.position.latitude}",
-                style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold)
+                style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.background
             )
             Text(
                 "Lon: ${airport.position.longitude}",
-                style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold)
+                style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.background
             )
 
             Spacer(modifier = Modifier.height(15.dp))
 
             when (state.sun) {
-                is LoadingState.Loading -> Text(text = "Loading sun")
-                is LoadingState.Error -> Text(text = state.sun.message)
+                is LoadingState.Loading -> Text(text = "Loading sun",
+                    color = MaterialTheme.colorScheme.background)
+                is LoadingState.Error -> Text(text = state.sun.message,
+                    color = MaterialTheme.colorScheme.background)
                 is LoadingState.Success -> state.sun.value?.let { SunComposable(sun = it) }
             }
         }
@@ -189,11 +197,13 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
 @Composable
 fun SunComposable(sun: Sun) {
     Text(
-        text = "Sun info:", style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold)
+        text = "Sun info:", style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.background
     )
     Row(verticalAlignment = Alignment.CenterVertically) {
 
-        Text(text = sun.sunrise, modifier = Modifier.height(IntrinsicSize.Min))
+        Text(text = sun.sunrise, modifier = Modifier.height(IntrinsicSize.Min),
+            color = MaterialTheme.colorScheme.background)
 
         Image(
             painter = painterResource(id = R.drawable.clearsky_polartwilight),
@@ -204,14 +214,16 @@ fun SunComposable(sun: Sun) {
         )
         Spacer(modifier = Modifier.width(10.dp))
 
-        Text(text = sun.sunset)
+        Text(text = sun.sunset,
+            color = MaterialTheme.colorScheme.background)
 
         Image(
             painter = painterResource(id = R.drawable.clearsky_polartwilight),
             contentDescription = "sunset",
             Modifier.size(35.dp)
         )
-        Text(text = "(LT)")
+        Text(text = "(LT)",
+            color = MaterialTheme.colorScheme.background)
     }
 }
 

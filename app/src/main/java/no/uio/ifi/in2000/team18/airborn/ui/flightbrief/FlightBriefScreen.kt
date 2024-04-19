@@ -14,10 +14,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.sharp.KeyboardArrowUp
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -67,7 +69,12 @@ fun FlightBriefScreen(
     val state by viewModel.state.collectAsState()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     val scope = rememberCoroutineScope()
+    val navController = LocalNavController.current
     MapBoxHomeScreen()
+    FloatingActionButton(onClick = { navController.navigate("home") }) {
+        Icon(imageVector = Icons.Filled.Home, contentDescription = "Home")
+
+    }
     Column(modifier=Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally){
         Spacer(modifier = Modifier.weight(2F))
