@@ -39,8 +39,8 @@ import kotlin.math.floor
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MetarTaf(state: LoadingState<MetarTaf?>) =
-    LoadingCollapsible(state, header = "Metar/Taf", expanded = false) { metarTaf ->
+fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
+    LazyCollapsible(header = "Metar/Taf", value = state, onExpand = initMetar) { metarTaf ->
         val clipboardManager = LocalClipboardManager.current
         val metar = metarTaf?.latestMetar
         val taf = metarTaf?.latestTaf

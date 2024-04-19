@@ -24,8 +24,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>) =
-    LoadingCollapsible(state, header = "Turbulence") { turbulence ->
+fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>, initTurbulence: () -> Unit) =
+    LazyCollapsible(header = "Turbulence", value = state, onExpand = initTurbulence) { turbulence ->
         var selectedTime by rememberSaveable { mutableStateOf(turbulence?.currentTurbulenceTime()) }
         var selectedDay by rememberSaveable { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
 
@@ -37,7 +37,7 @@ fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>) =
 
         if (times == null || selectedTime == null) {
             Text(text = "Turbulence not available")
-            return@LoadingCollapsible
+            return@LazyCollapsible
         }
 
         MultiToggleButton(currentSelection = selectedDay, toggleStates = timeMap.keys.toList()) {

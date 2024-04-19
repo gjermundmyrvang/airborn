@@ -25,6 +25,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -87,6 +88,21 @@ fun PreviewError() = Column {
 }
 
 @Composable
+fun LoadingScreen() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+    ) {
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+    }
+}
+
+@Composable
 fun MultiToggleButton(
     currentSelection: String, toggleStates: List<String>, onToggleChange: (String) -> Unit
 ) {
@@ -125,46 +141,15 @@ fun MultiToggleButton(
     }
 }
 
-
 @Composable
-fun <T> LoadingCollapsible(
-    value: LoadingState<T>,
-    header: String,
-    padding: Dp = 16.dp,
-    expanded: Boolean = false,
-    content: @Composable ColumnScope.(T) -> Unit
-) {
-    when (value) {
-        is LoadingState.Success -> Collapsible(
-            header = header,
-            padding = padding,
-            expanded = expanded,
-            content = { content(value.value) },
-        )
-
-        is LoadingState.Loading -> Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(header)
-            CircularProgressIndicator(modifier = Modifier.padding(start = 16.dp))
-        }
-
-        is LoadingState.Error -> Error(
-            "failed to load ${header}: ${value.message}",
-            modifier = Modifier.padding(16.dp, 8.dp)
-        )
-    }
-}
-
-
-@Composable
-fun Collapsible(
+fun <T> LazyCollapsible(
     modifier: Modifier = Modifier,
     padding: Dp = 16.dp,
     header: String,
     expanded: Boolean = false,
-    content: @Composable ColumnScope.() -> Unit
+    value: LoadingState<T>,
+    onExpand: () -> Unit,
+    content: @Composable ColumnScope.(T) -> Unit
 ) {
     var open by rememberSaveable {
         mutableStateOf(expanded)
@@ -184,7 +169,10 @@ fun Collapsible(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = header, fontSize = 22.sp)
-            IconButton(onClick = { open = !open }) {
+            IconButton(onClick = {
+                onExpand()
+                open = !open
+            }) {
                 Icon(
                     imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                     modifier = Modifier.size(30.dp),
@@ -195,7 +183,16 @@ fun Collapsible(
         if (open) {
             Column(
                 modifier = modifier.padding(padding),
-                content = content,
+                content = {
+                    when (value) {
+                        is LoadingState.Success -> LazyCollapsibleContent(content = { content(value.value) })
+                        is LoadingState.Loading -> LoadingScreen()
+                        is LoadingState.Error -> Error(
+                            "failed to load ${header}: ${value.message}",
+                            modifier = Modifier.padding(16.dp, 8.dp)
+                        )
+                    }
+                },
             )
         }
         HorizontalDivider(
@@ -207,6 +204,9 @@ fun Collapsible(
         )
     }
 }
+
+@Composable
+fun LazyCollapsibleContent(content: @Composable ColumnScope.() -> Unit) = Column(content = content)
 
 @Composable
 fun ImageComposable(uri: String, contentDescription: String) {

@@ -25,16 +25,12 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>) =
-    LoadingCollapsible(state, header = "Sigchart") { sigcharts ->
+fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () -> Unit) =
+    LazyCollapsible(header = "Sigcharts", value = state, onExpand = initSigchart) { sigcharts ->
         var selectedArea by rememberSaveable { mutableStateOf(Area.norway) }
         var selectedSigchart by rememberSaveable { mutableIntStateOf(0) }
 
-        val sigchartList = sigcharts[selectedArea]?.takeLast(3)
-
-        if (sigchartList == null) {
-            return@LoadingCollapsible
-        }
+        val sigchartList = sigcharts[selectedArea]?.takeLast(3) ?: return@LazyCollapsible
 
         MultiToggleButton(currentSelection = selectedArea.toString(),
             toggleStates = listOf("norway", "nordic"),

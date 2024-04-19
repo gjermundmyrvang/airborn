@@ -205,7 +205,7 @@ private fun DepartureAndArrivalContent(
 }
 
 @Composable
-private fun AirportInfoRow(
+fun AirportInfoRow(
     modifier: Modifier = Modifier,
     item: Airport,
     onItemClick: (Airport) -> Unit,

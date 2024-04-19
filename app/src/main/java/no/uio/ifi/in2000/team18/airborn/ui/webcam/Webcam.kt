@@ -37,11 +37,11 @@ import coil.compose.AsyncImage
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.ImageComposable
-import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LoadingCollapsible
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
 
 @Composable
-fun WebcamSection(state: LoadingState<List<Webcam>>) = LoadingCollapsible(
-    state, header = "Webcams"
+fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = LazyCollapsible(
+    header = "Webcams", value = state, onExpand = initWebcam
 ) { webcams ->
     if (webcams.isEmpty()) {
         Column(
@@ -52,7 +52,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>) = LoadingCollapsible(
                 text = "No webcams available in 20km radius", fontSize = 30.sp
             )
         }
-        return@LoadingCollapsible
+        return@LazyCollapsible
     }
     Column(
         modifier = Modifier
