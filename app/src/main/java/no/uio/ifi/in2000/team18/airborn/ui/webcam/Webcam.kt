@@ -41,7 +41,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
 
 @Composable
 fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = LazyCollapsible(
-    header = "Webcams", value = state, onExpand = initWebcam
+    header = "Webcams", value = state, onExpand = initWebcam, padding = 0.dp
 ) { webcams ->
     if (webcams.isEmpty()) {
         Column(
@@ -57,7 +57,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(top = 5.dp, start = 5.dp, end = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         var selectedWebcam by rememberSaveable { mutableIntStateOf(0) }
@@ -77,7 +77,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(500.dp),
+                .height(250.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LazyColumn(content = {
