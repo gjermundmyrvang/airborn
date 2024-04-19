@@ -2,6 +2,8 @@ package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -11,8 +13,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.KeyboardArrowUp
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
@@ -29,7 +35,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
@@ -61,10 +66,27 @@ fun FlightBriefScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val scope = rememberCoroutineScope()
     MapBoxHomeScreen()
+    Column(modifier=Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally){
+        Spacer(modifier = Modifier.weight(2F))
+        Button(
+            onClick = {
+                scope.launch {
+                    bottomSheetScaffoldState.bottomSheetState.partialExpand()
+                }
+            }
+        ) {
+            Row() {
+                Icon(imageVector = Icons.Sharp.KeyboardArrowUp, contentDescription = "Show")
+                Text("Expand")
+            }
+        }
+    }
     BottomSheetScaffold(
         modifier = modifier
-            .fillMaxSize(),
+            .padding(16.dp),
         scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
             Column(
@@ -80,7 +102,6 @@ fun FlightBriefScreen(
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         content = {
-
         },
     )
 }
