@@ -5,6 +5,7 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import kotlin.math.atan2
 import kotlin.math.round
+import kotlin.math.roundToInt
 
 class CelsiusAdapter : TypeAdapter<Temperature>() {
     override fun write(writer: JsonWriter, value: Temperature) = writer.value(value.celsius).let {}
@@ -54,7 +55,8 @@ data class Humidity(val humidity: Double) {
 }
 
 data class Speed(val mps: Double) {
-    override fun toString(): String = "%.0f kt".format(knots)
+    override fun toString(): String = "$mps m/s"
+    fun formatAsKnots(): String = "${knots.roundToInt()} kt"
     val kmh get() = this.mps * 3.6
     val knots get() = this.mps * 1.9438452
     operator fun times(x: Number) = Speed(mps = mps * x.toDouble())
@@ -62,8 +64,7 @@ data class Speed(val mps: Double) {
 }
 
 data class Temperature(val celsius: Double) {
-    override fun toString(): String = "%.0f\u2103".format(celsius)
-
+    override fun toString(): String = "${celsius.roundToInt()} \u2103"
     val kelvin get() = this.celsius + 273.15
 }
 
@@ -73,7 +74,7 @@ data class Direction(var degrees: Double) {
         degrees = Math.floorMod(this.degrees.toInt(), 360).toDouble()
     }
 
-    override fun toString(): String = "%.0f\u00B0".format(degrees)
+    override fun toString(): String = "${degrees.roundToInt()} \u00B0"
 
     companion object {
         val EAST: Direction = 90.degrees
@@ -84,11 +85,10 @@ data class Direction(var degrees: Double) {
         fun fromWindUV(u: Double, v: Double) = atan2(-u, -v).radians
     }
 
-    override fun equals(other: Any?) =
-        when (other) {
-            is Direction -> this.degrees.toInt() == other.degrees.toInt()
-            else -> false
-        }
+    override fun equals(other: Any?) = when (other) {
+        is Direction -> this.degrees.toInt() == other.degrees.toInt()
+        else -> false
+    }
 }
 
 data class UvIndex(val uv: Double) {
@@ -100,7 +100,8 @@ data class Distance(val meters: Double) {
     else if (meters < 1000) "${meters} m"
     else "${meters / 1000} km"
 
-    fun toStringAsFeet(): String = "${(round(feet / 10) * 10).toInt()} ft"
+    fun formatAsFeet(): String = "${(round(feet / 10) * 10).toInt()} ft"
+    fun formatAsNm(): String = "${nauticalMiles.roundToInt()} nm"
     val feet get() = meters * 3.2808399
     val nauticalMiles get() = meters * 0.000539956803
 

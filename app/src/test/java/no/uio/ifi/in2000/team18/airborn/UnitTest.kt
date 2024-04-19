@@ -3,7 +3,7 @@ package no.uio.ifi.in2000.team18.airborn
 import junit.framework.TestCase.assertEquals
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
-import no.uio.ifi.in2000.team18.airborn.model.celsius
+import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.model.hpa
 import no.uio.ifi.in2000.team18.airborn.model.mps
@@ -34,14 +34,14 @@ class UnitTest {
 
     @Test
     fun testCelsius() {
-        val celsius = 20.5.celsius
-        assertEquals("20.5 ℃", "$celsius")
+        val celsius = Temperature(20.5)
+        assertEquals("20.5 \u2103", "$celsius")
     }
 
     @Test
     fun testDirectionInDegrees() {
         val direction = 45.0.degrees
-        assertEquals("45.0 degrees", "$direction")
+        assertEquals("45.0 °", "$direction")
     }
 
     @Test
