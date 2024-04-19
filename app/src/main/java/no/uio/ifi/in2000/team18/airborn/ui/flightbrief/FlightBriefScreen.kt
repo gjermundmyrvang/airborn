@@ -14,12 +14,15 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
+
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.sharp.KeyboardArrowUp
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+
 import androidx.compose.material3.FloatingActionButton
+
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -75,6 +78,9 @@ fun FlightBriefScreen(
         Icon(imageVector = Icons.Filled.Home, contentDescription = "Home")
 
     }
+
+    MapBoxHomeScreen()
+
     Column(modifier=Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally){
         Spacer(modifier = Modifier.weight(2F))

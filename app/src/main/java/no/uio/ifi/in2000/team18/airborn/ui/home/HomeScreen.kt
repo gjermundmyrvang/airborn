@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
@@ -54,8 +55,10 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     MapBoxHomeScreen()
-    Column(modifier=Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally){
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Spacer(modifier = Modifier.weight(2F))
         Button(
             onClick = {
@@ -85,6 +88,11 @@ fun HomeScreen(
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         content = {
+
+            Text(
+                text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 80.sp
+            )
+
         },
     )
 }
@@ -170,7 +178,9 @@ fun AirportInfoRow(
         Spacer(modifier = Modifier.width(24.dp))
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = item.name, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold
+                text = item.name,
+                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
             Row {
