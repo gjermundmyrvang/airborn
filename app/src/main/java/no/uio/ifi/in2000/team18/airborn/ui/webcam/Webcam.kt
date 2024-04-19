@@ -66,7 +66,6 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
             uri = webcams[selectedWebcam].images.current.preview,
             contentDescription = "Webcam image"
         )
-        Text(text = "last updated: ${webcams[selectedWebcam].lastUpdatedOn}")
         HyperlinkText(
             fullText = "Webcams provided by windy.com — add a webcam",
             linkText = listOf("windy.com", "add a webcam"),
