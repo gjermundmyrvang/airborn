@@ -32,7 +32,6 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,41 +56,37 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        BottomSheetScaffold(
-            modifier = modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            scaffoldState = bottomSheetScaffoldState,
-            sheetContent = {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    AirportSelection(modifier = modifier.fillMaxWidth(), viewModel = viewModel)
-                }
-            },
-            sheetPeekHeight = 300.dp,
-            sheetShadowElevation = 5.dp,
-            sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
-            content = { paddingValues ->
-                Column(
-                    modifier = Modifier
-                        .padding(paddingValues = paddingValues)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 80.sp
-                    )
-                }
-            },
-        )
-    }
+    BottomSheetScaffold(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxSize(),
+        scaffoldState = bottomSheetScaffoldState,
+        sheetContent = {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AirportSelection(modifier = modifier.fillMaxWidth(), viewModel = viewModel)
+            }
+        },
+        sheetPeekHeight = 300.dp,
+        sheetShadowElevation = 5.dp,
+        sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        content = { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues = paddingValues)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 80.sp
+                )
+            }
+        },
+    )
 }
+
 
 @Composable
 private fun AirportSelection(
@@ -136,10 +131,7 @@ private fun AirportSelection(
                 true -> navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirportInput}")
                 false -> navController.navigate("flightBrief/${state.departureAirportInput}/null")
             }
-        },
-        enabled = departureSelected,
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp)
+        }, enabled = departureSelected, modifier = modifier, shape = RoundedCornerShape(8.dp)
     ) {
         Text("Generate brief")
     }
