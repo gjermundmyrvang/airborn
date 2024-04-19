@@ -51,9 +51,10 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+
+    MapBoxHomeScreen()
     BottomSheetScaffold(
         modifier = modifier
-            .padding(16.dp)
             .fillMaxSize(),
         scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
@@ -65,7 +66,7 @@ fun HomeScreen(
             }
         },
         sheetPeekHeight = 300.dp,
-        sheetShadowElevation = 5.dp,
+        sheetShadowElevation = 300.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         content = { paddingValues ->
             Column(
