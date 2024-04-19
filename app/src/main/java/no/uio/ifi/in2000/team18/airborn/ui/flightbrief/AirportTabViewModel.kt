@@ -54,6 +54,8 @@ sealed class AirportTabViewModel(
         viewModelScope.launch {
             val metarTar = load { airportRepository.fetchTafMetar(icao) }
             _state.update { it.copy(metarTaf = metarTar) }
+            val metarTaf = load { airportRepository.fetchTafMetar(icao) }
+            _state.update { it.copy(metarTaf = metarTaf) }
         }
     }
 
