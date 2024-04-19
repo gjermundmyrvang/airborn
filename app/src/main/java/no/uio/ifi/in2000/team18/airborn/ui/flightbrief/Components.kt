@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+import android.graphics.BlurMaskFilter
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -37,8 +38,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -102,6 +107,38 @@ fun LoadingScreen() {
     }
 }
 
+fun Modifier.shadow(
+    color: Color = Color.Black,
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = 0.dp,
+    blurRadius: Dp = 0.dp,
+) = then(
+    drawBehind {
+        drawIntoCanvas { canvas ->
+            val paint = Paint()
+            val frameworkPaint = paint.asFrameworkPaint()
+            if (blurRadius != 0.dp) {
+                frameworkPaint.maskFilter =
+                    (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
+            }
+            frameworkPaint.color = color.toArgb()
+
+            val leftPixel = offsetX.toPx()
+            val topPixel = offsetY.toPx()
+            val rightPixel = size.width + topPixel
+            val bottomPixel = size.height + leftPixel
+
+            canvas.drawRect(
+                left = leftPixel,
+                top = topPixel,
+                right = rightPixel,
+                bottom = bottomPixel,
+                paint = paint,
+            )
+        }
+    }
+)
+
 @Composable
 fun MultiToggleButton(
     currentSelection: String, toggleStates: List<String>, onToggleChange: (String) -> Unit
@@ -161,6 +198,16 @@ fun <T> LazyCollapsible(
             )
         )
     ) {
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(start = 5.dp, end = 5.dp)
+                .fillMaxWidth()
+                .shadow(
+                    Color.Black,
+                    offsetX = (-4).dp,
+                    blurRadius = 16.dp,
+                ),
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -195,13 +242,6 @@ fun <T> LazyCollapsible(
                 },
             )
         }
-        HorizontalDivider(
-            modifier = Modifier
-                .padding(start = 5.dp, end = 5.dp)
-                .fillMaxWidth(),
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
     }
 }
 
