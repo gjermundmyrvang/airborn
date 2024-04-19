@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,13 +30,11 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,25 +71,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    CustomTabRow(selectedIndex = selectedTabIndex,
-                        onSelectedIndexChanged = { newTabIndex ->
-                            selectedTabIndex = newTabIndex
-                        })
-                    when (selectedTabIndex) {
-                        0 -> DepartureOnlyContent(
-                            modifier = modifier
-                                .padding(start = 5.dp, end = 5.dp)
-                                .fillMaxWidth(),
-                            viewModel = viewModel
-                        )
-
-                        1 -> DepartureAndArrivalContent(
-                            modifier = modifier
-                                .padding(start = 5.dp, end = 5.dp)
-                                .fillMaxWidth(),
-                            viewModel = viewModel
-                        )
-                    }
+                    AirportSelection(modifier = modifier.fillMaxWidth(), viewModel = viewModel)
                 }
             },
             sheetPeekHeight = 300.dp,
@@ -113,41 +94,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun DepartureOnlyContent(
-    modifier: Modifier,
-    viewModel: HomeViewModel,
-) {
-    val state by viewModel.state.collectAsState()
-    val airports = state.airports
-    val navController = LocalNavController.current
-    val scope = rememberCoroutineScope()
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    OutlinedTextField(
-        value = state.departureAirportInput,
-        modifier = modifier,
-        onValueChange = {
-            viewModel.filterDepartureAirports(it)
-        },
-        singleLine = true,
-        label = { Text("Departure airport") },
-        keyboardActions = KeyboardActions(onDone = {
-            keyboardController?.hide()
-        }),
-    )
-    LazyColumn(modifier = Modifier.imePadding(), content = {
-        items(airports) { airport ->
-            AirportInfoRow(item = airport) { clickedAirport ->
-                keyboardController?.hide()
-                viewModel.selectDepartureAirport(clickedAirport.icao.code)
-                navController.navigate("flightBrief/${clickedAirport.icao.code}/null")
-            }
-        }
-    })
-}
-
-@Composable
-private fun DepartureAndArrivalContent(
+private fun AirportSelection(
     modifier: Modifier,
     viewModel: HomeViewModel,
 ) {
@@ -183,6 +130,19 @@ private fun DepartureAndArrivalContent(
             keyboardController?.hide()
         }),
     )
+    Button(
+        onClick = {
+            when (departureSelected && arrivalSelected) {
+                true -> navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirportInput}")
+                false -> navController.navigate("flightBrief/${state.departureAirportInput}/null")
+            }
+        },
+        enabled = departureSelected,
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text("Generate brief")
+    }
     LazyColumn(modifier = Modifier.imePadding(), content = {
         items(airports) { airport ->
             AirportInfoRow(item = airport) { clickedAirport ->
@@ -197,11 +157,6 @@ private fun DepartureAndArrivalContent(
             }
         }
     })
-    LaunchedEffect(departureSelected, arrivalSelected) {
-        if (departureSelected && arrivalSelected) {
-            navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirportInput}")
-        }
-    }
 }
 
 @Composable
