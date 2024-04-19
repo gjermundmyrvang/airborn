@@ -85,13 +85,13 @@ private fun TableContent(isorbaricData: IsobaricData) {
             ) {
                 data.height?.let {
                     TableCell(
-                        text = it.toStringAsFeet(),
+                        text = it.formatAsFeet(),
                         weight = column1Weight,
                         alignment = TextAlign.Left,
                     )
                 }
                 TableCell(text = data.temperature.toString(), weight = column2Weight)
-                TableCell(text = data.windSpeed.toString(), weight = column3Weight)
+                data.windSpeed?.let { TableCell(it.formatAsKnots(), weight = column3Weight) }
                 data.windFromDirection?.let {
                     IconCell(
                         text = data.windFromDirection.toString(),
@@ -144,8 +144,7 @@ fun RowScope.IconCell(
     ) {
         Text(
             text = text,
-            Modifier
-                .padding(10.dp),
+            Modifier.padding(10.dp),
             fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
             textAlign = alignment,
         )
