@@ -11,10 +11,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +29,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
@@ -35,6 +40,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.ArrivalViewModel
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.DepartureViewModel
 import no.uio.ifi.in2000.team18.airborn.ui.home.AirportInfoRow
+import no.uio.ifi.in2000.team18.airborn.ui.home.MapBoxHomeScreen
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.WeatherSection
 import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 
@@ -47,10 +53,36 @@ fun TestFlightBrief() {
     ), filterArrivalAirports = {})
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FlightBriefScreen(viewModel: FlightBriefViewModel = hiltViewModel()) {
+fun FlightBriefScreen(
+    modifier: Modifier = Modifier,
+    viewModel: FlightBriefViewModel = hiltViewModel()
+) {
     val state by viewModel.state.collectAsState()
-    FlightBriefScreenContent(state, filterArrivalAirports = { viewModel.filterArrivalAirports(it) })
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    MapBoxHomeScreen()
+    BottomSheetScaffold(
+        modifier = modifier
+            .fillMaxSize(),
+        scaffoldState = bottomSheetScaffoldState,
+        sheetContent = {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                FlightBriefScreenContent(
+                    state,
+                    filterArrivalAirports = { viewModel.filterArrivalAirports(it) })
+            }
+        },
+        sheetPeekHeight = 300.dp,
+        sheetShadowElevation = 5.dp,
+        sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        content = {
+
+        },
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
