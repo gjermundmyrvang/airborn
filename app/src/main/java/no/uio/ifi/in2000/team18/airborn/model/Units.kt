@@ -122,7 +122,7 @@ val Number.knots get() = this * 0.51444424416.mps
 
 // Temperature
 val Number.kelvin get() = Temperature(celsius = this.toDouble() - 273.15)
-
+val Number.celsius get() = Temperature(celsius = this.toDouble())
 
 // Pressure
 private operator fun Number.times(s: Pressure) = s * this

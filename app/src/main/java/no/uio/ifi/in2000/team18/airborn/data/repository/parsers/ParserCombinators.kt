@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team18.airborn.data.repository.sigmet
+package no.uio.ifi.in2000.team18.airborn.data.repository.parsers
 
 data class ParseState(
     val source: String,
@@ -50,6 +50,7 @@ abstract class Parser<T> {
     fun skipSpace() = skipChars { it.isWhitespace() }
     fun optional(): Parser<T?> = map<T?> { it }.or(pure(null))
     fun optional(default: T): Parser<T> = or(pure(default))
+    fun nullable(): Parser<T?> = map { it }
 }
 
 fun <T> pure(value: T): Parser<T> = GenericParser { ParseResult.Ok(value, it) }
@@ -175,3 +176,5 @@ fun <T, T2, T3, T4, T5, T6, R> lift(
         }
     }
 }
+
+fun <T> either(vararg parsers: Parser<T>) = parsers.reduce { acc, cur -> acc.or(cur) }
