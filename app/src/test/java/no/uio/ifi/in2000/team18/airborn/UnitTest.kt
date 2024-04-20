@@ -35,13 +35,13 @@ class UnitTest {
     @Test
     fun testCelsius() {
         val celsius = Temperature(20.5)
-        assertEquals("20.5 \u2103", "$celsius")
+        assertEquals("21 \u2103", "$celsius")
     }
 
     @Test
     fun testDirectionInDegrees() {
         val direction = 45.0.degrees
-        assertEquals("45.0 °", "$direction")
+        assertEquals("45°", "$direction")
     }
 
     @Test
