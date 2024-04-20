@@ -97,7 +97,7 @@ private val metParser = Unit.let {
 
 
     val messagePart = chars1("a word") { it.isLetter() }.skip(word(" ")).skipSpace()
-    val message = many(messagePart)
+    val message = many1(messagePart)
 
     val metBody = lift(
         metRegion.skipSpace(), message, coordinateList.skipSpace(), alititudeRange.optional()
@@ -139,7 +139,7 @@ private val metParser = Unit.let {
     met
 }
 
-val metsParser = many(
+val metsParser = many1(
     metParser.skipSpace()
 )
 

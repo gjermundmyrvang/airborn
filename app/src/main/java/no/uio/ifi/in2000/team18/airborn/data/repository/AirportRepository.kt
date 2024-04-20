@@ -6,6 +6,7 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.SunriseSunsetDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.WebcamDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
@@ -42,7 +43,8 @@ class AirportRepository @Inject constructor(
         val tafList: List<Taf> =
             tafmetarDataSource.fetchTaf(icao).lines().filter { it.isNotEmpty() }.map { Taf(it) }
         val metarList: List<Metar> =
-            tafmetarDataSource.fetchMetar(icao).lines().filter { it.isNotEmpty() }.map { Metar(it) }
+            tafmetarDataSource.fetchMetar(icao).lines().filter { it.isNotEmpty() }
+                .map { parseMetar(it).expect() }
         return MetarTaf(metars = metarList, tafs = tafList)
     }
 

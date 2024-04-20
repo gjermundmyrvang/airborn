@@ -1,105 +1,119 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository.parsers
 
-import no.uio.ifi.in2000.team18.airborn.model.Direction
-import no.uio.ifi.in2000.team18.airborn.model.Distance
-import no.uio.ifi.in2000.team18.airborn.model.Pressure
-import no.uio.ifi.in2000.team18.airborn.model.Speed
-import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.celsius
 import no.uio.ifi.in2000.team18.airborn.model.degrees
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudLayer
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Clouds
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarDateTime
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarWind
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarWindDirection
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Rvr
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RvrTrend
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RvrVisibility
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.SkyCover
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.VisibilityDistance
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.WeatherPhenomenon
 import no.uio.ifi.in2000.team18.airborn.model.hpa
 import no.uio.ifi.in2000.team18.airborn.model.knots
 import no.uio.ifi.in2000.team18.airborn.model.m
 
-data class Metar(
-    val icao: Icao,
-    val time: MetarDateTime,
-    val wind: Pair<MetarWind, Pair<Int, Int>?>,
-    val cav: Cav,
-    val temperatures: Pair<Temperature, Temperature>,
-    val altimeterSetting: Pressure,
-    val rest: String,
-)
 
-data class MetarDateTime(val day: Int, val hour: Int, val minute: Int) {
-    override fun toString(): String = "$day. $hour:$minute"
+enum class PhenomenonQualifier {
+    Light,
+    Heavy,
+    Moderate;
+
+    override fun toString() = when (this) {
+        Light -> "light"
+        Heavy -> "heavy"
+        Moderate -> "moderate"
+    }
 }
 
-sealed interface Visibility {
-    data object NoVisibility : Visibility // Less than 50 m
-    data object Clear : Visibility // More than 10 km
-    data class Distance(val distance: Int) : Visibility // Distance specified
+enum class PhenomenonDescriptor {
+    Patches,
+    Blowing,
+    LowDrifting,
+    Freezing,
+    Shallow,
+    Partial,
+    Shower,
+    Thunderstorm;
+
+    override fun toString() = when (this) {
+        Patches -> "patches"
+        Blowing -> "blowing"
+        LowDrifting -> "low drifting"
+        Freezing -> "freezing"
+        Shallow -> "shallow"
+        Partial -> "partial"
+        Shower -> "showering"
+        Thunderstorm -> "thunderstorm"
+    }
 }
 
-sealed interface Cav {
-    data object OK : Cav
-    data class Info(
-        val visibility: Pair<Visibility, List<Pair<Visibility, String>>>,
-        val rvrs: List<Rvr>,
-        val weatherPhenomena: List<WeatherPhenomenon>,
-        val clouds: Clouds
-    ) : Cav
+enum class PhenomenonPrecipitation {
+    Drizzle,
+    Hail,
+    SmallHail, // And/Or snow pellets
+    Icecrystals,
+    Icepellets,
+    Rain,
+    SnowGrains,
+    Snow,
+    UnknownPrecipitation;
+
+    override fun toString() = when (this) {
+        Drizzle -> "drizzle"
+        Hail -> "hail"
+        SmallHail -> "small hail and/or snow pellets"
+        Icecrystals -> "ice crystals"
+        Icepellets -> "ice pellets"
+        Rain -> "rain"
+        SnowGrains -> "snow grains"
+        Snow -> "snow"
+        UnknownPrecipitation -> "unknown"
+    }
 }
 
-data class WeatherPhenomenon(
-    val qualifier: String,
-    val descriptor: String?,
-    val precipitation: List<String>,
-    val obscuration: List<String>,
-    val other: List<String>
-)
+enum class PhenomenonObscuration {
+    Mist,
+    WidespreadDust,
+    Fog,
+    Smoke,
+    Haze,
+    Sand,
+    VolcanicAsh;
 
-sealed interface MetarWindDirection {
-    data object Variable : MetarWindDirection
-    data class Constant(val direction: Direction) : MetarWindDirection
+    override fun toString() = when (this) {
+        Mist -> "mist"
+        WidespreadDust -> "widespread dust"
+        Fog -> "fog"
+        Smoke -> "smoke"
+        Haze -> "haze"
+        Sand -> "sand"
+        VolcanicAsh -> "volcanic ash"
+    }
 }
 
-data class MetarWind(
-    val direction: MetarWindDirection,
-    val speed: Speed,
-    val gustSpeed: Speed?,
-)
+enum class PhenomenonExtra {
+    DustStorm,
+    FunnelClouds,
+    DustOrSandWhirls,
+    Squall,
+    Sandstorm;
 
-sealed interface RvrVisibility {
-    data class MoreThan(val distance: Distance) : RvrVisibility
-    data class LessThan(val distance: Distance) : RvrVisibility
-    data class Exactly(val distance: Distance) : RvrVisibility
-    data class Range(val min: Distance, val max: Distance) : RvrVisibility
-}
-
-enum class RvrTrend {
-    Downward, Upward, NoChange,
-}
-
-data class Rvr(
-    val runway: String,
-    val visibility: RvrVisibility,
-    val trend: RvrTrend?,
-)
-
-enum class SkyCover {
-    FEW, SCT, BKN, VV, OVC, Unknown,
-}
-
-enum class CloudType {
-    Cumulus, // "CU"
-    ToweringCumulus, // "TCU"
-    Unknown, // "///"
-    Nothing, // "";
-    Cumulonimbus, // CB
-}
-
-data class CloudLayer(
-    val cover: SkyCover,
-    val height: Int,
-    val type: CloudType,
-)
-
-sealed interface Clouds {
-    data class Layers(val layers: List<CloudLayer>) : Clouds
-    data object NCD : Clouds
-    data object NSC : Clouds
+    override fun toString() = when (this) {
+        DustStorm -> "dust storm"
+        FunnelClouds -> "funnel clouds"
+        DustOrSandWhirls -> "dust/sand whirls"
+        Squall -> "squall(s)"
+        Sandstorm -> "sandstorm"
+    }
 }
 
 
@@ -137,23 +151,28 @@ private val metarParser = Unit.let {
         val cavok: Parser<Cav> = word("CAVOK").or(word("CAVOC")).map { Cav.OK }
         val visibility = Unit.let {
             val cardinalDirectionLetter = either(
-                word("NE").map { "North East" },
-                word("SE").map { "South East" },
-                word("NW").map { "North West" },
-                word("SW").map { "South West" },
-                char('N').map { "North" },
-                char('E').map { "East" },
-                char('S').map { "South" },
-                char('W').map { "West" },
+                word("NE").map { 45.degrees },
+                word("SE").map { 135.degrees },
+                word("NW").map { 315.degrees },
+                word("SW").map { 225.degrees },
+                char('N').map { 0.degrees },
+                char('E').map { 90.degrees },
+                char('S').map { 180.degrees },
+                char('W').map { 270.degrees },
             )
             val clear =
-                word("9999").or(word("10SM")).map<Visibility> { Visibility.Clear }.skip(word("NDV"))
-            val noVisibility: Parser<Visibility> = word("0000").map { Visibility.NoVisibility }
-            val distance: Parser<Visibility> = number.map { Visibility.Distance(it) }
-            val visibility =
-                clear.or(noVisibility).or(distance).bind { v -> word("NDV").optional().map { v } }
+                word("9999").or(word("10SM")).map<VisibilityDistance> { VisibilityDistance.Clear }
+            val noVisibility: Parser<VisibilityDistance> =
+                word("0000").map { VisibilityDistance.NoVisibility }
+            val distance: Parser<VisibilityDistance> =
+                number.map { VisibilityDistance.Distance(it) }
+            val visibility = clear.or(noVisibility).or(distance)
+            // TODO: Directional visibility
             val directionalVisibility = pair(visibility.skipSpace(), cardinalDirectionLetter)
-            pair(visibility.skipSpace(), many(directionalVisibility).optional(listOf()))
+            pair(visibility.skipSpace(), either(
+                word("NDV").map { null },
+                pure(Unit).skipSpace().bind { many(directionalVisibility).nullable() }
+            ))
         }
 
         val rvr = Unit.let {
@@ -181,65 +200,73 @@ private val metarParser = Unit.let {
             lift(runway.skip(char('/')), visibilityPart, trend) { r, v, t -> Rvr(r, v, t) }
         }
 
+
         val weatherPhenomenon = Unit.let {
             val qualifier = either(
-                word("-").map { "Light" },
-                word("+").map { "Heavy" },
-                word("VC").map { "Vicinity" },
-                pure("Moderate"), // This has to be last
+                word("-").map { PhenomenonQualifier.Light },
+                word("+").map { PhenomenonQualifier.Heavy },
+                pure(PhenomenonQualifier.Moderate), // This has to be last
             )
 
             val descriptor = either(
-                word("BC").map { "Patches" },
-                word("BL").map { "Blowing" },
-                word("DR").map { "Low Drifting" },
-                word("FZ").map { "Freezing" },
-                word("MI").map { "Shallow" },
-                word("PR").map { "Partial" },
-                word("SH").map { "Shower(s)" },
-                word("TS").map { "Thunderstorm" },
+                word("BC").map { PhenomenonDescriptor.Patches },
+                word("BL").map { PhenomenonDescriptor.Blowing },
+                word("DR").map { PhenomenonDescriptor.LowDrifting },
+                word("FZ").map { PhenomenonDescriptor.Freezing },
+                word("MI").map { PhenomenonDescriptor.Shallow },
+                word("PR").map { PhenomenonDescriptor.Partial },
+                word("SH").map { PhenomenonDescriptor.Shower },
+                word("TS").map { PhenomenonDescriptor.Thunderstorm },
             )
 
             val precipitation = either(
-                word("DZ").map { "Drizzle" },
-                word("GR").map { "Hail" },
-                word("GS").map { "Small hail and/or snow pellets" },
-                word("IC").map { "Ice crystals" },
-                word("PL").map { "Ice pellets" },
-                word("RA").map { "Rain" },
-                word("SG").map { "Snow Grains" },
-                word("SN").map { "Snow" },
-                word("UP").map { "Unknown Precipitation" },
+                word("DZ").map { PhenomenonPrecipitation.Drizzle },
+                word("GR").map { PhenomenonPrecipitation.Hail },
+                word("GS").map { PhenomenonPrecipitation.SmallHail },
+                word("IC").map { PhenomenonPrecipitation.Icecrystals },
+                word("PL").map { PhenomenonPrecipitation.Icepellets },
+                word("RA").map { PhenomenonPrecipitation.Rain },
+                word("SG").map { PhenomenonPrecipitation.SnowGrains },
+                word("SN").map { PhenomenonPrecipitation.Snow },
+                word("UP").map { PhenomenonPrecipitation.UnknownPrecipitation },
             )
 
             val obsucration = either(
-                word("BR").map { "Mist" },
-                word("DU").map { "Widespread dust" },
-                word("FG").map { "Fog" },
-                word("FU").map { "Smoke" },
-                word("HZ").map { "Haze" },
-                word("SA").map { "Sand" },
-                word("VA").map { "Volcanic Ash" },
+                word("BR").map { PhenomenonObscuration.Mist },
+                word("DU").map { PhenomenonObscuration.WidespreadDust },
+                word("FG").map { PhenomenonObscuration.Fog },
+                word("FU").map { PhenomenonObscuration.Smoke },
+                word("HZ").map { PhenomenonObscuration.Haze },
+                word("SA").map { PhenomenonObscuration.Sand },
+                word("VA").map { PhenomenonObscuration.VolcanicAsh },
             )
 
             val other = either(
-                word("DS").map { "Duststorm" },
-                word("FC").map { "Funnel Clouds" },
-                word("PO").map { "Dust/Sand Whirls" },
-                word("SQ").map { "Squall(s)" },
-                word("SS").map { "Sandstorm" },
+                word("DS").map { PhenomenonExtra.DustStorm },
+                word("FC").map { PhenomenonExtra.FunnelClouds },
+                word("PO").map { PhenomenonExtra.DustOrSandWhirls },
+                word("SQ").map { PhenomenonExtra.Squall },
+                word("SS").map { PhenomenonExtra.Sandstorm },
             )
 
             lift(
                 qualifier,
+                word("VC").optional().map { it != null },
                 descriptor.optional(),
-                many(precipitation).optional(listOf()),
-                many(obsucration).optional(listOf()),
-                many(other).optional(listOf()),
-            ) { qualifier, descriptor, precipitation, obscuration, other ->
-                WeatherPhenomenon(qualifier, descriptor, precipitation, obscuration, other)
+                many1(precipitation).optional(listOf()),
+                many1(obsucration).optional(listOf()),
+                many1(other).optional(listOf()),
+            ) { qualifier, inVicinity, descriptor, precipitation, obscuration, other ->
+                WeatherPhenomenon(
+                    qualifier,
+                    descriptor,
+                    precipitation,
+                    obscuration,
+                    other,
+                    inVicinity
+                )
             }.filter({
-                it.qualifier != "Moderate" //
+                it.qualifier != PhenomenonQualifier.Moderate //
                         || it.descriptor != null //
                         || it.precipitation.isNotEmpty() //
                         || it.obscuration.isNotEmpty()  //
@@ -249,7 +276,7 @@ private val metarParser = Unit.let {
 
         val cloudLayer = Unit.let {
             val skyCover = either(
-                word("FEW").map { SkyCover.FEW }, // TODO: Is this always a three digit number
+                word("FEW").map { SkyCover.FEW },
                 word("SCT").map { SkyCover.SCT },
                 word("BKN").map { SkyCover.BKN },
                 word("VV").map { SkyCover.VV },
@@ -265,19 +292,20 @@ private val metarParser = Unit.let {
                 pure(CloudType.Nothing),
             )
 
+            // TODO: Is this always a three digit number
             lift(skyCover, number, cloudType) { cover, number, cloudType ->
-                CloudLayer(cover, number, cloudType)
+                CloudLayer(cover, number.m, cloudType)
             }
         }
         val clouds = either(
             word("NCD").map { Clouds.NCD },
             word("NSC").map { Clouds.NSC },
-            many(cloudLayer.skipSpace()).optional(listOf()).map { Clouds.Layers(it) },
+            many1(cloudLayer.skipSpace()).optional(listOf()).map { Clouds.Layers(it) },
         )
 
         cavok.or(lift(
             visibility.skipSpace(), many(rvr.skipSpace()),
-            many(weatherPhenomenon.skipSpace()).optional(listOf()), clouds,
+            many1(weatherPhenomenon.skipSpace()).optional(listOf()), clouds,
         ) { visibility, rvrs, weatherPhenomena, clouds ->
             Cav.Info(
                 visibility, rvrs, weatherPhenomena, clouds
@@ -306,4 +334,10 @@ private val metarParser = Unit.let {
     }.skip(char('='))
 }
 
-fun parseMetar(source: String): ParseResult<Metar> = metarParser.parse(source)
+fun parseMetar(source: String): ParseResult<Metar> =
+    metarParser.parse(source).map { it.copy(text = source) }
+
+private fun <T, U> ParseResult<T>.map(f: (T) -> U): ParseResult<U> = when (this) {
+    is ParseResult.Ok -> ParseResult.Ok(f(this.value), state)
+    is ParseResult.Error -> ParseResult.Error(this.expected)
+}

@@ -14,6 +14,11 @@ data class ParseState(
 }
 
 sealed interface ParseResult<T> {
+    fun expect() = when (this) {
+        is Ok -> this.value
+        is Error -> throw RuntimeException("Failed to parse metar. expected: ${this.expected}")
+    }
+
     data class Ok<T>(val value: T, val state: ParseState) : ParseResult<T>
     data class Error<T>(val expected: List<String>) : ParseResult<T>
 }
@@ -96,9 +101,11 @@ fun <T, T2> sepBy(parser: Parser<T>, sep: Parser<T2>): Parser<List<T>> = parser.
     sep.bind { sepBy(parser, sep) }.optional().map { listOf(v1) + (it ?: listOf()) }
 }
 
-fun <T> many(parser: Parser<T>): Parser<List<T>> = parser.bind { v1 ->
-    many(parser).optional().map { listOf(v1) + (it ?: listOf()) }
+fun <T> many1(parser: Parser<T>): Parser<List<T>> = parser.bind { v1 ->
+    many1(parser).optional().map { listOf(v1) + (it ?: listOf()) }
 }
+
+fun <T> many(parser: Parser<T>): Parser<List<T>> = many1(parser).optional(listOf())
 
 fun char(c: Char) = char("$c") { it == c }
 
@@ -112,12 +119,8 @@ fun <T, T2, R> lift(p1: Parser<T>, p2: Parser<T2>, fn: (T, T2) -> R): Parser<R> 
     p1.bind { a -> p2.map { fn(a, it) } }
 
 fun <T, T2, T3, R> lift(
-    p1: Parser<T>,
-    p2: Parser<T2>,
-    p3: Parser<T3>,
-    fn: (T, T2, T3) -> R
-): Parser<R> =
-    p1.bind { a -> p2.bind { b -> p3.map { fn(a, b, it) } } }
+    p1: Parser<T>, p2: Parser<T2>, p3: Parser<T3>, fn: (T, T2, T3) -> R
+): Parser<R> = p1.bind { a -> p2.bind { b -> p3.map { fn(a, b, it) } } }
 
 fun <T, T2, T3, T4, R> lift(
     p1: Parser<T>, p2: Parser<T2>, p3: Parser<T3>, p4: Parser<T4>, fn: (T, T2, T3, T4) -> R
@@ -136,11 +139,7 @@ fun <T, T2, T3, T4, T5, R> lift(
             p4.bind { d ->
                 p5.map {
                     fn(
-                        a,
-                        b,
-                        c,
-                        d,
-                        it
+                        a, b, c, d, it
                     )
                 }
             }
@@ -163,12 +162,7 @@ fun <T, T2, T3, T4, T5, T6, R> lift(
                 p5.bind { e ->
                     p6.map {
                         fn(
-                            a,
-                            b,
-                            c,
-                            d,
-                            e,
-                            it
+                            a, b, c, d, e, it
                         )
                     }
                 }

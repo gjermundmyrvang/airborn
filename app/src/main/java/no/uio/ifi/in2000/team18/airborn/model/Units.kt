@@ -89,6 +89,17 @@ data class Direction(var degrees: Double) {
         is Direction -> this.degrees.toInt() == other.degrees.toInt()
         else -> false
     }
+
+    fun formatAsPrincipal() = listOf(
+        "north",
+        "northeast",
+        "east",
+        "southeast",
+        "south",
+        "southwest",
+        "west",
+        "northwest",
+    )[Math.floorMod((degrees + 22.5).toInt().floorDiv(45), 8)]
 }
 
 data class UvIndex(val uv: Double) {
