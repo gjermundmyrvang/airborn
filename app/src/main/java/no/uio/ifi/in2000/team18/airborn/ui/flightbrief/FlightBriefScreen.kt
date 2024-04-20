@@ -25,6 +25,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -35,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,7 +72,12 @@ fun FlightBriefScreen(
     viewModel: FlightBriefViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(false,
+            LocalDensity.current,
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = false)
+    )
     val scope = rememberCoroutineScope()
     val navController = LocalNavController.current
     MapBoxHomeScreen()

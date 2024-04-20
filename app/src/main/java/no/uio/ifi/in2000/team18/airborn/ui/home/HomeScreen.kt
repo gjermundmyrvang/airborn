@@ -23,6 +23,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,7 +53,12 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(false,
+            LocalDensity.current,
+            initialValue = SheetValue.PartiallyExpanded,
+            skipHiddenState = false)
+    )
     val scope = rememberCoroutineScope()
 
     MapBoxHomeScreen()
@@ -83,7 +91,7 @@ fun HomeScreen(
                 AirportSelection(modifier = modifier.fillMaxWidth(), viewModel = viewModel)
             }
         },
-        sheetPeekHeight = 300.dp,
+        sheetPeekHeight = 400.dp,
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         content = {
