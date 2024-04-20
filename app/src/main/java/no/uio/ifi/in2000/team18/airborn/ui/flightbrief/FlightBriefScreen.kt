@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -16,7 +16,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.sharp.KeyboardArrowUp
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
@@ -80,19 +81,27 @@ fun FlightBriefScreen(
     )
     val scope = rememberCoroutineScope()
     val navController = LocalNavController.current
-    MapBoxHomeScreen()
-
-    FloatingActionButton(
-        modifier = Modifier.offset(330.dp, 445.dp),
-        shape = CircleShape,
-        onClick = {
-            navController.navigate("home") {
-                popUpTo("home") { inclusive = true }
+    Column {
+        Row {
+            FloatingActionButton(
+                shape = CircleShape,
+                onClick = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
+            ){
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Home")
             }
+            Spacer(Modifier.width(10.dp))
+            Text(text = "AIRBORNE",
+                fontWeight = FontWeight.Bold,
+                fontSize = 50.sp)
         }
-    ){
-        Icon(imageVector = Icons.Filled.Search, contentDescription = "Home")
+        MapBoxHomeScreen()
     }
+
+    
 
     Column(
         modifier = Modifier.fillMaxWidth(),
