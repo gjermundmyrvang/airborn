@@ -74,7 +74,7 @@ data class Direction(var degrees: Double) {
         degrees = Math.floorMod(this.degrees.toInt(), 360).toDouble()
     }
 
-    override fun toString(): String = "${degrees.roundToInt()} \u00B0"
+    override fun toString(): String = "${degrees.roundToInt()}\u00B0"
 
     companion object {
         val EAST: Direction = 90.degrees
