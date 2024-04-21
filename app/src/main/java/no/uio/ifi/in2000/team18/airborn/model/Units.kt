@@ -164,10 +164,10 @@ val Number.nauticalMiles get() = this * 1852.m
 
 // Utilities:
 fun Double.format(decimals: Int) =
-    if (decimals <= 0) "${
-        (this / Math.pow(
-            10.0,
-            -decimals.toDouble()
-        )).roundToInt()
-    }${"0".repeat(-decimals)}"
-    else "${this.formatToFloat(decimals)}"
+    if (decimals <= 0) "${this.round(decimals).roundToInt()}"
+    else "${this.round(decimals).formatToFloat(decimals)}"
+
+fun Double.round(decimals: Int): Double {
+    var multiplier = Math.pow(10.0, decimals.toDouble())
+    return round(this * multiplier) / multiplier
+}

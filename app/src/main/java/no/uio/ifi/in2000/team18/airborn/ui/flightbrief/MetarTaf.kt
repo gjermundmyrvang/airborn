@@ -35,9 +35,11 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Clouds
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarWindDirection
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Rvr
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.VisibilityDistance
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import java.time.ZoneId
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -143,8 +145,11 @@ fun DecodedMetar(metar: Metar) = Column(
     Row {
         Text("Wind: ", fontWeight = FontWeight.Bold)
         val wind = metar.wind.first
-        Text("${wind.direction} ${wind.speed}") // TODO: Arrow pointing in wind direction
-        wind.gustSpeed?.let { gusts -> Text(" (gusts: ${gusts})") }
+        if (wind.direction is MetarWindDirection.Constant) {
+            RotatableArrowIcon(wind.direction.direction, iconSize = 16.dp)
+        }
+        Text("${wind.direction.formatAsDegrees(0)} ${wind.speed.formatAsKnots(1)}") // TODO: Arrow pointing in wind direction
+        wind.gustSpeed?.let { gusts -> Text(" (gusts: ${gusts.formatAsKnots(1)})") }
     }
     metar.wind.second?.let { variableDirection ->
         Row {
@@ -239,7 +244,7 @@ fun MetarClouds(clouds: Clouds) {
 fun TestMetarDecode() = Column {
     DecodedMetar(
         parseMetar(
-            "ENSG 150720Z 07007KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
+            "ENSG 150720Z 07207KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
             Instant.parse("2024-04-16T00:00:00Z")
         ).expect()
     )
