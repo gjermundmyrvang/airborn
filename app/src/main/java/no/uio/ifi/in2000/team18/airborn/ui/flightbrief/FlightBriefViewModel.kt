@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
+import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
@@ -30,6 +31,8 @@ class FlightBriefViewModel @Inject constructor(
         val arrivalAirportInput: String = "",
         val airports: List<Airport> = listOf(),
         val departureIcao: Icao,
+        val offshoreMaps: LoadingState<Map<String, List<OffshoreMap>>> = Loading,
+        val geoSatelliteImage: LoadingState<String> = Loading,
     )
 
     private val _state = MutableStateFlow(
@@ -54,6 +57,20 @@ class FlightBriefViewModel @Inject constructor(
         viewModelScope.launch {
             val sigcharts = load { airportRepository.getSigcharts() }
             _state.update { it.copy(sigcharts = sigcharts) }
+        }
+    }
+
+    fun initOffshoreMpas() {
+        viewModelScope.launch {
+            val offshoreMaps = load { airportRepository.getOffshoreMaps() }
+            _state.update { it.copy(offshoreMaps = offshoreMaps) }
+        }
+    }
+
+    fun initGeosatelliteImage() {
+        viewModelScope.launch {
+            val satelliteImage = load { airportRepository.getGeosatelliteImage() }
+            _state.update { it.copy(geoSatelliteImage = satelliteImage) }
         }
     }
 
