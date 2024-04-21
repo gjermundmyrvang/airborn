@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Direction
-import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Clouds
@@ -127,7 +126,7 @@ fun DecodedMetar(metar: Metar) = Column(
     metar.wind.second?.let { variableDirection ->
         Row {
             Text("Variable Wind Direction: ", fontWeight = FontWeight.Bold)
-            Text("${variableDirection.first.degrees} to ${variableDirection.second.degrees}")
+            Text("${variableDirection.first} to ${variableDirection.second}")
         }
     }
 

@@ -144,7 +144,8 @@ private val metarParser = Unit.let {
                     MetarWind(direction, speed.let { it.knots }, gustSpeed?.let { it.knots })
                 }
             }
-        val variableWinds = pair(threeDigitNumber.skip(char("V")), threeDigitNumber).optional()
+        val direction = threeDigitNumber.map { it.degrees }
+        val variableWinds = pair(direction.skip(char("V")), direction).optional()
         pair(wind.skipSpace(), variableWinds)
     }
     val cav = Unit.let {
@@ -330,7 +331,15 @@ private val metarParser = Unit.let {
         altimeterSetting.skipSpace(),
         chars { it != '=' },
     ) { header, wind, cav, temperatures, altimeterSetting, rest ->
-        Metar(header.second, header.third, wind, cav, temperatures, altimeterSetting, rest)
+        Metar(
+            header.second, header.third,
+            wind,
+            cav,
+            temperatures,
+            altimeterSetting,
+            rest,
+            text = "",
+        )
     }.skip(char('='))
 }
 

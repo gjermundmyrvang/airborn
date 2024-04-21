@@ -14,7 +14,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Temperature
 data class Metar(
     val station: Icao,
     val time: MetarDateTime,
-    val wind: Pair<MetarWind, Pair<Int, Int>?>,
+    val wind: Pair<MetarWind, Pair<Direction, Direction>?>,
     val cav: Cav,
     val temperatures: Pair<Temperature, Temperature>,
     val altimeterSetting: Pressure,
