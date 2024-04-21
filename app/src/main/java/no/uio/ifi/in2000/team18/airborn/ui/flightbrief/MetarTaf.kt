@@ -180,7 +180,7 @@ fun MetarRvrList(rvrs: List<Rvr>) {
     rvrs.forEach { rvr ->
         Row {
             Text("RVR for runway ${rvr.runway}: ", fontWeight = FontWeight.Bold)
-            Text("${rvr.visibility} ${rvr.trend}")
+            Text("${rvr.visibility} ${rvr.trend ?: ""}")
         }
     }
 }
