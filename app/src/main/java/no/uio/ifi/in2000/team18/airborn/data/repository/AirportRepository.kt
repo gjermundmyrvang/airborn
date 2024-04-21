@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
 import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.GeosatelliteDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SunriseSunsetDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
@@ -28,6 +29,7 @@ class AirportRepository @Inject constructor(
     private val turbulenceDataSource: TurbulenceDataSource,
     private val webcamDataSource: WebcamDataSource,
     private val sunriseSunsetDataSource: SunriseSunsetDataSource
+    private val geosatelliteDataSource: GeosatelliteDataSource,
 ) {
     // Airport logic
     suspend fun getByIcao(icao: Icao): Airport? = airportDataSource.getByIcao(icao)
@@ -95,4 +97,5 @@ class AirportRepository @Inject constructor(
             newSun
         }
     }
+    fun getGeosatelliteImage(): String = geosatelliteDataSource.fetchGeosatelliteImage()
 }
