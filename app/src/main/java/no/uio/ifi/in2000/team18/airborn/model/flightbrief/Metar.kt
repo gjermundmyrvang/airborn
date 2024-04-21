@@ -60,21 +60,29 @@ data class WeatherPhenomenon(
     val inVicinity: Boolean,
 ) {
     override fun toString() = buildString {
-        append("$qualifier")
-        descriptor?.let { append(" $it") }
-        precipitation.forEach { append(" $it") }
-
-        if (precipitation.isNotEmpty() && (other.isNotEmpty() || obscuration.isNotEmpty())) append(" with")
-        when {
-            other.isNotEmpty() && obscuration.isNotEmpty() -> {
-                append(" ${formatList(obscuration.map { it.toString() })},")
-                append(" and ${formatList(other.map { it.toString() })}")
+        if (descriptor == PhenomenonDescriptor.Thunderstorm) {
+            append("thunderstorm with ")
+            if (qualifier != PhenomenonQualifier.Moderate) {
+                append(qualifier)
+                append(" ")
             }
+            append(formatList(precipitation.map { it.toString() } + obscuration.map { it.toString() } + other.map { it.toString() }))
+        } else {
+            append("$qualifier")
+            descriptor?.let { append(" $it") }
+            precipitation.forEach { append(" $it") }
 
-            obscuration.isNotEmpty() -> append(" ${formatList(obscuration.map { it.toString() })}")
-            other.isNotEmpty() -> append(" ${formatList(other.map { it.toString() })}")
+            if (precipitation.isNotEmpty() && (other.isNotEmpty() || obscuration.isNotEmpty())) append(" with")
+            when {
+                other.isNotEmpty() && obscuration.isNotEmpty() -> {
+                    append(" ${formatList(obscuration.map { it.toString() })},")
+                    append(" and ${formatList(other.map { it.toString() })}")
+                }
+
+                obscuration.isNotEmpty() -> append(" ${formatList(obscuration.map { it.toString() })}")
+                other.isNotEmpty() -> append(" ${formatList(other.map { it.toString() })}")
+            }
         }
-
         if (inVicinity) append(" in the vicinity")
     }
 }
