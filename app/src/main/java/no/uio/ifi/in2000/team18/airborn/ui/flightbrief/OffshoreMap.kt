@@ -39,7 +39,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 @Composable
 fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffshoreMap: () -> Unit) =
     LazyCollapsible(
-        header = "Offshore", value = state, onExpand = initOffshoreMap
+        header = "Offshore maps", value = state, onExpand = initOffshoreMap
     ) { offshoreMap ->
         val mapTypeOptions = listOf(
             "helicopterlightningobservations",
@@ -120,7 +120,7 @@ fun TimeRow(offshoreList: List<OffshoreMap>, currentlySelected: Int, onTimeClick
                     imageVector = if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange,
                     contentDescription = ""
                 )
-                Text(text = "${map.updated.dayMonthHour} LT")
+                Text(text = "${map.params.time.dayNumberMonthTime} LT")
             }
             Spacer(modifier = Modifier.width(16.dp))
         }

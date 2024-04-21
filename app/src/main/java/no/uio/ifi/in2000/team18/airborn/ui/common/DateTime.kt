@@ -29,6 +29,8 @@ data class DateTime(val isoDateTime: String) {
 
     val dayNumberMonth = "$dayNumber. $month"
 
+    val dayNumberMonthTime = "$dayNumber. $month. $time"
+
     val dayMonthHour = "$day $month $time"
 
     val time
