@@ -115,12 +115,16 @@ fun formatList(strings: List<String>): String = when (strings.size) {
 }
 
 sealed interface MetarWindDirection {
+    fun formatAsDegrees(decimals: Int = 0): String
+
     data object Variable : MetarWindDirection {
         override fun toString(): String = "Variable"
+        override fun formatAsDegrees(decimals: Int): String = "Variable"
     }
 
     data class Constant(val direction: Direction) : MetarWindDirection {
         override fun toString() = direction.toString()
+        override fun formatAsDegrees(decimals: Int): String = direction.formatAsDegrees(decimals)
     }
 
 }
