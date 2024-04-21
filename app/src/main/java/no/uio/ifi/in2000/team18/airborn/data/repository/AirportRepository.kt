@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
+import kotlinx.datetime.Clock
 import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SunriseSunsetDataSource
@@ -44,7 +45,7 @@ class AirportRepository @Inject constructor(
             tafmetarDataSource.fetchTaf(icao).lines().filter { it.isNotEmpty() }.map { Taf(it) }
         val metarList: List<Metar> =
             tafmetarDataSource.fetchMetar(icao).lines().filter { it.isNotEmpty() }
-                .map { parseMetar(it).expect() }
+                .map { parseMetar(it, Clock.System.now()).expect() }
         return MetarTaf(metars = metarList, tafs = tafList)
     }
 

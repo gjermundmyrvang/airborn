@@ -21,6 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
+import kotlinx.datetime.format.byUnicodePattern
+import kotlinx.datetime.toKotlinTimeZone
+import kotlinx.datetime.toLocalDateTime
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
@@ -31,6 +38,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Rvr
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.VisibilityDistance
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import java.time.ZoneId
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -93,6 +101,10 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
         }
     }
 
+@OptIn(FormatStringsInDatetimeFormats::class)
+fun LocalDateTime.format(format: String) =
+    format(LocalDateTime.Format { byUnicodePattern(format) })
+
 @Composable
 fun DecodedMetar(metar: Metar) = Column(
     modifier = Modifier
@@ -104,6 +116,17 @@ fun DecodedMetar(metar: Metar) = Column(
     Row {
         Text("Station Name: ", fontWeight = FontWeight.Bold)
         Text("${metar.station}")
+    }
+    metar.instant?.let {
+        Row {
+            val timeZone = ZoneId.systemDefault().toKotlinTimeZone()
+            val localTime = it.toLocalDateTime(timeZone)
+            val formattedTime = localTime.format("dd/MM-yy HH:mm")
+            Text("Time: ", fontWeight = FontWeight.Bold)
+            Text(
+                "$formattedTime local time"
+            )
+        }
     }
     // TODO: Report Time
     when (metar.cav) {
@@ -214,6 +237,11 @@ fun MetarClouds(clouds: Clouds) {
 @Preview(showSystemUi = true)
 @Composable
 fun TestMetarDecode() = Column {
-    DecodedMetar(parseMetar("ENSG 150720Z 07007KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=").expect())
-    DecodedMetar(parseMetar("ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT=").expect())
+    DecodedMetar(
+        parseMetar(
+            "ENSG 150720Z 07007KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
+            Instant.parse("2024-04-16T00:00:00Z")
+        ).expect()
+    )
+    DecodedMetar(parseMetar("ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT=").expect())
 }

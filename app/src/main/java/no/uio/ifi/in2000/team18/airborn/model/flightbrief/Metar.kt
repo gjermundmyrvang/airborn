@@ -1,5 +1,10 @@
 package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.PhenomenonDescriptor
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.PhenomenonExtra
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.PhenomenonObscuration
@@ -20,10 +25,23 @@ data class Metar(
     val altimeterSetting: Pressure,
     val rest: String,
     val text: String = "",
-)
+    val downloaded: Instant?,
+) {
+    val instant: Instant? get() = downloaded?.let { time.resolveInstant(it) }
+}
 
 data class MetarDateTime(val day: Int, val hour: Int, val minute: Int) {
     override fun toString(): String = "$day. $hour:$minute"
+
+    fun resolveInstant(
+        downloaded: Instant
+    ) = downloaded.toLocalDateTime(TimeZone.UTC).let {
+        LocalDateTime(
+            it.year,
+            it.month - if (day > it.dayOfMonth) 1 else 0,
+            day, hour, minute,
+        ).toInstant(TimeZone.UTC)
+    }
 }
 
 sealed interface VisibilityDistance {
@@ -72,7 +90,9 @@ data class WeatherPhenomenon(
             descriptor?.let { append(" $it") }
             precipitation.forEach { append(" $it") }
 
-            if (precipitation.isNotEmpty() && (other.isNotEmpty() || obscuration.isNotEmpty())) append(" with")
+            if (precipitation.isNotEmpty() && (other.isNotEmpty() || obscuration.isNotEmpty())) append(
+                " with"
+            )
             when {
                 other.isNotEmpty() && obscuration.isNotEmpty() -> {
                     append(" ${formatList(obscuration.map { it.toString() })},")

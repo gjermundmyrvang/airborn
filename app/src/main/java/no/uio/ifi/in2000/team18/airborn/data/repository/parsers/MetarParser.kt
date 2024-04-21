@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository.parsers
 
+import kotlinx.datetime.Instant
 import no.uio.ifi.in2000.team18.airborn.model.celsius
 import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
@@ -339,12 +340,13 @@ private val metarParser = Unit.let {
             altimeterSetting,
             rest,
             text = "",
+            downloaded = null,
         )
     }.skip(char('='))
 }
 
-fun parseMetar(source: String): ParseResult<Metar> =
-    metarParser.parse(source).map { it.copy(text = source) }
+fun parseMetar(source: String, downloaded: Instant? = null): ParseResult<Metar> =
+    metarParser.parse(source).map { it.copy(text = source, downloaded = downloaded) }
 
 private fun <T, U> ParseResult<T>.map(f: (T) -> U): ParseResult<U> = when (this) {
     is ParseResult.Ok -> ParseResult.Ok(f(this.value), state)
