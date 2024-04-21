@@ -32,6 +32,18 @@ class SigmetParserTest {
     }
 
     @Test
+    fun `test sigmet with bodø FIR`() {
+        val source = """
+            ZCZC
+            WSNO36 ENMI 211336
+            ENOB SIGMET M01 VALID 211400/211800 ENMI-
+            ENOB BODOE OCEANIC FIR SEV MTW FCST WI N7950 E01030 - N8000 E01730 - N7900 E02000 - N7900 E01100 - N7950 E01030 SFC/FL250 STNR INTSF=
+        """.trimIndent()
+
+        assert(parseSigmet(source) is ParseResult.Ok)
+    }
+
+    @Test
     fun `test multiple airmets and sigmets`() {
         val source = """
             ZCZC
