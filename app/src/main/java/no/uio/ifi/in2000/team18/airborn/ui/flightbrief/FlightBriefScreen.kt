@@ -17,27 +17,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.sharp.KeyboardArrowUp
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,7 +45,6 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.ArrivalViewModel
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.DepartureViewModel
 import no.uio.ifi.in2000.team18.airborn.ui.home.AirportInfoRow
-import no.uio.ifi.in2000.team18.airborn.ui.home.MapBoxHomeScreen
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.WeatherSection
 import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 
@@ -73,12 +64,6 @@ fun FlightBriefScreen(
     viewModel: FlightBriefViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = SheetState(false,
-            LocalDensity.current,
-            initialValue = SheetValue.Expanded,
-            skipHiddenState = false)
-    )
     val scope = rememberCoroutineScope()
     val navController = LocalNavController.current
     Column {
@@ -98,50 +83,11 @@ fun FlightBriefScreen(
                 fontWeight = FontWeight.Bold,
                 fontSize = 50.sp)
         }
-        MapBoxHomeScreen()
+        FlightBriefScreenContent(
+            state,
+            filterArrivalAirports = { viewModel.filterArrivalAirports(it) }
+        )
     }
-
-    
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.weight(2F))
-        Button(
-            onClick = {
-                scope.launch {
-                    bottomSheetScaffoldState.bottomSheetState.partialExpand()
-                }
-            }
-        ) {
-            Row() {
-                Icon(imageVector = Icons.Sharp.KeyboardArrowUp, contentDescription = "Show")
-                Text("Expand")
-            }
-        }
-    }
-    BottomSheetScaffold(
-        modifier = modifier
-            .padding(16.dp),
-        scaffoldState = bottomSheetScaffoldState,
-        sheetContent = {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                FlightBriefScreenContent(
-                    state,
-                    filterArrivalAirports = { viewModel.filterArrivalAirports(it) })
-            }
-        },
-        sheetPeekHeight = 300.dp,
-        sheetShadowElevation = 5.dp,
-        sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
-        content = {
-
-        },
-    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
