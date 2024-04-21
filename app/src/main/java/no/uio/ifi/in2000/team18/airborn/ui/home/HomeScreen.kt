@@ -74,7 +74,7 @@ fun HomeScreen(
                 }
             }
         ) {
-            Row() {
+            Row {
                 Text("Select airport")
             }
         }

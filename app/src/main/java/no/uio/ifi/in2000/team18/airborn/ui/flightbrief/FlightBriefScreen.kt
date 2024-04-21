@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -57,14 +56,11 @@ fun TestFlightBrief() {
     ), filterArrivalAirports = {})
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FlightBriefScreen(
-    modifier: Modifier = Modifier,
     viewModel: FlightBriefViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val scope = rememberCoroutineScope()
     val navController = LocalNavController.current
     Column {
         Row {
