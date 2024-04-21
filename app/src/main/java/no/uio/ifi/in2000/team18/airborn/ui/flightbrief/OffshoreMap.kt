@@ -54,9 +54,11 @@ fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffsho
         var selectedOffshoreMapTime by rememberSaveable { mutableIntStateOf(0) }
         val offshoreMapList = offshoreMap[selectedMap]?.filter { it.params.area == selectedArea }
         OptionList(options = mapTypeOptions, currentlySelected = selectedMap) {
+            selectedOffshoreMapTime = 0
             selectedMap = it
         }
         OptionList(options = areaOptions, currentlySelected = selectedArea, indent = true) {
+            selectedOffshoreMapTime = 0
             selectedArea = it
         }
         if (offshoreMapList == null) {
