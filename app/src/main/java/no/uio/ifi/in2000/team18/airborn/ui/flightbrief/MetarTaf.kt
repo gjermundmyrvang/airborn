@@ -6,36 +6,34 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toKotlinTimeZone
 import kotlinx.datetime.toLocalDateTime
-import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
@@ -56,35 +54,41 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
         val clipboardManager = LocalClipboardManager.current
         val metar = metarTaf?.latestMetar
         val taf = metarTaf?.latestTaf
-        val pageState = rememberPagerState { 2 }
-        val scope = rememberCoroutineScope()
         var rotated by remember {
             mutableStateOf(false)
         }
-        val rotar by animateFloatAsState(
+        val rotate by animateFloatAsState(
             targetValue = if (rotated) 180f else 0f,
             animationSpec = tween(500)
         )
+
         Card(
             modifier = Modifier
-                .height(220.dp)
-                .fillMaxWidth()
-                .padding(10.dp)
+                .fillMaxSize()
                 .graphicsLayer {
-                    rotationY = rotar
+                    rotationY = rotate
+                    cameraDistance = 8 * density
                 }
                 .clickable { rotated = !rotated },
             shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.tertiary
+                containerColor = MaterialTheme.colorScheme.secondary
             ),
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp
             )
         ) {
             if (!rotated) {
-                Column {
-                    Text(text = "METAR:", fontWeight = FontWeight.Bold)
+                Column( modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth()) {
+                    Row {
+                        Text(text = "METAR:",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1F)
+                            )
+                        Icon(imageVector = Icons.Outlined.Info, contentDescription = "Flip")
+                    }
                     if (metar != null) {
                         Text(text = metar.text, modifier = Modifier.clickable {
                             clipboardManager.setText(
@@ -108,7 +112,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
             } else {
                 if (metar != null) {
                     Column {
-                        DecodedMetar(metar = metar)
+                        DecodedMetar(metar = metar, rotate)
                     }
                 } else {
                     Text("No METAR available")
@@ -121,13 +125,22 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
 fun LocalDateTime.format(format: String) = format(LocalDateTime.Format { byUnicodePattern(format) })
 
 @Composable
-fun DecodedMetar(metar: Metar) = Column(
+fun DecodedMetar(metar: Metar, rotate: Float) = Column(
     modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth()
+        .graphicsLayer {
+            rotationY = rotate
+        }
 ) {
 
-    Text(text = "Metar", fontWeight = FontWeight.Bold)
+    Row {
+        Text(
+            text = "Metar",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1F))
+        Icon(imageVector = Icons.Outlined.Info, contentDescription = "Flip")
+    }
     Row {
         Text("Station Name: ", fontWeight = FontWeight.Bold)
         Text("${metar.station}")
@@ -251,7 +264,7 @@ fun MetarClouds(clouds: Clouds) {
         Clouds.NSC -> Text("No significant clouds", fontWeight = FontWeight.Bold)
     }
 }
-
+/*
 @Preview(showSystemUi = true)
 @Composable
 fun TestMetarDecode() = Column {
@@ -263,3 +276,4 @@ fun TestMetarDecode() = Column {
     )
     DecodedMetar(parseMetar("ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT=").expect())
 }
+*/
