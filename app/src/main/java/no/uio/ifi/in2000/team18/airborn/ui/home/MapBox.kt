@@ -51,6 +51,7 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseSigmet
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -164,33 +165,82 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
 fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
     modifier = Modifier
         .padding(16.dp)
-        .height(300.dp)
         .fillMaxWidth()
         .background(
-            color = if (sigmet.type == SigmetType.Airmet) Color.Cyan.copy(alpha = 0.4f) else Color.Yellow.copy(
-                alpha = 0.4f
+            color = if (sigmet.type == SigmetType.Airmet) Color.Cyan.copy(alpha = 0.6f) else Color.Yellow.copy(
+                alpha = 0.6f
             )
         )
         .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(5.dp))
         .clip(RoundedCornerShape(5.dp))
 ) {
+    IconButton(onClick = { onClose() }, modifier = Modifier.align(Alignment.TopEnd)) {
+        Icon(
+            imageVector = Icons.Filled.Close, contentDescription = "Close icon", tint = Color.Black
+        )
+    }
     Column(
-        Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.Start,
     ) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Type: ${sigmet.type}")
-            IconButton(onClick = { onClose() }) {
-                Icon(imageVector = Icons.Filled.Close, contentDescription = "Close icon")
-            }
+        Row {
+            Text("Type: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(sigmet.type.toString(), color = Color.Black)
         }
-        Text(text = "Weathermessage: ${sigmet.message}")
+        Row {
+            Text("Weathermessage: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(sigmet.message.joinToString(" ") { it }, color = Color.Black)
+        }
+        Row {
+            Text("Location: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(sigmet.location, color = Color.Black)
+        }
+        Row {
+            Text("Origin location: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(sigmet.originatingLocation, color = Color.Black)
+        }
+        Row {
+            Text("Region code: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(sigmet.regionCode, color = Color.Black)
+        }
+        Row {
+            Text("Issuing authority: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(sigmet.issuingAuthority, color = Color.Black)
+        }
+        val issued = sigmet.dateTime
+        val validFrom = sigmet.timeRange.first
+        val validTo = sigmet.timeRange.second
+        Row {
+            Text("Issued: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text("$issued", color = Color.Black)
+        }
+        Row {
+            Text("Valid from: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text("$validFrom", color = Color.Black)
+        }
+        Row {
+            Text("Valid to: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text("$validTo", color = Color.Black)
+        }
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun TestSigmetInfoBox() {
+    SigmetInfoBox(
+        sigmet = parseSigmet(
+            """
+        ZCZC
+        WSNO36 ENMI 211336
+        ENOB SIGMET M01 VALID 211400/211800 ENMI-
+        ENOB BODOE OCEANIC FIR SEV MTW FCST WI N7950 E01030 - N8000 E01730 - N7900 E02000 - N7900 E01100 - N7950 E01030 SFC/FL250 STNR INTSF=
+    """.trimIndent()
+        ).expect()
+    ) {
+
     }
 }
 
