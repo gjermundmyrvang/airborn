@@ -173,7 +173,7 @@ fun DecodedMetar(metar: Metar) = Column(
     }
     if (metar.rest != "") {
         Row {
-            Text("Not Decoded: ", fontWeight = FontWeight.Bold)
+            Text("Remarks: ", fontWeight = FontWeight.Bold)
             Text(metar.rest)
         }
     }
