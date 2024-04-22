@@ -29,7 +29,9 @@ data class DateTime(val isoDateTime: String) {
 
     val dayNumberMonth = "$dayNumber. $month"
 
-    val dayMonth = "$day $month"
+    val dayNumberMonthTime = "$dayNumber. $month. $time"
+
+    val dayMonthHour = "$day $month $time"
 
     val time
         get(): String = toLocalDateTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"))

@@ -139,6 +139,9 @@ fun OverallAirportBrieftab(
         modifier = Modifier.fillMaxSize()
     ) {
         item { Sigchart(state.sigcharts) { viewModel.initSigchart() } }
+        item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMpas() } }
+        item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
+
     }
 }
 
