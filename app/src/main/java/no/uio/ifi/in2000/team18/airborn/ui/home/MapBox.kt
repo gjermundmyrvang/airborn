@@ -93,7 +93,7 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
                     }
                 }
             }
-            Column {
+            Column(Modifier.padding(top = 16.dp)) {
                 when (val airport = selectedAirport) {
                     null -> {}
                     else -> {
