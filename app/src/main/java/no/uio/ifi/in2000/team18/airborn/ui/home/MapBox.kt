@@ -124,7 +124,7 @@ fun Polygons(
                 .toArgb() else Color.Yellow.copy(
                 alpha = 0.4f
             ).toArgb(),
-            fillOpacity = 0.4,
+            fillOpacity = 1.0,
             onClick = {
                 onPolyClicked(index)
                 true
