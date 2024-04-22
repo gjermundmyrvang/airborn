@@ -10,9 +10,9 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Clouds
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarDateTime
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarWind
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarWindDirection
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.ParsedDateTime
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Rvr
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RvrTrend
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RvrVisibility
@@ -123,7 +123,7 @@ private val metarParser = Unit.let {
     val metarHeader = Unit.let {
         val icao = chars { it.isLetter() }.map { Icao(it) }
         val metarTime = lift(twoDigitNumber, twoDigitNumber, twoDigitNumber) { day, hour, minute ->
-            MetarDateTime(day, hour, minute)
+            ParsedDateTime(day, hour, minute)
         }.skip(char { it.lowercaseChar() == 'z' })
         triple(
             word("METAR").or(word("SPECI")).or(word("AUTO")).skipSpace().optional("METAR"),
