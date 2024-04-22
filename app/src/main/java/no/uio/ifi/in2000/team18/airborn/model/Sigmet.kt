@@ -1,7 +1,5 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
-
 data class SigmetDateTime(val day: Int, val hour: Int, val minute: Int) {
     override fun toString(): String = "$day. $hour:$minute"
 }

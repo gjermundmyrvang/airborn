@@ -171,3 +171,7 @@ fun Double.round(decimals: Int): Double {
     var multiplier = Math.pow(10.0, decimals.toDouble())
     return round(this * multiplier) / multiplier
 }
+
+data class Position(
+    val latitude: Double, val longitude: Double
+)

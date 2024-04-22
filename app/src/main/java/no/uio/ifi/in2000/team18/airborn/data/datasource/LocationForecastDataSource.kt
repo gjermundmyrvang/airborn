@@ -4,7 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import no.uio.ifi.in2000.team18.airborn.model.LocationData
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
+import no.uio.ifi.in2000.team18.airborn.model.Position
 import javax.inject.Inject
 
 class LocationForecastDataSource @Inject constructor(val client: HttpClient) {

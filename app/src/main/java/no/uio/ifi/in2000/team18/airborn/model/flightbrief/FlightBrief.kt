@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
+import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -65,10 +66,6 @@ data class Airport(
     val icao: Icao,
     val name: String,
     val position: Position,
-)
-
-data class Position(
-    val latitude: Double, val longitude: Double
 )
 
 data class Icao(val code: String) {
