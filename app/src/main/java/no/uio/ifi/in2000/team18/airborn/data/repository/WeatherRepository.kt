@@ -33,9 +33,10 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    suspend fun getIsobaricData(position: Position, time: LocalDateTime): IsobaricData {
+    suspend fun getIsobaricData(position: Position): IsobaricData {
         val gribFiles = gribDataSource.availableGribFiles()
-        val windsAloft = gribDataSource.useGribFile(gribFiles.last()) { dataset ->
+        val gribFile = gribFiles.last()
+        val windsAloft = gribDataSource.useGribFile(gribFile) { dataset ->
             val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
             val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
             val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
@@ -70,7 +71,11 @@ class WeatherRepository @Inject constructor(
             val result = if (h != null) (h.feet <= maxHeight) else false
             result
         }
-        return IsobaricData(position, time, layers)
+        return IsobaricData(
+            position,
+            LocalDateTime.parse(gribFile.params.time.subSequence(0, 19)),
+            layers
+        )
     }
 
     private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
@@ -135,7 +140,8 @@ class WeatherRepository @Inject constructor(
     )
 
     suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
-        val weatherData = locationForecastDataSource.fetchForecast(airport.position).properties.timeseries
+        val weatherData =
+            locationForecastDataSource.fetchForecast(airport.position).properties.timeseries
         return mapToWeatherDay(weatherData)
     }
 
