@@ -1,11 +1,11 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository.parsers
 
-import com.mapbox.geojson.Point
 import no.uio.ifi.in2000.team18.airborn.model.AltitudeReference
 import no.uio.ifi.in2000.team18.airborn.model.AltitudeReferenceType
 import no.uio.ifi.in2000.team18.airborn.model.ParsedDateTime
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 
 
 private val metParser = Unit.let {
@@ -24,7 +24,7 @@ private val metParser = Unit.let {
 
     data class SigmetBody(
         val message: List<String>,
-        val coordinates: List<Point>,
+        val coordinates: List<Position>,
         val altitude: Pair<AltitudeReference, AltitudeReference>?,
     )
 
@@ -78,7 +78,7 @@ private val metParser = Unit.let {
         chars { it.isDigit() }) { dir, whole, decimal ->
         (if (dir == "E") 1 else -1) * ("$whole.$decimal").toDouble()
     }
-    val coordinate = lift(lat.skipSpace(), lon) { a, b -> Point.fromLngLat(b, a) }
+    val coordinate = lift(lat.skipSpace(), lon) { a, b -> Position(a, b) }
     val coordinateList = sepBy(
         coordinate.skipSpace(), word("-").skipSpace()
     )

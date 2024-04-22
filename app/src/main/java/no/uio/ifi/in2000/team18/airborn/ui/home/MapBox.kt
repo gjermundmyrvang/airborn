@@ -54,6 +54,7 @@ import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
@@ -116,7 +117,7 @@ fun Polygons(
     sigmets: List<Sigmet>, onPolyClicked: (Int) -> Unit
 ) {
     sigmets.forEachIndexed { index, sigmet ->
-        PolygonAnnotation(points = listOf(sigmet.coordinates),
+        PolygonAnnotation(points = listOf(sigmet.coordinates.map { it.toPoints() }),
             fillOutlineColorInt = Color.Black.toArgb(),
             fillColorInt = if (sigmet.type == SigmetType.Airmet) Color.Cyan.copy(alpha = 0.4f)
                 .toArgb() else Color.Yellow.copy(
