@@ -8,7 +8,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.serialization.gson.gson
-import no.uio.ifi.in2000.team18.airborn.model.Webcam
+import no.uio.ifi.in2000.team18.airborn.model.WebcamResponse
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import javax.inject.Inject
 
@@ -24,7 +24,7 @@ class WebcamDataSource @Inject constructor() {
         }
     }
 
-    suspend fun fetchImage(airport: Airport): List<Webcam> =
+    suspend fun fetchImage(airport: Airport): WebcamResponse =
         client.get("https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=10&offset=0&nearby=${airport.position.latitude}%2C${airport.position.longitude}%2C$radius&include=images")
             .body()
 }
