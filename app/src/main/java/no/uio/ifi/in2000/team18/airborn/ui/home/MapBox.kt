@@ -172,6 +172,7 @@ fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
             color = if (sigmet.type == SigmetType.Airmet) Color.Cyan.copy(alpha = 0.6f) else Color.Yellow.copy(
                 alpha = 0.6f
             )
+            shape = RoundedCornerShape(5.dp),
         )
         .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(5.dp))
         .clip(RoundedCornerShape(5.dp))
