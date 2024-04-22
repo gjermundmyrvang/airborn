@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -284,26 +285,26 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
                 "Lat: ${airport.position.latitude}",
                 style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.background
+        when (state.sun) {
+            is LoadingState.Loading -> LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
             Text(
                 "Lon: ${airport.position.longitude}",
                 style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
+
+            is LoadingState.Error -> Text(
+                text = "Failed to retrive sundata, could be because of midnightsun",
                 color = MaterialTheme.colorScheme.background
             )
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            when (state.sun) {
-                is LoadingState.Loading -> Text(
-                    text = "Loading sun", color = MaterialTheme.colorScheme.background
-                )
-
-                is LoadingState.Error -> Text(
-                    text = state.sun.message, color = MaterialTheme.colorScheme.background
-                )
-
-                is LoadingState.Success -> state.sun.value?.let { SunComposable(sun = it) }
-            }
+            is LoadingState.Success -> state.sun.value?.let { SunComposable(sun = it) }
         }
     }
 }
