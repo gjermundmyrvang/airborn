@@ -298,9 +298,9 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
                 color = MaterialTheme.colorScheme.secondary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
-
+            
             is LoadingState.Error -> Text(
-                text = "Failed to retrive sundata, could be because of midnightsun",
+                text = state.sun.message,
                 color = MaterialTheme.colorScheme.background
             )
 

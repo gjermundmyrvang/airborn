@@ -40,7 +40,7 @@ class ZonedDateTimeAdapter : TypeAdapter<ZonedDateTime>() {
 }
 
 data class Sun(
-    val time: String, val azimuth: Double
+    val time: String?, val azimuth: Double?
 )
 
 data class When(

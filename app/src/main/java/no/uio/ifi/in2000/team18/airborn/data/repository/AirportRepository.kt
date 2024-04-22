@@ -13,6 +13,7 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Taf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.TurbulenceMapAndCross
 import java.time.ZoneId
@@ -65,17 +66,20 @@ class AirportRepository @Inject constructor(
     suspend fun fetchWebcamImages(airport: Airport) = webcamDataSource.fetchImage(airport).webcams
 
     // Sunrise & Sunset logic
-    suspend fun fetchSunriseSunset(airport: Airport): no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun {
+    suspend fun fetchSunriseSunset(airport: Airport): Sun {
         sunDataCache[airport.icao]?.also { return it }
         val sun = sunriseSunsetDataSource.fetchSunriseSunset(
             airport.position.latitude, airport.position.longitude
         )
+        if (sun.properties.sunrise.time == null) {
+            return Sun("N/A", "N/A")
+        }
         val formatter = DateTimeFormatter.ofPattern("kk:mm")
         val sunrise = ZonedDateTime.parse(sun.properties.sunrise.time)
             .withZoneSameInstant(ZoneId.systemDefault()).format(formatter)
         val sunset = ZonedDateTime.parse(sun.properties.sunset.time)
             .withZoneSameInstant(ZoneId.systemDefault()).format(formatter)
-        val newSun = no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun(sunrise, sunset)
+        val newSun = Sun(sunrise, sunset)
         sunDataCache[airport.icao] = newSun
         return newSun
     }
