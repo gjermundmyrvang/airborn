@@ -18,7 +18,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Temperature
 
 data class Metar(
     val station: Icao,
-    val time: MetarDateTime,
+    val time: ParsedDateTime,
     val wind: Pair<MetarWind, Pair<Direction, Direction>?>,
     val cav: Cav,
     val temperatures: Pair<Temperature, Temperature>,
@@ -30,7 +30,8 @@ data class Metar(
     val instant: Instant? get() = downloaded?.let { time.resolveInstant(it) }
 }
 
-data class MetarDateTime(val day: Int, val hour: Int, val minute: Int) {
+
+data class ParsedDateTime(val day: Int, val hour: Int, val minute: Int) { // TODO should be moved
     override fun toString(): String = "$day. $hour:$minute"
 
     fun resolveInstant(

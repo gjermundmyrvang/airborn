@@ -4,6 +4,7 @@ import alexmaryin.metarkt.parser.formatToFloat
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import com.mapbox.geojson.Point
 import kotlin.math.atan2
 import kotlin.math.round
 import kotlin.math.roundToInt
@@ -174,4 +175,6 @@ fun Double.round(decimals: Int): Double {
 
 data class Position(
     val latitude: Double, val longitude: Double
-)
+) {
+    fun toPoints(): Point = Point.fromLngLat(longitude, latitude)
+}

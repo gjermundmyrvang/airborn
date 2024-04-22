@@ -4,20 +4,19 @@ import no.uio.ifi.in2000.team18.airborn.model.AltitudeReference
 import no.uio.ifi.in2000.team18.airborn.model.AltitudeReferenceType
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
-import no.uio.ifi.in2000.team18.airborn.model.SigmetDateTime
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
-
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.ParsedDateTime
 
 private val metParser = Unit.let {
     data class SigmetHeader(
-        val issuingAuthority: String, val location: String, val dateTime: SigmetDateTime
+        val issuingAuthority: String, val location: String, val dateTime: ParsedDateTime
     )
 
     data class SigmetSigmeta(
         val regionCode: String,
         val type: SigmetType,
         val identifier: Pair<Char, Int>,
-        val timeRange: Pair<SigmetDateTime, SigmetDateTime>,
+        val timeRange: Pair<ParsedDateTime, ParsedDateTime>,
         val location: String,
         val extra: String?,
     )
@@ -31,7 +30,7 @@ private val metParser = Unit.let {
 
     // Sigmet stuff
     val metTime = lift(twoDigitNumber, twoDigitNumber, twoDigitNumber) { day, hour, minute ->
-        SigmetDateTime(day, hour, minute)
+        ParsedDateTime(day, hour, minute)
     }
 
     val issuingAuthority = chars1("an authority code") { it.isLetter() or it.isDigit() }

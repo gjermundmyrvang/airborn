@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
+import com.mapbox.geojson.Point
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import java.time.ZoneId
@@ -67,6 +68,12 @@ data class Airport(
     val name: String,
     val position: Position,
 )
+
+data class Position(
+    val latitude: Double, val longitude: Double
+) {
+    fun toPoints(): Point = Point.fromLngLat(longitude, latitude)
+}
 
 data class Icao(val code: String) {
     override fun toString(): String = code

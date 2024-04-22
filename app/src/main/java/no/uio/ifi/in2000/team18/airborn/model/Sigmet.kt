@@ -1,15 +1,11 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
-data class SigmetDateTime(val day: Int, val hour: Int, val minute: Int) {
-    override fun toString(): String = "$day. $hour:$minute"
-}
-
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.ParsedDateTime
 
 enum class SigmetType {
     Airmet,
     Sigmet,
 }
-
 
 enum class AltitudeReferenceType {
     Feet, FlightLevel, Unknown,
@@ -23,11 +19,11 @@ data class AltitudeReference(
 data class Sigmet(
     val issuingAuthority: String,
     val originatingLocation: String,
-    val dateTime: SigmetDateTime,
+    val dateTime: ParsedDateTime,
     val regionCode: String,
     val type: SigmetType,
     val identifier: Pair<Char, Int>,
-    val timeRange: Pair<SigmetDateTime, SigmetDateTime>,
+    val timeRange: Pair<ParsedDateTime, ParsedDateTime>,
     val location: String,
     val extra: String?,
     val message: List<String>,
