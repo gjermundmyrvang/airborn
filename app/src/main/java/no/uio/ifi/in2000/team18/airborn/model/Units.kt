@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
+import alexmaryin.metarkt.parser.formatToFloat
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
@@ -56,7 +57,8 @@ data class Humidity(val humidity: Double) {
 
 data class Speed(val mps: Double) {
     override fun toString(): String = "$mps m/s"
-    fun formatAsKnots(): String = "${knots.roundToInt()} kt"
+    fun formatAsKnots(decimals: Int = 0): String = "${knots.format(decimals)} kt"
+    fun formatAsMps(decimals: Int = 0): String = "${mps.format(decimals)} m/s"
     val kmh get() = this.mps * 3.6
     val knots get() = this.mps * 1.9438452
     operator fun times(x: Number) = Speed(mps = mps * x.toDouble())
@@ -89,6 +91,19 @@ data class Direction(var degrees: Double) {
         is Direction -> this.degrees.toInt() == other.degrees.toInt()
         else -> false
     }
+
+    fun formatAsPrincipal() = listOf(
+        "north",
+        "northeast",
+        "east",
+        "southeast",
+        "south",
+        "southwest",
+        "west",
+        "northwest",
+    )[Math.floorMod((degrees + 22.5).toInt().floorDiv(45), 8)]
+
+    fun formatAsDegrees(decimals: Int = 0) = "${degrees.format(decimals)}\u00B0"
 }
 
 data class UvIndex(val uv: Double) {
@@ -122,7 +137,7 @@ val Number.knots get() = this * 0.51444424416.mps
 
 // Temperature
 val Number.kelvin get() = Temperature(celsius = this.toDouble() - 273.15)
-
+val Number.celsius get() = Temperature(celsius = this.toDouble())
 
 // Pressure
 private operator fun Number.times(s: Pressure) = s * this
@@ -146,3 +161,13 @@ val Number.km get() = this * 1000.m
 val Number.mm get() = this * 0.001.m
 val Number.feet get() = this * 0.3048.m
 val Number.nauticalMiles get() = this * 1852.m
+
+// Utilities:
+fun Double.format(decimals: Int) =
+    if (decimals <= 0) "${this.round(decimals).roundToInt()}"
+    else "${this.round(decimals).formatToFloat(decimals)}"
+
+fun Double.round(decimals: Int): Double {
+    var multiplier = Math.pow(10.0, decimals.toDouble())
+    return round(this * multiplier) / multiplier
+}

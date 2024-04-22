@@ -1,9 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn
 
-import no.uio.ifi.in2000.team18.airborn.data.repository.sigmet.ParseResult
-import no.uio.ifi.in2000.team18.airborn.data.repository.sigmet.metsParser
-import no.uio.ifi.in2000.team18.airborn.data.repository.sigmet.parseSigmet
-import no.uio.ifi.in2000.team18.airborn.data.repository.sigmet.parseSigmets
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.ParseResult
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.metsParser
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseSigmet
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseSigmets
 import org.junit.Test
 
 class SigmetParserTest {

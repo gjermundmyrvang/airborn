@@ -75,10 +75,6 @@ data class Icao(val code: String) {
     override fun toString(): String = code
 }
 
-data class Metar(val text: String) {
-    override fun toString(): String = text
-}
-
 data class Taf(val text: String) {
     override fun toString(): String = text
 }

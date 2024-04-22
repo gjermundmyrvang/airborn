@@ -1,13 +1,10 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
-import alexmaryin.metarkt.MetarParser
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -18,24 +15,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
+import kotlinx.datetime.format.byUnicodePattern
+import kotlinx.datetime.toKotlinTimeZone
+import kotlinx.datetime.toLocalDateTime
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
+import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Clouds
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarWindDirection
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Rvr
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.VisibilityDistance
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
-import java.time.LocalDateTime
+import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-import kotlin.math.floor
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -86,7 +91,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                 1 -> {
                     if (metar != null) {
                         Card {
-                            MetarDecode(metar = metar.text)
+                            DecodedMetar(metar = metar)
                         }
 
                     } else {
@@ -98,158 +103,150 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
         }
     }
 
+@OptIn(FormatStringsInDatetimeFormats::class)
+fun LocalDateTime.format(format: String) =
+    format(LocalDateTime.Format { byUnicodePattern(format) })
+
 @Composable
-fun MetarDecode(metar: String) {
-    val parser = MetarParser.current()
-    val decode = parser.parse(metar)
-    Column {
-        Card(
-            modifier = Modifier
-                .padding(5.dp)
-                .fillMaxWidth()
-                .border(2.dp, Color.Black)
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth()
-            ) {
+fun DecodedMetar(metar: Metar) = Column(
+    modifier = Modifier
+        .padding(10.dp)
+        .fillMaxWidth()
+) {
 
-                Text(text = "Metar", fontWeight = FontWeight.Bold)
-                Text(buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Station name: ")
-                    }
-                    append(decode.station.toString())
-                })
-                Text(buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Report time: ")
-                    }
-                    val localTime = LocalDateTime.parse(decode.reportTime.toString())
-                    val zonedDateTimeGMT = ZonedDateTime.of(localTime, ZoneId.of("GMT"))
-                    val zoneIdNorway = ZoneId.of("Europe/Oslo")
-                    val zonedDateTimeNorway = zonedDateTimeGMT.withZoneSameInstant(zoneIdNorway)
-                    val formattedTime =
-                        zonedDateTimeNorway.format(DateTimeFormatter.ofPattern("HH:mm"))
-                    append("${decode.reportTime?.date} at $formattedTime local time.")
-                })
-                Text(buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Cavok status: ")
-                    }
-                    append(decode.ceilingAndVisibilityOK.toString())
-                })
-                Spacer(modifier = Modifier.height(10.dp))
-                if (decode.wind != null) {
-                    val wind = decode.wind
-                    Text(text = "Wind", fontWeight = FontWeight.Bold)
-                    if (wind != null) {
-                        when (wind.isCalm) {
-                            true -> Text(text = "All clear and no winds")
-                            false -> when (wind.variable) {
-                                true -> Text(text = "Wind is variable at ${wind.speed} KT")
-                                false -> Text(buildAnnotatedString {
-                                    append("Direction: ${wind.direction}°.\n")
-                                    append("Speed: ${wind.speed} ${decode.wind?.speedUnits}")
-                                })
-                            }
-                        }
-                    }
-                    if (wind != null) {
-                        if (wind.gusts != 0) {
-                            Text(text = "Gusts: ${wind.gustsKt} ${wind.speedUnits}")
-                        }
-                    }
-                }
-                val raw = decode.raw.split(" ")
-                if (raw[3].length > 4 && raw[3].contains("V")) {
-                    Text(text = "Variable winds from ${raw[3].take(3)}° to ${raw[3].takeLast(3)}°")
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Visibility", fontWeight = FontWeight.Bold)
-                if (decode.visibility != null) {
-                    val vis = decode.visibility
-                    when (vis!!.distAll) {
-                        9999 -> Text(text = "Visibility: >10 km")
-                        else -> {
-                            val distToKm = vis.distAll!!.div(1000.0)
-                            val result = floor(distToKm * 10) / 10
-                            Text(text = "Visibility: $result km")
-                        }
-                    }
-                    if (vis.byDirections.isNotEmpty()) {
-                        Text(text = "Remark", fontWeight = FontWeight.Bold)
-                        Text(text = "Directions: ${vis.byDirections.joinToString(", ")}")
-                    }
-                    if (vis.byRunways.isNotEmpty()) {
-                        Text(text = "Lowest visual: ${vis.byRunways.joinToString(", ")} ${vis.distUnits}")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Weather conditions:", fontWeight = FontWeight.Bold)
-
-                if (decode.phenomenons.isNotEmpty()) {
-                    var qualifier = decode.phenomenons[0].intensity.toString()
-                        .substring(0, 1) +
-                            decode.phenomenons[0].intensity.toString()
-                                .substring(1)
-                                .lowercase(Locale.ROOT)
-                    if (qualifier == "None") {
-                        qualifier = "Moderate"
-                    }
-                    var phenomenon =
-                        decode.phenomenons[0].group.joinToString(separator = " ").substring(0, 1) +
-                                decode.phenomenons[0].group.joinToString(separator = " ")
-                                    .substring(1).lowercase(Locale.ROOT)
-                    if (phenomenon.contains("In_vicinity")) {
-                        phenomenon = phenomenon.substring(12)
-                        Text(text = "$qualifier $phenomenon in the vicinity")
-                    } else {
-                        Text(text = "$qualifier $phenomenon")
-                    }
-
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Clouds: ", fontWeight = FontWeight.Bold)
-                val clouds = decode.clouds[0].type.toString()
-                val cloudString =
-                    clouds.substring(0, 1) + clouds.substring(1).lowercase(Locale.ROOT)
-                when (decode.clouds[0].type.toString()) {
-                    "CLEAR" -> Text(text = "Sky is clear")
-                    "NIL_SIGNIFICANT" -> Text(text = "No significant clouds. Layer at ${decode.clouds[0].lowMarginFt * 100} ft")
-                    else -> {
-                        Text(text = "$cloudString layer at ${decode.clouds[0].lowMarginFt * 100} ft")
-                    }
-                }
-                val cumulus = decode.clouds[0].cumulusType
-                if (cumulus != null) {
-                    Text(text = "Cumulus Type: " + decode.clouds[0].cumulusType)
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "Temperature", fontWeight = FontWeight.Bold)
-                Text(text = "Air temperature: ${decode.temperature?.air} °C")
-                Text(text = "Dew point: ${decode.temperature?.dewPoint} °C")
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(text = "Sea Level Pressure: ")
-                    }
-                    append("${decode.pressureQNH?.hPa.toString()} hPa")
-                })
+    Text(text = "Metar", fontWeight = FontWeight.Bold)
+    Row {
+        Text("Station Name: ", fontWeight = FontWeight.Bold)
+        Text("${metar.station}")
+    }
+    metar.instant?.let {
+        Row {
+            val timeZone = ZoneId.systemDefault().toKotlinTimeZone()
+            val localTime = it.toLocalDateTime(timeZone)
+            val formattedTime = localTime.format("dd/MM-yy HH:mm")
+            Text("Time: ", fontWeight = FontWeight.Bold)
+            Text(
+                "$formattedTime local time"
+            )
+        }
+    }
+    // TODO: Report Time
+    when (metar.cav) {
+        Cav.OK -> Text("Ceiling and visibility OK", fontWeight = FontWeight.Bold)
+        is Cav.Info -> {
+            MetarClouds(metar.cav.clouds)
+            MetarVisibility(metar.cav.visibility)
+            MetarRvrList(metar.cav.rvrs)
+            metar.cav.weatherPhenomena.forEach { phenomenon ->
+                Row { Text("Phenomenon: ", fontWeight = FontWeight.Bold); Text("$phenomenon") }
             }
+        }
+    }
+    Row {
+        Text("Wind: ", fontWeight = FontWeight.Bold)
+        val wind = metar.wind.first
+        if (wind.direction is MetarWindDirection.Constant) {
+            RotatableArrowIcon(wind.direction.direction, iconSize = 16.dp)
+        }
+        Text("${wind.direction.formatAsDegrees(0)} ${wind.speed.formatAsKnots(1)}") // TODO: Arrow pointing in wind direction
+        wind.gustSpeed?.let { gusts -> Text(" (gusts: ${gusts.formatAsKnots(1)})") }
+    }
+    metar.wind.second?.let { variableDirection ->
+        Row {
+            Text("Variable Wind Direction: ", fontWeight = FontWeight.Bold)
+            Text("${variableDirection.first} to ${variableDirection.second}")
+        }
+    }
+
+    Row {
+        Text("Altimeter Setting: ", fontWeight = FontWeight.Bold)
+        Text("${metar.altimeterSetting}")
+    }
+
+    Row {
+        Text("Temperature: ", fontWeight = FontWeight.Bold)
+        Text(metar.temperatures.first.toString())
+    }
+    Row {
+        Text("Dew point: ", fontWeight = FontWeight.Bold)
+        Text(metar.temperatures.second.toString())
+    }
+    if (metar.rest != "") {
+        Row {
+            Text("Not Decoded: ", fontWeight = FontWeight.Bold)
+            Text(metar.rest)
         }
     }
 }
 
 
+@Composable
+fun MetarRvrList(rvrs: List<Rvr>) {
+    rvrs.forEach { rvr ->
+        Row {
+            Text("RVR for runway ${rvr.runway}: ", fontWeight = FontWeight.Bold)
+            Text("${rvr.visibility} ${rvr.trend ?: ""}")
+        }
+    }
+}
+
+@Composable
+fun MetarVisibility(visibility: Pair<VisibilityDistance, List<Pair<VisibilityDistance, Direction>>?>) {
+    val directional = visibility.second
+    Row {
+        Text("Visibility: ", fontWeight = FontWeight.Bold)
+        Text("${visibility.first}")
+        if (directional == null) {
+            Text(" (no directional variation reporting capability)")
+            return
+        }
+    }
+
+    directional?.forEach { vis ->
+        Row {
+            Text(
+                "Visibility towards ${vis.second.formatAsPrincipal()}: ",
+                fontWeight = FontWeight.Bold
+            )
+            Text("${vis.first}")
+        }
+    }
+}
+
+@Composable
+fun MetarClouds(clouds: Clouds) {
+    when (clouds) {
+        is Clouds.Layers -> {
+            if (clouds.layers.isEmpty()) {
+                Text("No Cloud information")
+            }
+            clouds.layers.forEach {
+                Row {
+                    Text("Cloud Layer: ", fontWeight = FontWeight.Bold)
+                    if (it.type == CloudType.Nothing) {
+                        Text("${it.cover} clouds at ${it.height.formatAsFeet()}") // TODO: Make more human readable
+                    } else if (it.type == CloudType.Unknown) {
+                        Text("${it.cover} clouds of unknown type at ${it.height}")
+                    } else {
+                        Text("${it.cover} ${it.type} at ${it.height}")
+                    }
+                }
+            }
+        }
+
+        Clouds.NCD -> Text("No clouds detected", fontWeight = FontWeight.Bold)
+        Clouds.NSC -> Text("No significant clouds", fontWeight = FontWeight.Bold)
+    }
+}
+
 @Preview(showSystemUi = true)
 @Composable
-fun TestMetarDecode() {
-    val test = "ENGM 080850Z 18003G10KT 150V240 9988 -VCSNTS NSC009 M08/M06 Q1005 TEMPO BKN012="
-    MetarDecode(metar = test)
+fun TestMetarDecode() = Column {
+    DecodedMetar(
+        parseMetar(
+            "ENSG 150720Z 07207KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
+            Instant.parse("2024-04-16T00:00:00Z")
+        ).expect()
+    )
+    DecodedMetar(parseMetar("ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT=").expect())
 }
