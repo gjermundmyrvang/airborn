@@ -95,8 +95,8 @@ private fun TableContent(isorbaricData: IsobaricData) {
                 data.windFromDirection?.let {
                     IconCell(
                         text = data.windFromDirection.toString(),
-                        weight = column3Weight,
-                        alignment = TextAlign.Right,
+                        weight = column4Weight,
+                        arrangement = Arrangement.End,
                         windDirection = it
                     )
                 }
@@ -133,20 +133,21 @@ fun RowScope.TableCell(
 fun RowScope.IconCell(
     text: String,
     weight: Float,
-    alignment: TextAlign = TextAlign.Center,
+    arrangement: Arrangement.Horizontal,
     title: Boolean = false,
     windDirection: Direction
 ) {
     Row(
         Modifier
             .weight(weight)
-            .padding(10.dp), verticalAlignment = Alignment.CenterVertically
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = arrangement
     ) {
         Text(
             text = text,
             Modifier.padding(10.dp),
             fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
-            textAlign = alignment,
         )
         RotatableArrowIcon(direction = windDirection)
     }
