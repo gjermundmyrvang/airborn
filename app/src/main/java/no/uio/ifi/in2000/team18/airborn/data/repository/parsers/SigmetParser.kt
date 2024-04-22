@@ -6,8 +6,6 @@ import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.ParsedDateTime
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
-
 
 private val metParser = Unit.let {
     data class SigmetHeader(
