@@ -1,7 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigmetDatasource
-import no.uio.ifi.in2000.team18.airborn.data.repository.sigmet.parseSigmets
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseSigmets
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import javax.inject.Inject
 

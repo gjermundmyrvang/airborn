@@ -1,12 +1,17 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
+import kotlinx.datetime.Clock
 import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.GeosatelliteDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.OffshoreMapsDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SunriseSunsetDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.WebcamDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Area
+import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -27,7 +32,9 @@ class AirportRepository @Inject constructor(
     private val sigchartDataSource: SigchartDataSource,
     private val turbulenceDataSource: TurbulenceDataSource,
     private val webcamDataSource: WebcamDataSource,
-    private val sunriseSunsetDataSource: SunriseSunsetDataSource
+    private val sunriseSunsetDataSource: SunriseSunsetDataSource,
+    private val offshoreMapsDataSource: OffshoreMapsDataSource,
+    private val geosatelliteDataSource: GeosatelliteDataSource,
 ) {
     // Airport logic
     suspend fun getByIcao(icao: Icao): Airport? = airportDataSource.getByIcao(icao)
@@ -42,7 +49,8 @@ class AirportRepository @Inject constructor(
         val tafList: List<Taf> =
             tafmetarDataSource.fetchTaf(icao).lines().filter { it.isNotEmpty() }.map { Taf(it) }
         val metarList: List<Metar> =
-            tafmetarDataSource.fetchMetar(icao).lines().filter { it.isNotEmpty() }.map { Metar(it) }
+            tafmetarDataSource.fetchMetar(icao).lines().filter { it.isNotEmpty() }
+                .map { parseMetar(it, Clock.System.now()).expect() }
         return MetarTaf(metars = metarList, tafs = tafList)
     }
 
@@ -95,4 +103,9 @@ class AirportRepository @Inject constructor(
             newSun
         }
     }
+
+    suspend fun getOffshoreMaps(): Map<String, List<OffshoreMap>> =
+        offshoreMapsDataSource.fetchOffshoreMaps().groupBy { it.endpoint }
+
+    fun getGeosatelliteImage(): String = geosatelliteDataSource.fetchGeosatelliteImage()
 }

@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team18.airborn.data.repository.sigmet
+package no.uio.ifi.in2000.team18.airborn.data.repository.parsers
 
 import no.uio.ifi.in2000.team18.airborn.model.AltitudeReference
 import no.uio.ifi.in2000.team18.airborn.model.AltitudeReferenceType
@@ -28,12 +28,6 @@ private val metParser = Unit.let {
         val altitude: Pair<AltitudeReference, AltitudeReference>?,
     )
 
-
-    // Generic stuff
-    val digit = char { it.isDigit() }.map { it.digitToInt() }
-    val twoDigitNumber = pair(digit, digit).map { it.first * 10 + it.second }
-    val threeDigitNumber = lift(digit, digit, digit) { a, b, c -> 100 * a + 10 * b + c }
-    val number = chars1("a number") { it.isDigit() }.map { it.toInt() }
 
     // Sigmet stuff
     val metTime = lift(twoDigitNumber, twoDigitNumber, twoDigitNumber) { day, hour, minute ->
@@ -102,7 +96,7 @@ private val metParser = Unit.let {
 
 
     val messagePart = chars1("a word") { it.isLetter() }.skip(word(" ")).skipSpace()
-    val message = many(messagePart)
+    val message = many1(messagePart)
 
     val metBody = lift(
         flightInformationRegion.skipSpace(),
@@ -147,7 +141,7 @@ private val metParser = Unit.let {
     met
 }
 
-val metsParser = many(
+val metsParser = many1(
     metParser.skipSpace()
 )
 
