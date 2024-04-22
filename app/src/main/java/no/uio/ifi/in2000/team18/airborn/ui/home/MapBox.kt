@@ -74,8 +74,8 @@ fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
         Box {
             val mapViewportState = rememberMapViewportState {
                 setCameraOptions {
-                    zoom(7.0)
-                    center(Point.fromLngLat(11.93, 59.97))
+                    zoom(3.2)
+                    center(Point.fromLngLat(18.06, 59.00))
                     pitch(0.0)
                     bearing(0.0)
                 }
