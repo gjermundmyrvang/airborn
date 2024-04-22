@@ -1,26 +1,33 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
@@ -51,61 +58,67 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
         val taf = metarTaf?.latestTaf
         val pageState = rememberPagerState { 2 }
         val scope = rememberCoroutineScope()
-
-        TabRow(selectedTabIndex = pageState.currentPage) {
-            Tab(selected = pageState.currentPage == 0,
-                onClick = { scope.launch { pageState.animateScrollToPage(0) } },
-                text = { Text("Raw") })
-            Tab(selected = pageState.currentPage == 1,
-                onClick = { scope.launch { pageState.animateScrollToPage(1) } },
-                text = { Text("Decoded") })
-
+        var rotated by remember {
+            mutableStateOf(false)
         }
-        HorizontalPager(state = pageState) { index ->
-            when (index) {
-                0 -> {
-                    Column {
-                        Text(text = "METAR:", fontWeight = FontWeight.Bold)
-                        if (metar != null) {
-                            Text(text = metar.text, modifier = Modifier.clickable {
-                                clipboardManager.setText(
-                                    AnnotatedString(metar.text)
-                                )
-                            })
-                        } else {
-                            Text("No METAR available")
-                        }
-                        if (taf != null) {
-                            Text(text = "TAF:", fontWeight = FontWeight.Bold)
-                            Text(text = taf.text, modifier = Modifier.clickable {
-                                clipboardManager.setText(
-                                    AnnotatedString(taf.text)
-                                )
-                            })
-                        } else {
-                            Text("No Taf available")
-                        }
-                    }
+        val rotar by animateFloatAsState(
+            targetValue = if (rotated) 180f else 0f,
+            animationSpec = tween(500)
+        )
+        Card(
+            modifier = Modifier
+                .height(220.dp)
+                .fillMaxWidth()
+                .padding(10.dp)
+                .graphicsLayer {
+                    rotationY = rotar
                 }
-
-                1 -> {
+                .clickable { rotated = !rotated },
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.tertiary
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 6.dp
+            )
+        ) {
+            if (!rotated) {
+                Column {
+                    Text(text = "METAR:", fontWeight = FontWeight.Bold)
                     if (metar != null) {
-                        Card {
-                            DecodedMetar(metar = metar)
-                        }
-
+                        Text(text = metar.text, modifier = Modifier.clickable {
+                            clipboardManager.setText(
+                                AnnotatedString(metar.text)
+                            )
+                        })
                     } else {
                         Text("No METAR available")
                     }
+                    if (taf != null) {
+                        Text(text = "TAF:", fontWeight = FontWeight.Bold)
+                        Text(text = taf.text, modifier = Modifier.clickable {
+                            clipboardManager.setText(
+                                AnnotatedString(taf.text)
+                            )
+                        })
+                    } else {
+                        Text("No Taf available")
+                    }
+                }
+            } else {
+                if (metar != null) {
+                    Column {
+                        DecodedMetar(metar = metar)
+                    }
+                } else {
+                    Text("No METAR available")
                 }
             }
-
         }
     }
 
 @OptIn(FormatStringsInDatetimeFormats::class)
-fun LocalDateTime.format(format: String) =
-    format(LocalDateTime.Format { byUnicodePattern(format) })
+fun LocalDateTime.format(format: String) = format(LocalDateTime.Format { byUnicodePattern(format) })
 
 @Composable
 fun DecodedMetar(metar: Metar) = Column(
