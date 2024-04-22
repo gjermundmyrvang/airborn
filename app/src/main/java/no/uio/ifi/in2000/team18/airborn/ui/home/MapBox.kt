@@ -56,6 +56,7 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseSigmet
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
@@ -257,34 +258,38 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
         )
         .clip(RoundedCornerShape(5.dp))
 ) {
-    Column {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, start = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                "${airport.name} / ${airport.icao.code}",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.background
-            )
-            IconButton(onClick = { onClose() }) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = "Close icon",
-                    tint = MaterialTheme.colorScheme.background
-                )
-            }
-        }
+    IconButton(
+        onClick = { onClose() }, Modifier.align(Alignment.TopEnd)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Close,
+            contentDescription = "Close icon",
+            tint = MaterialTheme.colorScheme.background
+        )
+    }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(16.dp), horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            "${airport.name} / ${airport.icao.code}",
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.background
+        )
+        Text(
+            "Lat: ${airport.position.latitude}",
+            style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.background
+        )
+        Text(
+            "Lon: ${airport.position.longitude}",
+            style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.background
+        )
 
-        Column(Modifier.padding(start = 10.dp)) {
+        Spacer(modifier = Modifier.height(15.dp))
 
-            Text(
-                "Lat: ${airport.position.latitude}",
-                style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.background
         when (state.sun) {
             is LoadingState.Loading -> LinearProgressIndicator(
                 modifier = Modifier
@@ -293,20 +298,26 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
                 color = MaterialTheme.colorScheme.secondary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
-            Text(
-                "Lon: ${airport.position.longitude}",
-                style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
 
             is LoadingState.Error -> Text(
                 text = "Failed to retrive sundata, could be because of midnightsun",
                 color = MaterialTheme.colorScheme.background
             )
 
-            Spacer(modifier = Modifier.height(15.dp))
-
             is LoadingState.Success -> state.sun.value?.let { SunComposable(sun = it) }
         }
     }
+}
+
+
+@Preview(showSystemUi = true)
+@Composable
+fun TestInfoBox() {
+    InfoBox(
+        airport = Airport(
+            icao = Icao("ENGM"), name = "Gardermoen", position = Position(59.11, 11.59)
+        ), state = HomeViewModel.UiState()
+    ) { }
 }
 
 
@@ -318,13 +329,11 @@ fun SunComposable(sun: Sun) {
         color = MaterialTheme.colorScheme.background
     )
     Row(verticalAlignment = Alignment.CenterVertically) {
-
         Text(
             text = sun.sunrise,
             modifier = Modifier.height(IntrinsicSize.Min),
             color = MaterialTheme.colorScheme.background
         )
-
         Image(
             painter = painterResource(id = R.drawable.clearsky_polartwilight),
             contentDescription = "sunrise",
