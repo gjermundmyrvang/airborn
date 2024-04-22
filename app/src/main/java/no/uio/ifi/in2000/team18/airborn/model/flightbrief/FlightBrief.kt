@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
 import com.mapbox.geojson.Point
+import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import java.time.ZoneId
 import java.time.ZoneOffset

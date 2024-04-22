@@ -53,11 +53,11 @@ import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseSigmet
+import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 

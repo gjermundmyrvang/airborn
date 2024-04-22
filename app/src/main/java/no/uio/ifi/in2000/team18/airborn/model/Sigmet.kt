@@ -1,15 +1,11 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
-
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.ParsedDateTime
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
-
 
 enum class SigmetType {
     Airmet,
     Sigmet,
 }
-
 
 enum class AltitudeReferenceType {
     Feet, FlightLevel, Unknown,
