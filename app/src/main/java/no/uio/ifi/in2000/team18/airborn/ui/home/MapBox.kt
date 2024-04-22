@@ -191,6 +191,7 @@ fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
         Row {
             Text("Type: ", color = Color.Black, fontWeight = FontWeight.Bold)
             Text(sigmet.type.toString(), color = Color.Black)
+            Text(" (${sigmet.identifier.first}${sigmet.identifier.second})", color = Color.Black)
         }
         Row {
             Text("Weathermessage: ", color = Color.Black, fontWeight = FontWeight.Bold)
@@ -226,6 +227,16 @@ fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
         Row {
             Text("Valid to: ", color = Color.Black, fontWeight = FontWeight.Bold)
             Text("$validTo", color = Color.Black)
+        }
+        val base = "${sigmet.altitude?.first?.typ}/${sigmet.altitude?.first?.number}"
+        val top = "${sigmet.altitude?.second?.number}"
+        Row {
+            Text("Base: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(base, color = Color.Black)
+        }
+        Row {
+            Text("Top: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(top, color = Color.Black)
         }
     }
 }
