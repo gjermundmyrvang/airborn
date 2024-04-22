@@ -310,10 +310,9 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
                 color = MaterialTheme.colorScheme.secondary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
-            
+
             is LoadingState.Error -> Text(
-                text = state.sun.message,
-                color = MaterialTheme.colorScheme.background
+                text = state.sun.message, color = MaterialTheme.colorScheme.background
             )
 
             is LoadingState.Success -> state.sun.value?.let { SunComposable(sun = it) }
