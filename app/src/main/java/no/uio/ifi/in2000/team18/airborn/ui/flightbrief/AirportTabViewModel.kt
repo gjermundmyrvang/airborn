@@ -72,7 +72,7 @@ sealed class AirportTabViewModel(
 
     fun initTurbulence() {
         viewModelScope.launch {
-            val turbulence = load { airportRepository.createTurbulence(icao!!) }
+            val turbulence = load { airportRepository.fetchTurbulence(icao) }
             _state.update { it.copy(turbulence = turbulence) }
         }
     }

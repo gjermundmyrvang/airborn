@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(
 
     fun updateSunriseAirport(airport: Airport) {
         viewModelScope.launch {
-            val sun = load { airportRepository.getSunriseSunset(airport) }
+            val sun = load { airportRepository.fetchSunriseSunset(airport) }
             _state.update { it.copy(sun = sun) }
         }
     }
