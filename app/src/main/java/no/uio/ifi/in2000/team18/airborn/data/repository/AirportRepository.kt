@@ -62,7 +62,7 @@ class AirportRepository @Inject constructor(
     }
 
     // Webcam Logic
-    suspend fun fetchWebcamImages(airport: Airport) = webcamDataSource.fetchImage(airport)
+    suspend fun fetchWebcamImages(airport: Airport) = webcamDataSource.fetchImage(airport).webcams
 
     // Sunrise & Sunset logic
     suspend fun fetchSunriseSunset(airport: Airport): no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun {
