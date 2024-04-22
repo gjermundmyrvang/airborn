@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -36,7 +35,6 @@ import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toKotlinTimeZone
 import kotlinx.datetime.toLocalDateTime
-import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
@@ -92,7 +90,6 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                             )
                         Icon(imageVector = Icons.Outlined.Info, contentDescription = "Flip")
                     }
-
                     if (metar != null) {
                         Text(text = "METAR:",
                             fontWeight = FontWeight.Bold
@@ -275,7 +272,7 @@ fun MetarClouds(clouds: Clouds) {
         Clouds.NSC -> Text("No significant clouds", fontWeight = FontWeight.Bold)
     }
 }
-
+/*
 @Preview(showSystemUi = true)
 @Composable
 fun TestMetarDecode() = Column {
@@ -299,3 +296,4 @@ fun TestMetarDecode() = Column {
         rotate
         )
 }
+*/
