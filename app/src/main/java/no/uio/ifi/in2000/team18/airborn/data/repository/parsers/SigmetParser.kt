@@ -2,9 +2,9 @@ package no.uio.ifi.in2000.team18.airborn.data.repository.parsers
 
 import no.uio.ifi.in2000.team18.airborn.model.AltitudeReference
 import no.uio.ifi.in2000.team18.airborn.model.AltitudeReferenceType
-import no.uio.ifi.in2000.team18.airborn.model.ParsedDateTime
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.ParsedDateTime
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 
 
