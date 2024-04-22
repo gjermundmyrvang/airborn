@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team18.airborn.data.repository.parsers
 import kotlinx.datetime.Instant
 import no.uio.ifi.in2000.team18.airborn.model.celsius
 import no.uio.ifi.in2000.team18.airborn.model.degrees
+import no.uio.ifi.in2000.team18.airborn.model.feet
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudLayer
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
@@ -296,7 +297,7 @@ private val metarParser = Unit.let {
 
             // TODO: Is this always a three digit number
             lift(skyCover, number, cloudType) { cover, number, cloudType ->
-                CloudLayer(cover, number.m, cloudType)
+                CloudLayer(cover, (number * 100).feet, cloudType)
             }
         }
         val clouds = either(

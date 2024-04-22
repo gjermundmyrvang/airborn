@@ -224,7 +224,7 @@ fun MetarClouds(clouds: Clouds) {
                 Row {
                     Text("Cloud Layer: ", fontWeight = FontWeight.Bold)
                     if (it.type == CloudType.Nothing) {
-                        Text("${it.cover} clouds at ${it.height}") // TODO: Make more human readable
+                        Text("${it.cover} clouds at ${it.height.formatAsFeet()}") // TODO: Make more human readable
                     } else if (it.type == CloudType.Unknown) {
                         Text("${it.cover} clouds of unknown type at ${it.height}")
                     } else {
