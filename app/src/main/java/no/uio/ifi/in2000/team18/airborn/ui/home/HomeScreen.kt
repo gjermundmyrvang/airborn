@@ -23,6 +23,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
@@ -30,16 +32,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 
@@ -50,11 +53,35 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(false,
+            LocalDensity.current,
+            initialValue = SheetValue.PartiallyExpanded,
+            skipHiddenState = false)
+    )
+    val scope = rememberCoroutineScope()
+
+    MapBoxHomeScreen()
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.weight(2F))
+        Button(
+            onClick = {
+                scope.launch {
+                    bottomSheetScaffoldState.bottomSheetState.partialExpand()
+                }
+            }
+        ) {
+            Row {
+                Text("Select airport")
+            }
+        }
+    }
     BottomSheetScaffold(
         modifier = modifier
-            .padding(16.dp)
-            .fillMaxSize(),
+            .padding(16.dp),
         scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
             Column(
@@ -64,20 +91,10 @@ fun HomeScreen(
                 AirportSelection(modifier = modifier.fillMaxWidth(), viewModel = viewModel)
             }
         },
-        sheetPeekHeight = 300.dp,
+        sheetPeekHeight = 400.dp,
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues = paddingValues)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 80.sp
-                )
-            }
+        content = {
         },
     )
 }
@@ -163,17 +180,19 @@ fun AirportInfoRow(
         Spacer(modifier = Modifier.width(24.dp))
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = item.name, color = Color.Black, fontWeight = FontWeight.Bold
+                text = item.name,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
             Row {
                 Text(
-                    text = item.icao.code, color = Color.Black
+                    text = item.icao.code, color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = "${item.position.latitude}N/${item.position.longitude}E",
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
