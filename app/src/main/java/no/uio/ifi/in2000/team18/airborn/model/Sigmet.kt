@@ -1,6 +1,11 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
+import com.mapbox.geojson.Point
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.ParsedDateTime
+
+data class SigmetDateTime(val day: Int, val hour: Int, val minute: Int) {
+    override fun toString(): String = "$day. $hour:$minute"
+}
 
 enum class SigmetType {
     Airmet,
@@ -27,6 +32,6 @@ data class Sigmet(
     val location: String,
     val extra: String?,
     val message: List<String>,
-    val coordinates: List<Position>,
+    val coordinates: List<Point>,
     val altitude: Pair<AltitudeReference, AltitudeReference>?,
 )
