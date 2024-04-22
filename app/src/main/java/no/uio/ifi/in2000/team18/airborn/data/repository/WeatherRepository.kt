@@ -7,6 +7,7 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSour
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
+import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
 import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
@@ -14,7 +15,6 @@ import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
@@ -135,7 +135,8 @@ class WeatherRepository @Inject constructor(
     )
 
     suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
-        val weatherData = locationForecastDataSource.fetchForecast(airport.position).properties.timeseries
+        val weatherData =
+            locationForecastDataSource.fetchForecast(airport.position).properties.timeseries
         return mapToWeatherDay(weatherData)
     }
 

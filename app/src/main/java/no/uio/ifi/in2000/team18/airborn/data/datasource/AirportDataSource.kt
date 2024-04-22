@@ -3,9 +3,9 @@ package no.uio.ifi.in2000.team18.airborn.data.datasource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.uio.ifi.in2000.team18.airborn.data.dao.BuiltinAirportDao
+import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Position
 import javax.inject.Inject
 
 class AirportDataSource @Inject constructor(
