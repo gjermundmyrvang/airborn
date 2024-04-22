@@ -60,11 +60,10 @@ private val metParser = Unit.let {
         )
     }
 
-    val metRegion = lift(
-        word("ENOR").skipSpace(),
-        word("POLARIS").or(word("...")).skipSpace(),
+    val flightInformationRegion = lift(
+        word("ENOR POLARIS").or(word("ENOB BODOE OCEANIC")).skipSpace(),
         word("FIR"),
-    ) { _, _, _ ->
+    ) { _, _ ->
     }
 
     val lat = lift(
@@ -100,7 +99,10 @@ private val metParser = Unit.let {
     val message = many1(messagePart)
 
     val metBody = lift(
-        metRegion.skipSpace(), message, coordinateList.skipSpace(), alititudeRange.optional()
+        flightInformationRegion.skipSpace(),
+        message,
+        coordinateList.skipSpace(),
+        alititudeRange.optional(),
     ) { _, m, c, r ->
         SigmetBody(
             message = m,
