@@ -169,9 +169,10 @@ fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
         .padding(16.dp)
         .fillMaxWidth()
         .background(
-            color = if (sigmet.type == SigmetType.Airmet) Color.Cyan.copy(alpha = 0.6f) else Color.Yellow.copy(
-                alpha = 0.6f
-            )
+            color = if (sigmet.type == SigmetType.Airmet) Color.Cyan.copy(alpha = 0.8f) else Color.Yellow.copy(
+                alpha = 0.8f
+            ),
+            shape = RoundedCornerShape(5.dp),
         )
         .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(5.dp))
         .clip(RoundedCornerShape(5.dp))
@@ -190,6 +191,7 @@ fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
         Row {
             Text("Type: ", color = Color.Black, fontWeight = FontWeight.Bold)
             Text(sigmet.type.toString(), color = Color.Black)
+            Text(" (${sigmet.identifier.first}${sigmet.identifier.second})", color = Color.Black)
         }
         Row {
             Text("Weathermessage: ", color = Color.Black, fontWeight = FontWeight.Bold)
@@ -225,6 +227,16 @@ fun SigmetInfoBox(sigmet: Sigmet, onClose: () -> Unit) = Box(
         Row {
             Text("Valid to: ", color = Color.Black, fontWeight = FontWeight.Bold)
             Text("$validTo", color = Color.Black)
+        }
+        val base = "${sigmet.altitude?.first?.typ}/${sigmet.altitude?.first?.number}"
+        val top = "${sigmet.altitude?.second?.number}"
+        Row {
+            Text("Base: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(base, color = Color.Black)
+        }
+        Row {
+            Text("Top: ", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(top, color = Color.Black)
         }
     }
 }
@@ -298,10 +310,9 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
                 color = MaterialTheme.colorScheme.secondary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
-            
+
             is LoadingState.Error -> Text(
-                text = state.sun.message,
-                color = MaterialTheme.colorScheme.background
+                text = state.sun.message, color = MaterialTheme.colorScheme.background
             )
 
             is LoadingState.Success -> state.sun.value?.let { SunComposable(sun = it) }
