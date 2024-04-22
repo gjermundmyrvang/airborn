@@ -27,13 +27,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toKotlinTimeZone
 import kotlinx.datetime.toLocalDateTime
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
@@ -83,13 +86,17 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                     .padding(10.dp)
                     .fillMaxWidth()) {
                     Row {
-                        Text(text = "METAR:",
+                        Text(text = "RAW:",
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1F)
                             )
                         Icon(imageVector = Icons.Outlined.Info, contentDescription = "Flip")
                     }
+
                     if (metar != null) {
+                        Text(text = "METAR:",
+                            fontWeight = FontWeight.Bold
+                        )
                         Text(text = metar.text, modifier = Modifier.clickable {
                             clipboardManager.setText(
                                 AnnotatedString(metar.text)
@@ -136,11 +143,15 @@ fun DecodedMetar(metar: Metar, rotate: Float) = Column(
 
     Row {
         Text(
-            text = "Metar",
+            text = "DECODED",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1F))
         Icon(imageVector = Icons.Outlined.Info, contentDescription = "Flip")
     }
+    Text(
+        text = "METAR",
+        fontWeight = FontWeight.Bold
+    )
     Row {
         Text("Station Name: ", fontWeight = FontWeight.Bold)
         Text("${metar.station}")
@@ -264,16 +275,27 @@ fun MetarClouds(clouds: Clouds) {
         Clouds.NSC -> Text("No significant clouds", fontWeight = FontWeight.Bold)
     }
 }
-/*
+
 @Preview(showSystemUi = true)
 @Composable
 fun TestMetarDecode() = Column {
+    var rotated by remember {
+        mutableStateOf(false)
+    }
+    val rotate by animateFloatAsState(
+            targetValue = if (rotated) 180f else 0f,
+            animationSpec = tween(500)
+        )
     DecodedMetar(
         parseMetar(
             "ENSG 150720Z 07207KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
             Instant.parse("2024-04-16T00:00:00Z")
-        ).expect()
+        ).expect(),
+        rotate
     )
-    DecodedMetar(parseMetar("ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT=").expect())
+    DecodedMetar(
+        parseMetar(
+            "ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT=").expect(),
+        rotate
+        )
 }
-*/
