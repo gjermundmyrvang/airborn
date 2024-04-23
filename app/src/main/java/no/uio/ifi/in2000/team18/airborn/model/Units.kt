@@ -6,8 +6,12 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.mapbox.geojson.Point
 import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.roundToInt
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class CelsiusAdapter : TypeAdapter<Temperature>() {
     override fun write(writer: JsonWriter, value: Temperature) = writer.value(value.celsius).let {}
@@ -129,6 +133,84 @@ data class Fraction(val fraction: Double) {
     override fun toString(): String = "$fraction %"
 }
 
+data class Position(
+    val latitude: Double, val longitude: Double
+) {
+    override fun toString(): String = "($latitude, $longitude)"
+
+    companion object {
+        const val EARTH_RADIUS_METERS: Double = 6371000.0
+    }
+
+    fun toPoints(): Point = Point.fromLngLat(longitude, latitude)
+
+    /**
+     * Giving great-circle distances to another position on a sphere.
+     * Using the haversine formula.
+     *
+     * https://www.movable-type.co.uk/scripts/latlong.html
+     *
+     * @param destination Position of destination
+     * @return Distance to destination
+     */
+    fun distanceTo(destination: Position): Distance {
+        val startLat = Math.toRadians(this.latitude)
+        val endLat = Math.toRadians(destination.latitude)
+        val deltaLat = Math.toRadians(destination.latitude - this.latitude)
+        val deltaLon = Math.toRadians(destination.longitude - this.longitude)
+
+        val a = sin(deltaLat / 2).pow(2) +
+                cos(startLat) * cos(endLat) * sin(deltaLon / 2).pow(2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return Distance(EARTH_RADIUS_METERS * c)
+    }
+
+    /**
+     * Halfway to another position along a great-circle arc
+     * (along the surface-path on the globe).
+     * https://www.movable-type.co.uk/scripts/latlong.html
+     *
+     * @param destination Position of interest
+     * @return Position of midpoint, halfway to destination.
+     */
+    fun halfwayTo(destination: Position): Position {
+        val startLon = Math.toRadians(this.longitude)
+        val startLat = Math.toRadians(this.latitude)
+        val endLon = Math.toRadians(destination.longitude)
+        val endLat = Math.toRadians(destination.latitude)
+        val deltaLon = endLon - startLon
+
+        val x = cos(endLat) * cos(deltaLon)
+        val y = cos(endLat) * sin(deltaLon)
+        val lat = atan2(
+            sin(startLat) + sin(endLat),
+            sqrt((cos(startLat) + x) * (cos(startLat) + x) + y * y)
+        )
+
+        val lon = startLon + atan2(y, cos(startLat) + x)
+        return Position(Math.toDegrees(lat), Math.toDegrees(lon))
+    }
+
+    /**
+     * Follow a great-circle line between two positions.
+     * https://www.movable-type.co.uk/scripts/latlong.html
+     *
+     * @param destination Position of destination
+     * @return Direction of initial bearing to destination
+     */
+    fun bearingTo(destination: Position): Double {
+        val startLon = Math.toRadians(this.longitude)
+        val startLat = Math.toRadians(this.latitude)
+        val endLon = Math.toRadians(destination.longitude)
+        val endLat = Math.toRadians(destination.latitude)
+        val deltaLon = endLon - startLon
+
+        val y = sin(deltaLon) * cos(endLat)
+        val x = (cos(startLat) * sin(endLat)).minus(sin(startLat) * cos(endLat) * cos(deltaLon))
+        val theta = atan2(y, x)
+        return Math.toDegrees((theta)).mod(360.0) // bearing in degrees
+    }
+}
 
 // Speed
 private operator fun Number.times(s: Speed) = s * this
@@ -173,8 +255,3 @@ fun Double.round(decimals: Int): Double {
     return round(this * multiplier) / multiplier
 }
 
-data class Position(
-    val latitude: Double, val longitude: Double
-) {
-    fun toPoints(): Point = Point.fromLngLat(longitude, latitude)
-}
