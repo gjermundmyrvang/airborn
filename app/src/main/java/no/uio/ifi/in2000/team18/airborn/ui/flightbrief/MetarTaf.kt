@@ -117,7 +117,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                 }
             } else {
                 if (metar != null) {
-                    Box(modifier = Modifier.graphicsLayer { rotationY = rotate }) {
+                    Box(modifier = Modifier.graphicsLayer { rotationY = 180f }) {
                         DecodedMetar(metar = metar)
                     }
                 } else {
