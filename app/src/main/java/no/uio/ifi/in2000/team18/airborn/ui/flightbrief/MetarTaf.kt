@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
@@ -59,8 +57,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
             mutableStateOf(false)
         }
         val rotate by animateFloatAsState(
-            targetValue = if (rotated) 180f else 0f,
-            animationSpec = tween(500)
+            targetValue = if (rotated) 180f else 0f
         )
 
         Card(
@@ -80,18 +77,22 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
             )
         ) {
             if (!rotated) {
-                Column( modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                ) {
                     Row {
-                        Text(text = "RAW:",
+                        Text(
+                            text = "RAW:",
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1F)
-                            )
+                        )
                         Icon(imageVector = Icons.Outlined.Info, contentDescription = "Flip")
                     }
                     if (metar != null) {
-                        Text(text = "METAR:",
+                        Text(
+                            text = "METAR:",
                             fontWeight = FontWeight.Bold
                         )
                         Text(text = metar.text, modifier = Modifier.clickable {
@@ -115,9 +116,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                 }
             } else {
                 if (metar != null) {
-                    Column {
-                        DecodedMetar(metar = metar, rotate)
-                    }
+                    DecodedMetar(metar = metar, rotate)
                 } else {
                     Text("No METAR available")
                 }
@@ -142,7 +141,8 @@ fun DecodedMetar(metar: Metar, rotate: Float) = Column(
         Text(
             text = "DECODED",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1F))
+            modifier = Modifier.weight(1F)
+        )
         Icon(imageVector = Icons.Outlined.Info, contentDescription = "Flip")
     }
     Text(
