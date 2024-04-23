@@ -21,7 +21,6 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import java.nio.channels.UnresolvedAddressException
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 
@@ -65,7 +64,7 @@ sealed class AirportTabViewModel(
                 return@launch
             }
             val isobaric =
-                load { weatherRepository.getIsobaricData(airport.position, LocalDateTime.now()) }
+                load { weatherRepository.getIsobaricData(airport.position) }
             _state.update { it.copy(isobaric = isobaric) }
         }
     }
