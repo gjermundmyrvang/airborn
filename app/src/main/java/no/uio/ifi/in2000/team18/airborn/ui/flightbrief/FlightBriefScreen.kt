@@ -68,9 +68,7 @@ fun FlightBriefScreen(
                 Text(text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 50.sp)
             }, navigationIcon = {
                 IconButton(onClick = {
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
-                    }
+                    navController.popBackStack()
                 }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
