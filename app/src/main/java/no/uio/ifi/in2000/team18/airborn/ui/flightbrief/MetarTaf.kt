@@ -33,6 +33,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
@@ -92,6 +93,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                     Row {
                         Text(
                             text = "RAW DATA:",
+                            fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .weight(1F)
@@ -147,6 +149,7 @@ fun DecodedMetar(metar: Metar) = Column(
     Row {
         Text(
             text = "DECODED",
+            fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .weight(1F)
