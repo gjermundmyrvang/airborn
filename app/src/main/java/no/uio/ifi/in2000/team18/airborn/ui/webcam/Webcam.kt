@@ -100,19 +100,13 @@ fun NearbyWebcam(
     webcam: Webcam, current: Webcam, onWebcamClicked: (Webcam) -> Unit
 ) {
     val borderColor =
-        if (webcam == current) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.outline
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onWebcamClicked(webcam) }
-            .shadow(
-                Color.LightGray,
-                offsetX = (5).dp,
-                offsetY = (5).dp,
-                blurRadius = 8.dp
-            ),
-        border = BorderStroke(1.dp, color = borderColor)
-    ) {
+        if (webcam == current) MaterialTheme.colorScheme.primary else Color.Transparent
+    OutlinedCard(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onWebcamClicked(webcam) }
+        .shadow(
+            Color.LightGray, offsetX = (5).dp, offsetY = (5).dp, blurRadius = 5.dp
+        ), border = BorderStroke(1.dp, color = borderColor)) {
         Row(
             modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
