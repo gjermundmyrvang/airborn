@@ -59,10 +59,7 @@ import kotlin.random.Random
 @Composable
 fun WeatherSection(state: LoadingState<List<WeatherDay>>, initWeather: () -> Unit) =
     LazyCollapsible(
-        header = "Weather",
-        value = state,
-        padding = 0.dp,
-        onExpand = initWeather
+        header = "Weather", value = state, padding = 0.dp, onExpand = initWeather
     ) { weather ->
         var selectedDay by rememberSaveable { mutableIntStateOf(0) }
         var selectedHour by rememberSaveable { mutableIntStateOf(0) }
@@ -257,14 +254,13 @@ fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onCli
 
 @Composable
 fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: WeatherHour) {
-    val nextHours = weatherHour.nextOneHour
+    val nextHours = weatherHour.nextOneHour ?: weatherHour.nextSixHour ?: weatherHour.nextTwelweHour
     val icon = weatherHour.nextOneHour?.icon ?: weatherHour.nextSixHour?.icon
     ?: weatherHour.nextTwelweHour?.icon
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
             Row {
@@ -296,6 +292,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                 fromDegrees = weatherHour.weatherDetails.windFromDirection.degrees
             )
         }
+        Spacer(modifier = Modifier.width(16.dp))
         Column {
             if (nextHours != null) {
                 Text(
@@ -364,9 +361,7 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
         ) {
             Row {
                 Text(
-                    text = windSpeed.formatAsKnots(),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp
+                    text = windSpeed.formatAsKnots(), fontWeight = FontWeight.Bold, fontSize = 22.sp
                 )
                 Image(
                     painter = painterResource(id = R.drawable.air_icon),
