@@ -15,10 +15,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -84,6 +86,11 @@ private fun AirportSelection(
         onValueChange = { viewModel.filterDepartureAirports(it) },
         singleLine = true,
         label = { Text("Departure airport") },
+        trailingIcon = {
+            IconButton(onClick = { viewModel.clearDepartureInput() }) {
+                Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
+            }
+        },
         keyboardActions = KeyboardActions(onDone = {
             keyboardController?.hide()
             focusManager.clearFocus()
@@ -100,6 +107,11 @@ private fun AirportSelection(
         singleLine = true,
         enabled = state.departureAirportIcao != null,
         label = { Text("Arrival airport") },
+        trailingIcon = {
+            IconButton(onClick = { viewModel.clearArrivalInput() }) {
+                Icon(Icons.Filled.Close, contentDescription = "clear arrival inputfield")
+            }
+        },
         keyboardActions = KeyboardActions(onDone = {
             keyboardController?.hide()
             focusManager.clearFocus()

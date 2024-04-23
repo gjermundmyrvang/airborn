@@ -47,6 +47,28 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun clearDepartureInput() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    departureAirportInput = "",
+                    departureAirportIcao = null
+                )
+            }
+        }
+    }
+
+    fun clearArrivalInput() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    arrivalAirportInput = "",
+                    arrivalAirportIcao = null
+                )
+            }
+        }
+    }
+
     private fun initSigmets() {
         viewModelScope.launch {
             val sigmets = try {
