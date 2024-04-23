@@ -2,12 +2,15 @@ package no.uio.ifi.in2000.team18.airborn
 
 import junit.framework.TestCase.assertEquals
 import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.Humidity
+import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.model.hpa
 import no.uio.ifi.in2000.team18.airborn.model.mps
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import org.junit.Assert
 import org.junit.Test
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -95,5 +98,39 @@ class UnitTest {
         val expectedDirection = Direction.SOUTH
 
         assertEquals(direction, expectedDirection)
+    }
+
+    @Test
+    fun bearing_isCorrect() {
+        // Arrange
+        val start = Position(60.0, 10.0)
+        val end = Position(61.0, 9.0)
+        // Act
+        val result = start.bearingTo(end)
+        // Assert
+        Assert.assertEquals(334.0, result, 0.5)
+    }
+
+    @Test
+    fun halfway_isCorrect() {
+        // Arrange
+        val start = Position(35.0, 45.0)
+        val end = Position(35.0, 135.0)
+        // Act
+        val result: Position = start.halfwayTo(end)
+        // Assert
+        Assert.assertEquals(45.0, result.latitude, 0.5)
+        Assert.assertEquals(90.0, result.longitude, 0.5)
+    }
+
+    @Test
+    fun distance_isCorrect() {
+        // Arrange
+        val start = Position(35.0, 45.0)
+        val end = Position(35.0, 135.0)
+        // Act
+        val result: Distance = start.distanceTo(end)
+        // Assert
+        Assert.assertEquals(7872000.0, result.meters, 500.0)
     }
 }
