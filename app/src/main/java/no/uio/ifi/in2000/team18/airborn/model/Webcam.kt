@@ -1,5 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
+import com.google.gson.annotations.JsonAdapter
+import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import no.uio.ifi.in2000.team18.airborn.ui.common.DateTimeAdapter
+
 data class WebcamResponse(
     val total: Long,
     val webcams: List<Webcam>
@@ -10,7 +14,7 @@ data class Webcam(
     val viewCount: Long,
     val webcamID: Long,
     val status: String,
-    val lastUpdatedOn: String,
+    @JsonAdapter(DateTimeAdapter::class) val lastUpdatedOn: DateTime,
     val images: Images
 )
 

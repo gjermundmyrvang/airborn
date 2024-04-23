@@ -1,5 +1,8 @@
 package no.uio.ifi.in2000.team18.airborn.ui.common
 
+import com.google.gson.TypeAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -35,4 +38,9 @@ data class DateTime(val isoDateTime: String) {
 
     val time
         get(): String = toLocalDateTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"))
+}
+
+class DateTimeAdapter : TypeAdapter<DateTime>() {
+    override fun write(writer: JsonWriter, value: DateTime) = writer.value(value.isoDateTime).let {}
+    override fun read(reader: JsonReader): DateTime = DateTime(reader.nextString())
 }

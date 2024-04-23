@@ -123,7 +123,10 @@ fun NearbyWebcam(
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(text = webcam.title, fontWeight = FontWeight.Bold)
-                Text(text = "updated: " + webcam.lastUpdatedOn, fontSize = 15.sp)
+                Text(
+                    text = "updated: ${webcam.lastUpdatedOn.dayNumberMonthTime} (LT)",
+                    fontSize = 15.sp
+                )
             }
         }
     }
