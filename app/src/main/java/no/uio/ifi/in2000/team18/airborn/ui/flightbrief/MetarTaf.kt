@@ -273,9 +273,11 @@ fun MetarClouds(clouds: Clouds) {
                         CloudType.Nothing -> {
                             Text("${it.cover} clouds at ${it.height.formatAsFeet()}") // TODO: Make more human readable
                         }
+
                         CloudType.Unknown -> {
                             Text("${it.cover} clouds of unknown type at ${it.height}")
                         }
+
                         else -> {
                             Text("${it.cover} ${it.type} at ${it.height}")
                         }
@@ -289,6 +291,7 @@ fun MetarClouds(clouds: Clouds) {
     }
 }
 
+// Create new icon
 @Composable
 fun rememberFlip(): ImageVector {
     return remember {
@@ -389,17 +392,23 @@ fun rememberFlip(): ImageVector {
         }.build()
     }
 }
+
 @Preview(showSystemUi = true)
 @Composable
 fun TestMetarDecode() = Column {
-    DecodedMetar(
-        parseMetar(
-            "ENSG 150720Z 07207KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
-            Instant.parse("2024-04-16T00:00:00Z")
-        ).expect()
-    )
-    DecodedMetar(
-        parseMetar(
-            "ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT=").expect()
+    Box {
+        DecodedMetar(
+            parseMetar(
+                "ENSG 150720Z 07207KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
+                Instant.parse("2024-04-16T00:00:00Z")
+            ).expect()
         )
+    }
+    Box {
+        DecodedMetar(
+            parseMetar(
+                "ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT="
+            ).expect()
+        )
+    }
 }
