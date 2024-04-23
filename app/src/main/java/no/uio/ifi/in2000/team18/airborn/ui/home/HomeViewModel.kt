@@ -11,6 +11,7 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.SigmetRepository
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
@@ -25,6 +26,8 @@ class HomeViewModel @Inject constructor(
     data class UiState(
         val departureAirportInput: String = "",
         val arrivalAirportInput: String = "",
+        val departureAirportIcao: Icao? = null,
+        val arrivalAirportIcao: Icao? = null,
         val airports: List<Airport> = listOf(),
         val sigmets: List<Sigmet> = listOf(),
         val sun: LoadingState<Sun?> = LoadingState.Loading
@@ -75,11 +78,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun selectDepartureAirport(airport: String) =
-        _state.update { it.copy(departureAirportInput = airport) }
+    fun selectDepartureAirport(airport: Icao) = _state.update {
+        it.copy(departureAirportInput = airport.code, departureAirportIcao = airport)
+    }
 
-    fun selectArrivalAirport(airport: String) =
-        _state.update { it.copy(arrivalAirportInput = airport) }
+    fun selectArrivalAirport(airport: Icao) = _state.update {
+        it.copy(arrivalAirportInput = airport.code, departureAirportIcao = airport)
+    }
 
     fun updateSunriseAirport(airport: Airport) {
         viewModelScope.launch {

@@ -1,13 +1,13 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,151 +16,128 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = SheetState(false,
-            LocalDensity.current,
-            initialValue = SheetValue.PartiallyExpanded,
-            skipHiddenState = false)
-    )
-    val scope = rememberCoroutineScope()
-
-    MapBoxHomeScreen()
+    var airportInputSelected by remember { mutableStateOf(false) }
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Spacer(modifier = Modifier.weight(2F))
-        Button(
-            onClick = {
-                scope.launch {
-                    bottomSheetScaffoldState.bottomSheetState.partialExpand()
-                }
-            }
-        ) {
-            Row {
-                Text("Select airport")
-            }
-        }
+        Map(
+            viewModel,
+            modifier = Modifier
+                .height(0.dp)
+                .let { if (airportInputSelected) it else it.weight(1.0f) },
+        )
+        AirportSelection(modifier = modifier.padding(16.dp),
+            viewModel = viewModel,
+            onFocusChange = { airportInputSelected = it })
     }
-    BottomSheetScaffold(
-        modifier = modifier
-            .padding(16.dp),
-        scaffoldState = bottomSheetScaffoldState,
-        sheetContent = {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AirportSelection(modifier = modifier.fillMaxWidth(), viewModel = viewModel)
-            }
-        },
-        sheetPeekHeight = 400.dp,
-        sheetShadowElevation = 5.dp,
-        sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
-        content = {
-        },
-    )
 }
 
 
 @Composable
 private fun AirportSelection(
-    modifier: Modifier,
-    viewModel: HomeViewModel,
-) {
+    modifier: Modifier, viewModel: HomeViewModel, onFocusChange: (Boolean) -> Unit = {}
+) = Column(modifier = modifier) {
     val state by viewModel.state.collectAsState()
     val airports = state.airports
     val navController = LocalNavController.current
-    var departureSelected by remember { mutableStateOf(false) }
-    var arrivalSelected by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
+    var departureFocused by remember { mutableStateOf(false) }
+    var arrivalFocused by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = state.departureAirportInput,
-        modifier = modifier,
-        onValueChange = {
-            viewModel.filterDepartureAirports(it)
-        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged { departureFocused = it.isFocused },
+        onValueChange = { viewModel.filterDepartureAirports(it) },
         singleLine = true,
         label = { Text("Departure airport") },
         keyboardActions = KeyboardActions(onDone = {
             keyboardController?.hide()
+            focusManager.clearFocus()
         }),
     )
     OutlinedTextField(
         value = state.arrivalAirportInput,
-        modifier = modifier,
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged { arrivalFocused = it.isFocused },
         onValueChange = {
             viewModel.filterArrivalAirports(it)
         },
         singleLine = true,
-        enabled = departureSelected,
+        enabled = state.departureAirportIcao != null,
         label = { Text("Arrival airport") },
         keyboardActions = KeyboardActions(onDone = {
             keyboardController?.hide()
+            focusManager.clearFocus()
         }),
     )
-    Button(
-        onClick = {
-            when (departureSelected && arrivalSelected) {
-                true -> navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirportInput}")
-                false -> navController.navigate("flightBrief/${state.departureAirportInput}/null")
-            }
-        }, enabled = departureSelected, modifier = modifier, shape = RoundedCornerShape(8.dp)
-    ) {
-        Text("Generate brief")
+
+    LaunchedEffect(arrivalFocused || departureFocused) {
+        onFocusChange(arrivalFocused || departureFocused)
     }
-    LazyColumn(modifier = Modifier.imePadding(), content = {
+
+
+    if (!(departureFocused || arrivalFocused)) {
+        Button(
+            onClick = {
+                navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirportIcao?.code ?: "null"}")
+            },
+            enabled = state.departureAirportIcao != null,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+        ) { Text("Go to brief") }
+    }
+
+    val configuration = LocalConfiguration.current
+    if (!(departureFocused || arrivalFocused)) return@Column
+    LazyColumn(modifier = Modifier.height(configuration.screenHeightDp.dp)) {
         items(airports) { airport ->
             AirportInfoRow(item = airport) { clickedAirport ->
                 keyboardController?.hide()
-                if (!departureSelected) {
-                    departureSelected = true
-                    viewModel.selectDepartureAirport(clickedAirport.icao.code)
+                if (departureFocused) {
+                    viewModel.selectDepartureAirport(clickedAirport.icao)
+                    focusManager.clearFocus(true)
                 } else {
-                    arrivalSelected = true
-                    viewModel.selectArrivalAirport(clickedAirport.icao.code)
+                    viewModel.selectArrivalAirport(clickedAirport.icao)
+                    focusManager.clearFocus(true)
                 }
             }
         }
-    })
+    }
 }
 
 @Composable
@@ -198,11 +175,4 @@ fun AirportInfoRow(
         }
     }
     HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
-}
-
-@Preview
-@Composable
-fun HomeScreenPreview() {
-//    val mockViewModel = HomeViewModel(AirportDataSource()).apply { filterAirports("") }
-//    HomeScreen(viewModel = mockViewModel)
 }

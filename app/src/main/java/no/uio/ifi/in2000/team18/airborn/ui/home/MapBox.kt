@@ -49,6 +49,8 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
+import com.mapbox.maps.plugin.attribution.generated.AttributionSettings
+import com.mapbox.maps.plugin.logo.generated.LogoSettings
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
@@ -63,56 +65,55 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @OptIn(MapboxExperimental::class)
 @Composable
-fun MapBoxHomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) =
-    Column(modifier = Modifier.fillMaxSize()) {
-        val state by homeViewModel.state.collectAsState()
-        val airports = state.airports
-        val sigmets = state.sigmets
-        var selectedAirport by remember { mutableStateOf<Airport?>(null) }
-        var isClicked by remember { mutableStateOf(false) }
-        var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
-        Box {
-            val mapViewportState = rememberMapViewportState {
-                setCameraOptions {
-                    zoom(3.2)
-                    center(Point.fromLngLat(18.06, 59.00))
-                    pitch(0.0)
-                    bearing(0.0)
-                }
-            }
-            MapboxMap(
-                Modifier.fillMaxSize(), mapViewportState = mapViewportState
+fun Map(homeViewModel: HomeViewModel, modifier: Modifier = Modifier) = Column(
+    modifier = modifier,
+) {
+    val state by homeViewModel.state.collectAsState()
+    val airports = state.airports
+    val sigmets = state.sigmets
+    var selectedAirport by remember { mutableStateOf<Airport?>(null) }
+    var isClicked by remember { mutableStateOf(false) }
+    var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
+    val mapViewportState = rememberMapViewportState {
+        setCameraOptions {
+            zoom(3.2)
+            center(Point.fromLngLat(18.06, 59.00))
+            pitch(0.0)
+            bearing(0.0)
+        }
+    }
+    Box {
+        MapboxMap(
+            mapViewportState = mapViewportState,
+
             ) {
-                airports.forEach { airport ->
-                    Annotation(airport) {
-                        selectedAirport = it
-                    }
-                }
-                if (sigmets.isNotEmpty()) {
-                    Polygons(sigmets = sigmets) {
-                        isClicked = true
-                        sigmetClicked = it
-                    }
+            airports.forEach { airport ->
+                Annotation(airport) {
+                    selectedAirport = it
                 }
             }
-            Column(Modifier.padding(top = 16.dp)) {
-                when (val airport = selectedAirport) {
-                    null -> {}
-                    else -> {
-                        homeViewModel.updateSunriseAirport(airport)
-                        InfoBox(airport = airport, state) {
-                            selectedAirport = null
-                        }
-                    }
+            if (sigmets.isNotEmpty()) {
+                Polygons(sigmets = sigmets) {
+                    isClicked = true
+                    sigmetClicked = it
                 }
-                if (isClicked) {
-                    SigmetInfoBox(sigmet = sigmets[sigmetClicked]) {
-                        isClicked = false
-                    }
+            }
+        }
+        Column(modifier = Modifier.padding(top = 16.dp)) {
+            selectedAirport?.let { airport ->
+                homeViewModel.updateSunriseAirport(airport)
+                InfoBox(airport = airport, state) {
+                    selectedAirport = null
+                }
+            }
+            if (isClicked) {
+                SigmetInfoBox(sigmet = sigmets[sigmetClicked]) {
+                    isClicked = false
                 }
             }
         }
     }
+}
 
 @OptIn(MapboxExperimental::class)
 @Composable
