@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -116,7 +117,9 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                 }
             } else {
                 if (metar != null) {
-                    DecodedMetar(metar = metar, rotate)
+                    Box(modifier = Modifier.graphicsLayer { rotationY = rotate }) {
+                        DecodedMetar(metar = metar)
+                    }
                 } else {
                     Text("No METAR available")
                 }
@@ -128,15 +131,11 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
 fun LocalDateTime.format(format: String) = format(LocalDateTime.Format { byUnicodePattern(format) })
 
 @Composable
-fun DecodedMetar(metar: Metar, rotate: Float) = Column(
+fun DecodedMetar(metar: Metar) = Column(
     modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth()
-        .graphicsLayer {
-            rotationY = rotate
-        }
 ) {
-
     Row {
         Text(
             text = "DECODED",
