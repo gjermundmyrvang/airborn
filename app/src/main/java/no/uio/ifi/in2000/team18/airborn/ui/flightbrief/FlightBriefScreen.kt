@@ -178,7 +178,7 @@ fun OverallAirportBrieftab(
         item { Sigchart(state.sigcharts) { viewModel.initSigchart() } }
         item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMpas() } }
         item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
-
+        item { Route(state.route) { viewModel.initRouteIsobaric() } }
     }
 }
 
