@@ -38,10 +38,11 @@ import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.ImageComposable
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
+import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.shadow
 
 @Composable
 fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = LazyCollapsible(
-    header = "Webcams", value = state, onExpand = initWebcam
+    header = "Webcams", value = state, onExpand = initWebcam, padding = 0.dp
 ) { webcams ->
     if (webcams.isEmpty()) {
         Column(
@@ -57,7 +58,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(top = 5.dp, start = 5.dp, end = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         var selectedWebcam by rememberSaveable { mutableIntStateOf(0) }
@@ -65,7 +66,6 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
             uri = webcams[selectedWebcam].images.current.preview,
             contentDescription = "Webcam image"
         )
-        Text(text = "last updated: ${webcams[selectedWebcam].lastUpdatedOn}")
         HyperlinkText(
             fullText = "Webcams provided by windy.com — add a webcam",
             linkText = listOf("windy.com", "add a webcam"),
@@ -77,7 +77,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(500.dp),
+                .height(250.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LazyColumn(content = {
@@ -100,13 +100,13 @@ fun NearbyWebcam(
     webcam: Webcam, current: Webcam, onWebcamClicked: (Webcam) -> Unit
 ) {
     val borderColor =
-        if (webcam == current) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.outline
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onWebcamClicked(webcam) },
-        border = BorderStroke(1.dp, color = borderColor)
-    ) {
+        if (webcam == current) MaterialTheme.colorScheme.primary else Color.Transparent
+    OutlinedCard(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onWebcamClicked(webcam) }
+        .shadow(
+            Color.LightGray, offsetX = (5).dp, offsetY = (5).dp, blurRadius = 5.dp
+        ), border = BorderStroke(1.dp, color = borderColor)) {
         Row(
             modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
@@ -117,7 +117,10 @@ fun NearbyWebcam(
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(text = webcam.title, fontWeight = FontWeight.Bold)
-                Text(text = "updated: " + webcam.lastUpdatedOn, fontSize = 15.sp)
+                Text(
+                    text = "updated: ${webcam.lastUpdatedOn.dayNumberMonthTime} (LT)",
+                    fontSize = 15.sp
+                )
             }
         }
     }

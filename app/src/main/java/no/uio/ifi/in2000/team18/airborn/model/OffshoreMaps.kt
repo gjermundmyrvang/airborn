@@ -1,11 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
-import com.google.gson.TypeAdapter
 import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
-import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonWriter
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import no.uio.ifi.in2000.team18.airborn.ui.common.DateTimeAdapter
 
 
 data class OffshoreMap(
@@ -25,7 +23,3 @@ data class OffshoreParams(
     @JsonAdapter(DateTimeAdapter::class) val time: DateTime
 )
 
-class DateTimeAdapter : TypeAdapter<DateTime>() {
-    override fun write(writer: JsonWriter, value: DateTime) = writer.value(value.isoDateTime).let {}
-    override fun read(reader: JsonReader): DateTime = DateTime(reader.nextString())
-}
