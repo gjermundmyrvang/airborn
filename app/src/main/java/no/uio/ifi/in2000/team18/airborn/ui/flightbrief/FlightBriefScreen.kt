@@ -50,7 +50,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 @Composable
 fun TestFlightBrief() {
     FlightBriefScreenContent(FlightBriefViewModel.UiState(
-        hasArrival = false,
+        arrivalIcao = null,
         departureIcao = Icao(""),
     ), filterArrivalAirports = {})
 }
