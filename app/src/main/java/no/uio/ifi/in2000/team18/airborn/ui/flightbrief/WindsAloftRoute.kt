@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
@@ -106,7 +107,7 @@ fun Route(state: LoadingState<IsobaricData>, initRouteIsobaric: () -> Unit) =
                             text = "Bearing: ${bearing}",
                             style = TextStyle(fontWeight = FontWeight.Bold)
                         )
-                        RotatableArrowIcon(direction = bearing)
+                        RotatableArrowIcon(direction = Direction(bearing.degrees - 180.0))
                     }
                 }
             }
