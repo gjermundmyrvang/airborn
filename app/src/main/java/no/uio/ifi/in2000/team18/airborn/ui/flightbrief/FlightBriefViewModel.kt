@@ -13,6 +13,7 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
+import no.uio.ifi.in2000.team18.airborn.model.Radar
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -39,9 +40,11 @@ class FlightBriefViewModel @Inject constructor(
         val offshoreMaps: LoadingState<Map<String, List<OffshoreMap>>> = Loading,
         val geoSatelliteImage: LoadingState<String> = Loading,
         val route: LoadingState<RouteIsobaric> = Loading,
+        val radarAnimations: LoadingState<List<Radar>> = Loading,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
     }
+
 
     private val _state = MutableStateFlow(
         UiState(
@@ -80,6 +83,13 @@ class FlightBriefViewModel @Inject constructor(
         viewModelScope.launch {
             val satelliteImage = load { airportRepository.getGeosatelliteImage() }
             _state.update { it.copy(geoSatelliteImage = satelliteImage) }
+        }
+    }
+
+    fun initRadarAnimations() {
+        viewModelScope.launch {
+            val radarAnimations = load { airportRepository.fetchRadarAnimations() }
+            _state.update { it.copy(radarAnimations = radarAnimations) }
         }
     }
 
