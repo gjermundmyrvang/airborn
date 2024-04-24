@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -100,12 +99,11 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
                 text = it, fontWeight = FontWeight.Bold, fontSize = 22.sp
             )
         }
-        val scrollState = rememberScrollState()
+        Spacer(modifier = Modifier.height(8.dp))
         GifComposable(uri = selectedList[selectedTypeIndex].uri, contentDescription = "")
         Button(
             onClick = {
                 dropdownExpanded = !dropdownExpanded
-                selectedTypeIndex = 0
             }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)
         ) {
             Text("Change area")
