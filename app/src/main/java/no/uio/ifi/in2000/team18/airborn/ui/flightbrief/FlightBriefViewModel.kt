@@ -10,19 +10,29 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
+import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
+import no.uio.ifi.in2000.team18.airborn.model.Position
+import no.uio.ifi.in2000.team18.airborn.model.Pressure
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
+import no.uio.ifi.in2000.team18.airborn.model.Speed
+import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
+import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import java.nio.channels.UnresolvedAddressException
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class FlightBriefViewModel @Inject constructor(
-    private val airportRepository: AirportRepository, savedStateHandle: SavedStateHandle
+    private val airportRepository: AirportRepository,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     data class UiState(
@@ -33,6 +43,7 @@ class FlightBriefViewModel @Inject constructor(
         val departureIcao: Icao,
         val offshoreMaps: LoadingState<Map<String, List<OffshoreMap>>> = Loading,
         val geoSatelliteImage: LoadingState<String> = Loading,
+        val route: LoadingState<IsobaricData> = Loading,
     )
 
     private val _state = MutableStateFlow(
@@ -73,6 +84,61 @@ class FlightBriefViewModel @Inject constructor(
             _state.update { it.copy(geoSatelliteImage = satelliteImage) }
         }
     }
+
+    fun initRouteIsobaric() {
+        viewModelScope.launch {
+            val dummyData = IsobaricData(
+                Position(
+                    latitude = 62.56, longitude = 6.11,
+                ), LocalDateTime.parse("2024-04-22T09:58:16.568610"), listOf<IsobaricLayer>(
+                    IsobaricLayer(
+                        Pressure(600.0),
+                        Temperature(-10.0),
+                        uWind = 3.645589828491211,
+                        vWind = -5.9597625732421875,
+                        Direction(
+                            33.0
+                        ),
+                        Speed(6.986350630122777),
+                        Distance(4267.0)
+                    ),
+
+                    IsobaricLayer(
+                        Pressure(700.0),
+                        Temperature(-5.0),
+                        uWind = 3.645589828491211,
+                        vWind = -5.9597625732421875,
+                        Direction(35.0),
+                        Speed(6.986350630122777),
+                        Distance(3200.0)
+                    ),
+
+                    IsobaricLayer(
+                        Pressure(750.0),
+                        Temperature(-2.0),
+                        uWind = 3.645589828491211,
+                        vWind = -5.9597625732421875,
+                        Direction(31.0),
+                        Speed(6.986350630122777),
+                        Distance(2134.0)
+                    ),
+
+                    IsobaricLayer(
+                        Pressure(750.0),
+                        Temperature(3.0),
+                        uWind = 3.645589828491211,
+                        vWind = -5.9597625732421875,
+                        Direction(29.0),
+                        Speed(6.986350630122777),
+                        Distance(1067.0)
+                    )
+                )
+            )
+            val route = load { dummyData }
+            _state.update { it.copy(route = route) }
+        }
+    }
+
 
     fun filterArrivalAirports(input: String) {
         _state.update { it.copy(arrivalAirportInput = input) }
