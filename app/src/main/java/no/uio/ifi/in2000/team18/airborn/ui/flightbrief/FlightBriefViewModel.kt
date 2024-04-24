@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
+import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
+import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
@@ -32,24 +34,28 @@ import javax.inject.Inject
 @HiltViewModel
 class FlightBriefViewModel @Inject constructor(
     private val airportRepository: AirportRepository,
+    private val weatherRepository: WeatherRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     data class UiState(
         val sigcharts: LoadingState<Map<Area, List<Sigchart>>> = Loading,
-        val hasArrival: Boolean,
         val arrivalAirportInput: String = "",
+        val arrivalIcao: Icao?,
         val airports: List<Airport> = listOf(),
         val departureIcao: Icao,
         val offshoreMaps: LoadingState<Map<String, List<OffshoreMap>>> = Loading,
         val geoSatelliteImage: LoadingState<String> = Loading,
-        val route: LoadingState<IsobaricData> = Loading,
-    )
+        val route: LoadingState<RouteIsobaric> = Loading,
+    ) {
+        val hasArrival: Boolean get() = arrivalIcao != null
+    }
 
     private val _state = MutableStateFlow(
         UiState(
-            hasArrival = savedStateHandle.get<String>("arrivalIcao") != "null",
-            departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!)
+            departureIcao = Icao(savedStateHandle.get<String>("departureIcao")!!),
+            arrivalIcao = savedStateHandle.get<String>("arrivalIcao")
+                ?.let { if (it == "null") null else Icao(it) },
         )
     )
     val state = _state.asStateFlow()
