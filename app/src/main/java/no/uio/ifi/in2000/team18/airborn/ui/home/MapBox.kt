@@ -42,15 +42,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
-import com.mapbox.maps.plugin.attribution.generated.AttributionSettings
-import com.mapbox.maps.plugin.logo.generated.LogoSettings
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
@@ -277,7 +274,7 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = "Close icon",
-            tint = MaterialTheme.colorScheme.background
+            tint = MaterialTheme.colorScheme.primary
         )
     }
     Column(
@@ -288,17 +285,17 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
         Text(
             "${airport.name} / ${airport.icao.code}",
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             "Lat: ${airport.position.latitude}",
             style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             "Lon: ${airport.position.longitude}",
             style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -338,13 +335,13 @@ fun SunComposable(sun: Sun) {
     Text(
         text = "Sun info:",
         style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.primary
     )
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = sun.sunrise,
             modifier = Modifier.height(IntrinsicSize.Min),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.primary
         )
         Image(
             painter = painterResource(id = R.drawable.clearsky_polartwilight),
@@ -356,7 +353,7 @@ fun SunComposable(sun: Sun) {
         Spacer(modifier = Modifier.width(10.dp))
 
         Text(
-            text = sun.sunset, color = MaterialTheme.colorScheme.background
+            text = sun.sunset, color = MaterialTheme.colorScheme.primary
         )
 
         Image(
@@ -365,7 +362,7 @@ fun SunComposable(sun: Sun) {
             Modifier.size(35.dp)
         )
         Text(
-            text = "(LT)", color = MaterialTheme.colorScheme.background
+            text = "(LT)", color = MaterialTheme.colorScheme.primary
         )
     }
 }
