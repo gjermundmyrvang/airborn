@@ -13,6 +13,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -150,15 +151,18 @@ fun FlightBriefScreenContent(
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureAirportBriefTab()
-            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(
-                state,
+            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(state,
                 filterArrivalAirports = { filterArrivalAirports(it) },
                 clearArrivalInput = { clearArrivalInput() })
 
             2 -> OverallAirportBrieftab()
         }
     }
-    TabRow(selectedTabIndex = pagerState.currentPage) {
+    TabRow(
+        selectedTabIndex = pagerState.currentPage,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.primary
+    ) {
         Tab(selected = pagerState.currentPage == 0,
             onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
             text = { Text("Departure") })
