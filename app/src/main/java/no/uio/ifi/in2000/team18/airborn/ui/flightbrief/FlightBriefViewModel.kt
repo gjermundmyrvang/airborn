@@ -97,7 +97,7 @@ class FlightBriefViewModel @Inject constructor(
                         uWind = 3.645589828491211,
                         vWind = -5.9597625732421875,
                         Direction(
-                            009.0
+                            33.0
                         ),
                         Speed(6.986350630122777),
                         Distance(4267.0)
@@ -108,7 +108,7 @@ class FlightBriefViewModel @Inject constructor(
                         Temperature(-5.0),
                         uWind = 3.645589828491211,
                         vWind = -5.9597625732421875,
-                        Direction(199.0),
+                        Direction(35.0),
                         Speed(6.986350630122777),
                         Distance(3200.0)
                     ),
@@ -118,7 +118,7 @@ class FlightBriefViewModel @Inject constructor(
                         Temperature(-2.0),
                         uWind = 3.645589828491211,
                         vWind = -5.9597625732421875,
-                        Direction(329.0),
+                        Direction(31.0),
                         Speed(6.986350630122777),
                         Distance(2134.0)
                     ),
@@ -128,7 +128,7 @@ class FlightBriefViewModel @Inject constructor(
                         Temperature(3.0),
                         uWind = 3.645589828491211,
                         vWind = -5.9597625732421875,
-                        Direction(329.0),
+                        Direction(29.0),
                         Speed(6.986350630122777),
                         Distance(1067.0)
                     )
