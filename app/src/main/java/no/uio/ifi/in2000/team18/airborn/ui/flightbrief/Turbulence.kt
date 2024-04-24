@@ -71,8 +71,8 @@ fun TurbulenceTimecardRow(
     currentTime: ZonedDateTime, times: List<ZonedDateTime>, onCardClicked: (ZonedDateTime) -> Unit
 ) {
 
-    val selectedTint = MaterialTheme.colorScheme.surfaceTint
-    val unselectedTint = Color.Unspecified
+    val selectedTint = MaterialTheme.colorScheme.secondary
+    val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
 
     LazyRow(
         horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(all = 10.dp)
@@ -81,7 +81,7 @@ fun TurbulenceTimecardRow(
         itemsIndexed(times) { _, time ->
             val isSelected = currentTime == time
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
-            val textColor = if (isSelected) Color.White else Color.Unspecified
+            val textColor = if (isSelected) unselectedTint else selectedTint
 
             Card(colors = CardColors(
                 containerColor = backgroundTint,
