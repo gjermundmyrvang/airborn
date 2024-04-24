@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -47,7 +46,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -151,43 +149,30 @@ fun MultiToggleButton(
     Row(
         modifier = Modifier
             .height(IntrinsicSize.Min)
-            .padding(bottom = 5.dp)
+            .clip(shape = RoundedCornerShape(20.dp))
+
+
     ) {
         toggleStates.forEachIndexed { _, toggleState ->
             val isSelected = currentSelection.lowercase() == toggleState.lowercase()
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
-            val textColor = MaterialTheme.colorScheme.secondary
+            val textColor = if (isSelected) Color.White else Color.Unspecified
+
 
             Row(
                 modifier = Modifier
-                    .padding(end = 15.dp, bottom = 5.dp)
+                    .clip(shape = RoundedCornerShape(20.dp))
+                    .background(backgroundTint)
+                    .padding(vertical = 6.dp, horizontal = 8.dp)
                     .toggleable(value = isSelected, enabled = true, onValueChange = { selected ->
                         if (selected) {
                             onToggleChange(toggleState)
                         }
                     })
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.width(IntrinsicSize.Min)
-                ) {
-                    Text(
-                        toggleState.lowercase().replaceFirstChar { it.uppercase() },
-                        color = textColor,
-                        fontWeight = FontWeight.W400,
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(bottom = 5.dp)
-                    )
-                    Box(
-                        Modifier
-                            .background(
-                                backgroundTint,
-                                RoundedCornerShape(3.dp)
-                            )
-                            .fillMaxWidth()
-                            .height(3.dp)
-                    )
-                }
+                Text(
+                    toggleState.uppercase(), color = textColor, modifier = Modifier.padding(4.dp)
+                )
             }
         }
     }
