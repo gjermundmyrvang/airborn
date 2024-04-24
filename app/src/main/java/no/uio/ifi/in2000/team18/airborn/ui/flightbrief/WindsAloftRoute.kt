@@ -29,9 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.Distance
+import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
-import no.uio.ifi.in2000.team18.airborn.model.nauticalMiles
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 
@@ -43,8 +43,8 @@ fun Route(state: LoadingState<IsobaricData>, initRouteIsobaric: () -> Unit) =
         val departure = "Gardemoen Lufthavn*"
         val arrival = "Hamar flyplass*"
 
-        val bearing = Direction(120.0)
-        val distance = 150.nauticalMiles
+        val bearing = 359.degrees
+        val distance = Distance(68900.0)
 
         Column {
             Row(
@@ -77,7 +77,23 @@ fun Route(state: LoadingState<IsobaricData>, initRouteIsobaric: () -> Unit) =
                     )
                 }
             }
-            Row {
+            Row(
+                horizontalArrangement = Arrangement.End,
+            ) {
+                OutlinedCard(
+                    Modifier.padding(horizontal = 8.dp),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "Distance: ${distance.formatAsNm()}",
+                            style = TextStyle(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
                 OutlinedCard(
                     Modifier.padding(horizontal = 8.dp),
                     border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
@@ -91,20 +107,6 @@ fun Route(state: LoadingState<IsobaricData>, initRouteIsobaric: () -> Unit) =
                             style = TextStyle(fontWeight = FontWeight.Bold)
                         )
                         RotatableArrowIcon(direction = bearing)
-                    }
-                }
-                OutlinedCard(
-                    Modifier.padding(horizontal = 8.dp),
-                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "Distance: ${distance.formatAsNm()}",
-                            style = TextStyle(fontWeight = FontWeight.Bold)
-                        )
                     }
                 }
             }

@@ -93,44 +93,44 @@ class FlightBriefViewModel @Inject constructor(
                 ), LocalDateTime.parse("2024-04-22T09:58:16.568610"), listOf<IsobaricLayer>(
                     IsobaricLayer(
                         Pressure(600.0),
-                        Temperature(-15.0),
+                        Temperature(-10.0),
                         uWind = 3.645589828491211,
                         vWind = -5.9597625732421875,
                         Direction(
                             009.0
                         ),
                         Speed(6.986350630122777),
-                        Distance(4.206490784860739)
+                        Distance(4267.0)
                     ),
 
                     IsobaricLayer(
                         Pressure(700.0),
-                        Temperature(-15.0),
+                        Temperature(-5.0),
                         uWind = 3.645589828491211,
                         vWind = -5.9597625732421875,
-                        Direction(329.0),
+                        Direction(199.0),
                         Speed(6.986350630122777),
-                        Distance(4.206490784860739)
+                        Distance(3200.0)
                     ),
 
                     IsobaricLayer(
                         Pressure(750.0),
-                        Temperature(-20.0),
+                        Temperature(-2.0),
                         uWind = 3.645589828491211,
                         vWind = -5.9597625732421875,
                         Direction(329.0),
                         Speed(6.986350630122777),
-                        Distance(4.206490784860739)
+                        Distance(2134.0)
                     ),
 
                     IsobaricLayer(
                         Pressure(750.0),
-                        Temperature(-25.0),
+                        Temperature(3.0),
                         uWind = 3.645589828491211,
                         vWind = -5.9597625732421875,
                         Direction(329.0),
                         Speed(6.986350630122777),
-                        Distance(4.206490784860739)
+                        Distance(1067.0)
                     )
                 )
             )
