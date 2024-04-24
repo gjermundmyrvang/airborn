@@ -135,13 +135,13 @@ fun WeatherDayCard(
         weatherHours.minByOrNull { it.weatherDetails.airTemperature.celsius }!!.weatherDetails.airTemperature.celsius
     val isSelected = selected == weatherDay
     val borderColor =
-        if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+        if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
     val icon =
         if (today) hourNow.nextOneHour?.icon else hourNow.nextTwelweHour?.icon  // if today we want to show current weather, but for the rest of the week we want a overview
 
     OutlinedCard(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = Color.Transparent,
         ),
         border = BorderStroke(
             width = if (isSelected) 2.dp else 1.dp, color = borderColor
@@ -245,7 +245,7 @@ fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onCli
                 .height(5.dp)
                 .fillMaxWidth()
                 .background(
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    color = if (isSelected) MaterialTheme.colorScheme.secondary else Color.Transparent,
                     shape = RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp)
                 )
         )
@@ -352,7 +352,8 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
         else -> "NE"
     }
     OutlinedCard(
-        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline)
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.secondary),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Row(
             modifier = Modifier.padding(5.dp),
