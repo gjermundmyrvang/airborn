@@ -17,11 +17,14 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +47,8 @@ import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.Arriv
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.DepartureViewModel
 import no.uio.ifi.in2000.team18.airborn.ui.home.AirportInfoRow
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.WeatherSection
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 
 @Preview(showSystemUi = true)
@@ -75,14 +80,58 @@ fun FlightBriefScreen(
                         contentDescription = "Home"
                     )
                 }
-            })
-        },
+            }, colors = TopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+                navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
+                actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
+            )
+            )
+        }, containerColor = MaterialTheme.colorScheme.primaryContainer
     ) { padding ->
         FlightBriefScreenContent(
             state,
             filterArrivalAirports = { viewModel.filterArrivalAirports(it) },
             modifier = Modifier.padding(padding),
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun TesFlighBriefScreen() {
+    AirbornTheme {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(title = {
+                    Text(text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 50.sp)
+                }, navigationIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Home"
+                        )
+                    }
+                })
+            },
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                LazyCollapsible(
+                    header = "TEST",
+                    value = LoadingState.Loading,
+                    onExpand = { /*TODO*/ },
+                    expanded = true
+                ) {
+                    Text(text = "Yo")
+                }
+            }
+        }
     }
 }
 
@@ -138,6 +187,7 @@ fun ArrivalSelectionTab(
             onValueChange = {
                 filterArrivalAirports(it)
             },
+            colors = AirbornTextFieldColors,
             singleLine = true,
             label = { Text("Add an arrival airport") },
             keyboardActions = KeyboardActions(onDone = {
