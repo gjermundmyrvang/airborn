@@ -101,8 +101,8 @@ fun LoadingScreen() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(5.dp),
-            color = MaterialTheme.colorScheme.secondary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.background,
+            trackColor = MaterialTheme.colorScheme.secondaryContainer,
         )
     }
 }
@@ -143,8 +143,8 @@ fun Modifier.shadow(
 fun MultiToggleButton(
     currentSelection: String, toggleStates: List<String>, onToggleChange: (String) -> Unit
 ) {
-    val selectedTint = MaterialTheme.colorScheme.surfaceTint
-    val unselectedTint = Color.Unspecified
+    val selectedTint = MaterialTheme.colorScheme.secondary
+    val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
 
     Row(
         modifier = Modifier
@@ -156,7 +156,7 @@ fun MultiToggleButton(
         toggleStates.forEachIndexed { _, toggleState ->
             val isSelected = currentSelection.lowercase() == toggleState.lowercase()
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
-            val textColor = if (isSelected) Color.White else Color.Unspecified
+            val textColor = if (isSelected) unselectedTint else selectedTint
 
 
             Row(
@@ -198,16 +198,6 @@ fun <T> LazyCollapsible(
             )
         )
     ) {
-        HorizontalDivider(
-            modifier = Modifier
-                .padding(start = 5.dp, end = 5.dp)
-                .fillMaxWidth()
-                .shadow(
-                    Color.Black,
-                    offsetX = (-4).dp,
-                    blurRadius = 16.dp,
-                ),
-        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -242,6 +232,13 @@ fun <T> LazyCollapsible(
                 },
             )
         }
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(start = 5.dp, end = 5.dp)
+                .fillMaxWidth(),
+            color = MaterialTheme.colorScheme.tertiary
+
+        )
     }
 }
 
@@ -265,7 +262,7 @@ fun ImageComposable(uri: String, contentDescription: String) {
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(30.dp),
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.background,
                     strokeWidth = 1.dp
                 )
             }
