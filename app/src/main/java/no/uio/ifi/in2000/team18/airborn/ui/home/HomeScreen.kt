@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,14 +36,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 
 @Composable
@@ -51,14 +57,13 @@ fun HomeScreen(
 ) {
     var airportInputSelected by remember { mutableStateOf(false) }
     Column(
+        modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Map(
-            viewModel,
+        Map(viewModel,
             modifier = Modifier
                 .height(0.dp)
-                .let { if (airportInputSelected) it else it.weight(1.0f) },
-        )
+                .let { if (airportInputSelected) it else it.weight(1.0f) })
         AirportSelection(modifier = modifier.padding(16.dp),
             viewModel = viewModel,
             onFocusChange = { airportInputSelected = it })
@@ -69,7 +74,9 @@ fun HomeScreen(
 @Composable
 private fun AirportSelection(
     modifier: Modifier, viewModel: HomeViewModel, onFocusChange: (Boolean) -> Unit = {}
-) = Column(modifier = modifier) {
+) = Column(
+    modifier = modifier
+) {
     val state by viewModel.state.collectAsState()
     val airports = state.airports
     val navController = LocalNavController.current
@@ -84,6 +91,7 @@ private fun AirportSelection(
             .fillMaxWidth()
             .onFocusChanged { departureFocused = it.isFocused },
         onValueChange = { viewModel.filterDepartureAirports(it) },
+        colors = AirbornTextFieldColors,
         singleLine = true,
         label = { Text("Departure airport") },
         trailingIcon = {
@@ -96,6 +104,7 @@ private fun AirportSelection(
             focusManager.clearFocus()
         }),
     )
+    Spacer(modifier = Modifier.height(8.dp))
     OutlinedTextField(
         value = state.arrivalAirportInput,
         modifier = Modifier
@@ -104,6 +113,7 @@ private fun AirportSelection(
         onValueChange = {
             viewModel.filterArrivalAirports(it)
         },
+        colors = AirbornTextFieldColors,
         singleLine = true,
         enabled = state.departureAirportIcao != null,
         label = { Text("Arrival airport") },
@@ -121,15 +131,23 @@ private fun AirportSelection(
     LaunchedEffect(arrivalFocused || departureFocused) {
         onFocusChange(arrivalFocused || departureFocused)
     }
-
+    Spacer(modifier = Modifier.height(32.dp))
 
     if (!(departureFocused || arrivalFocused)) {
         Button(
             onClick = {
                 navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirportIcao?.code ?: "null"}")
             },
+            colors = ButtonColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.secondaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
+            ),
             enabled = state.departureAirportIcao != null,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .width(200.dp)
+                .align(Alignment.CenterHorizontally),
             shape = RoundedCornerShape(8.dp),
         ) { Text("Go to brief") }
     }
@@ -152,6 +170,85 @@ private fun AirportSelection(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun TestTextField() {
+    AirbornTheme {
+        Column(
+            Modifier
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .fillMaxSize()
+        ) {
+            OutlinedTextField(
+                value = "",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+                    .onFocusChanged { },
+                onValueChange = { },
+                colors = AirbornTextFieldColors,
+                singleLine = true,
+                maxLines = 1,
+                label = { Text("Departure airport") },
+                trailingIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
+                    }
+                },
+                keyboardActions = KeyboardActions(onDone = { }),
+            )
+            OutlinedTextField(
+                value = "",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+                    .onFocusChanged { },
+                onValueChange = { },
+                enabled = false,
+                colors = AirbornTextFieldColors,
+                singleLine = true,
+                maxLines = 1,
+                label = { Text("Arrival airport") },
+                trailingIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
+                    }
+                },
+                keyboardActions = KeyboardActions(onDone = { }),
+            )
+            Button(
+                onClick = {
+                },
+                colors = ButtonColors(
+                    containerColor = Color(0xFFFB9B50),
+                    contentColor = MaterialTheme.colorScheme.secondaryContainer,
+                    disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
+                ),
+                modifier = Modifier
+                    .width(200.dp)
+                    .align(Alignment.CenterHorizontally),
+                shape = RoundedCornerShape(8.dp),
+            ) { Text("Go to brief") }
+            Button(
+                onClick = {
+                },
+                colors = ButtonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.secondaryContainer,
+                    disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
+                ),
+                enabled = false,
+                modifier = Modifier
+                    .width(200.dp)
+                    .align(Alignment.CenterHorizontally),
+                shape = RoundedCornerShape(8.dp),
+            ) { Text("Go to brief") }
+        }
+    }
+}
+
 @Composable
 fun AirportInfoRow(
     modifier: Modifier = Modifier,
@@ -165,7 +262,11 @@ fun AirportInfoRow(
             .clickable { onItemClick(item) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(imageVector = Icons.Outlined.LocationOn, contentDescription = "Location")
+        Icon(
+            imageVector = Icons.Outlined.LocationOn,
+            contentDescription = "Location",
+            tint = MaterialTheme.colorScheme.secondary
+        )
         Spacer(modifier = Modifier.width(24.dp))
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
@@ -176,7 +277,7 @@ fun AirportInfoRow(
             Spacer(Modifier.height(4.dp))
             Row {
                 Text(
-                    text = item.icao.code, color = MaterialTheme.colorScheme.primary
+                    text = item.icao.code, color = MaterialTheme.colorScheme.secondary
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
@@ -186,5 +287,5 @@ fun AirportInfoRow(
             }
         }
     }
-    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.tertiary)
 }
