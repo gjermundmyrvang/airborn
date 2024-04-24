@@ -7,19 +7,24 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Blue,
-    secondary = DarkGrey,
-    tertiary = White,
+    primary = White,
+    secondary = Blue,
+    tertiary = LightBlue,
     primaryContainer = DarkBlue,
-    onPrimary = White,
+    secondaryContainer = DarkGrey,
+    tertiaryContainer = Disabled,
+    onPrimaryContainer = White,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Blue,
-    secondary = DarkGrey,
-    tertiary = White,
+    primary = White,
+    secondary = Blue,
+    tertiary = LightBlue,
     primaryContainer = DarkBlue,
-    onPrimary = White,
+    secondaryContainer = DarkGrey,
+    tertiaryContainer = BlueSecond,
+    onPrimaryContainer = White,
+    background = Orange,
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
