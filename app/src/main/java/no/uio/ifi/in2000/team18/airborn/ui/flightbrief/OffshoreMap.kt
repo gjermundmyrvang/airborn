@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,64 +42,67 @@ fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffsho
     LazyCollapsible(
         header = "Offshore maps", value = state, onExpand = initOffshoreMap
     ) { offshoreMap ->
-        val mapTypeOptions = listOf(
-            "helicopterlightningobservations",
-            "helicoptersignificantwaveheight",
-            "helicoptertriggeredlightningindex",
-        )
-        val areaOptions = listOf(
-            "norway", "northern_norway", "central_norway", "western_norway"
-        )
-        var selectedMap by rememberSaveable { mutableStateOf(mapTypeOptions[0]) }
-        var selectedArea by rememberSaveable { mutableStateOf(areaOptions[0]) }
+        val options = remember {
+            listOf(
+                "helicopterlightningobservations" to "Lightningobservations",
+                "helicoptersignificantwaveheight" to "Significantwaveheight",
+                "helicoptertriggeredlightningindex" to "Triggeredlightningindex"
+            )
+        }
+        val areas = remember {
+            listOf(
+                "norway" to "Norway",
+                "northern_norway" to "Northern Norway",
+                "central_norway" to "Central Norway",
+                "western_norway" to "Western Norway"
+            )
+        }
+        var selectedMap by rememberSaveable { mutableStateOf(options[0].first) }
+        var selectedArea by rememberSaveable { mutableStateOf(areas[0].first) }
         var selectedOffshoreMapTime by rememberSaveable { mutableIntStateOf(0) }
         val offshoreMapList = offshoreMap[selectedMap]?.filter { it.params.area == selectedArea }
-        OptionList(options = mapTypeOptions, currentlySelected = selectedMap) {
-            selectedOffshoreMapTime = 0
-            selectedMap = it
-        }
-        OptionList(options = areaOptions, currentlySelected = selectedArea, indent = true) {
-            selectedOffshoreMapTime = 0
-            selectedArea = it
-        }
-        if (offshoreMapList == null) {
+        OptionList(options = options,
+            currentlySelected = selectedMap,
+            onOptionClicked = { selectedOffshoreMapTime = 0; selectedMap = it })
+        OptionList(options = areas,
+            currentlySelected = selectedArea,
+            indent = true,
+            onOptionClicked = { selectedOffshoreMapTime = 0; selectedArea = it })
+        if (offshoreMapList.isNullOrEmpty()) {
             Text("Unable to find images that matches selected parameters")
-            return@LazyCollapsible
+        } else {
+            TimeRow(offshoreList = offshoreMapList,
+                currentlySelected = selectedOffshoreMapTime,
+                onTimeClicked = { selectedOffshoreMapTime = it })
+            ImageComposable(
+                uri = offshoreMapList[selectedOffshoreMapTime].uri,
+                contentDescription = "Offshore picture"
+            )
         }
-        TimeRow(
-            offshoreList = offshoreMapList,
-            currentlySelected = selectedOffshoreMapTime,
-            onTimeClicked = { selectedOffshoreMapTime = it })
-        ImageComposable(
-            uri = offshoreMapList[selectedOffshoreMapTime].uri,
-            contentDescription = "Offshore picture"
-        )
     }
 
 @Composable
 fun OptionList(
-    options: List<String>,
+    options: List<Pair<String, String>>,
     currentlySelected: String,
     indent: Boolean = false,
     onOptionClicked: (String) -> Unit
 ) {
-    options.forEach { option ->
+    options.forEach { (option, name) ->
         val isSelected = option == currentlySelected
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onOptionClicked(option) },
-            horizontalArrangement = Arrangement.Absolute.Left,
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (indent) Spacer(modifier = Modifier.width(16.dp))
             Icon(
                 imageVector = if (isSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                contentDescription = ""
+                contentDescription = "Select icon"
             )
             Text(
-                text = option.uppercase().replace("_", " "),
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                text = name, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
         }
     }
@@ -108,8 +112,7 @@ fun OptionList(
 @Composable
 fun TimeRow(offshoreList: List<OffshoreMap>, currentlySelected: Int, onTimeClicked: (Int) -> Unit) {
     LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
     ) {
         itemsIndexed(offshoreList) { i, map ->
             val selected = i == currentlySelected
@@ -215,8 +218,7 @@ fun TestOffshoreMaps() {
         if (offshoreMapList == null) return@Column
         Spacer(modifier = Modifier.height(8.dp))
         LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             itemsIndexed(offshoreMapList) { i, map ->
                 val selected = i == selectedOffshoreMapTime
