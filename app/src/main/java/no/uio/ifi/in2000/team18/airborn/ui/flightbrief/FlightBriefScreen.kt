@@ -95,17 +95,7 @@ fun FlightBriefScreenContent(
 ) = Column(modifier = modifier) {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
-    TabRow(selectedTabIndex = pagerState.currentPage) {
-        Tab(selected = pagerState.currentPage == 0,
-            onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-            text = { Text("Departure") })
-        Tab(selected = pagerState.currentPage == 1,
-            onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-            text = { Text("Arrival") })
-        Tab(selected = pagerState.currentPage == 2,
-            onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
-            text = { Text("Overall") })
-    }
+
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureAirportBriefTab()
@@ -117,6 +107,17 @@ fun FlightBriefScreenContent(
 
             2 -> OverallAirportBrieftab()
         }
+    }
+    TabRow(selectedTabIndex = pagerState.currentPage) {
+        Tab(selected = pagerState.currentPage == 0,
+            onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
+            text = { Text("Departure") })
+        Tab(selected = pagerState.currentPage == 1,
+            onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
+            text = { Text("Arrival") })
+        Tab(selected = pagerState.currentPage == 2,
+            onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
+            text = { Text("Overall") })
     }
 }
 

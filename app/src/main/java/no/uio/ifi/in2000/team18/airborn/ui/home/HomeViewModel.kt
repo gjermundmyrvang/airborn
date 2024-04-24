@@ -105,7 +105,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun selectArrivalAirport(airport: Icao) = _state.update {
-        it.copy(arrivalAirportInput = airport.code, arrivalAirportIcao = airport)
+        it.copy(
+            arrivalAirportInput = airport.code, arrivalAirportIcao
+            = airport
+        )
     }
 
     fun updateSunriseAirport(airport: Airport) {
