@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GeosatelliteDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.OffshoreMapsDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.RadarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SunriseSunsetDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
@@ -32,6 +33,7 @@ class AirportRepository @Inject constructor(
     private val sunriseSunsetDataSource: SunriseSunsetDataSource,
     private val offshoreMapsDataSource: OffshoreMapsDataSource,
     private val geosatelliteDataSource: GeosatelliteDataSource,
+    private val radarDataSource: RadarDataSource,
 ) {
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
@@ -88,4 +90,17 @@ class AirportRepository @Inject constructor(
         offshoreMapsDataSource.fetchOffshoreMaps().groupBy { it.endpoint }
 
     fun getGeosatelliteImage() = geosatelliteDataSource.fetchGeosatelliteImage()
+
+    // Uri's dont work when time is present in the uri string
+    // Dont know why, ask MET
+    suspend fun fetchRadarAnimations() = radarDataSource.fetchRadarAnimations().map { radar ->
+        radar.copy(uri = removeTimeFromUrl(radar.uri))
+    }
+
+    private fun removeTimeFromUrl(uri: String): String {
+        val startIndex = uri.indexOf("time=")
+        val endIdex = uri.indexOf("&", startIndex)
+
+        return uri.replaceRange(startIndex, endIdex + 1, "")
+    }
 }
