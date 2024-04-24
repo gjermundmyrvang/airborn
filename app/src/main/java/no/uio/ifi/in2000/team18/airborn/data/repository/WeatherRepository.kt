@@ -9,11 +9,13 @@ import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
+import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
+import no.uio.ifi.in2000.team18.airborn.model.degrees
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
@@ -75,6 +77,22 @@ class WeatherRepository @Inject constructor(
             position,
             LocalDateTime.parse(gribFile.params.time.subSequence(0, 19)),
             layers
+        )
+    }
+
+    suspend fun getRouteIsobaric(departure: Airport, arrival: Airport): RouteIsobaric {
+        val departurePos = Position(departure.position.latitude, departure.position.longitude)
+        val arrivalPos = Position(arrival.position.latitude, arrival.position.longitude)
+
+        val distance = Distance(6900000.0) //TODO: GET REAL DISTANCE
+        val bearing = 359.degrees //TODO: GET REAL BEARING
+
+        return RouteIsobaric(
+            departure = departure,
+            arrival = arrival,
+            isobaric = getIsobaricData(departurePos.halfwayTo(arrivalPos)),
+            distance = distance,
+            bearing = bearing
         )
     }
 
