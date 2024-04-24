@@ -82,6 +82,16 @@ class FlightBriefViewModel @Inject constructor(
         }
     }
 
+    fun clearArrivalInput() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    arrivalAirportInput = ""
+                )
+            }
+        }
+    }
+
     private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
         return try {
             f().toSuccess()
