@@ -57,7 +57,7 @@ fun TestFlightBrief() {
     FlightBriefScreenContent(FlightBriefViewModel.UiState(
         arrivalIcao = null,
         departureIcao = Icao(""),
-    ), filterArrivalAirports = {})
+    ), filterArrivalAirports = {}, clearArrivalInput = {})
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,6 +93,7 @@ fun FlightBriefScreen(
         FlightBriefScreenContent(
             state,
             filterArrivalAirports = { viewModel.filterArrivalAirports(it) },
+            clearArrivalInput = { viewModel.clearArrivalInput() },
             modifier = Modifier.padding(padding),
         )
     }
@@ -140,6 +141,7 @@ fun TesFlighBriefScreen() {
 fun FlightBriefScreenContent(
     state: FlightBriefViewModel.UiState,
     filterArrivalAirports: (String) -> Unit,
+    clearArrivalInput: () -> Unit,
     modifier: Modifier = Modifier
 ) = Column(modifier = modifier) {
     val pagerState = rememberPagerState { 3 }
@@ -148,11 +150,10 @@ fun FlightBriefScreenContent(
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureAirportBriefTab()
-            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(state) {
-                filterArrivalAirports(
-                    it
-                )
-            }
+            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(
+                state,
+                filterArrivalAirports = { filterArrivalAirports(it) },
+                clearArrivalInput = { clearArrivalInput() })
 
             2 -> OverallAirportBrieftab()
         }
@@ -172,7 +173,9 @@ fun FlightBriefScreenContent(
 
 @Composable
 fun ArrivalSelectionTab(
-    state: FlightBriefViewModel.UiState, filterArrivalAirports: (String) -> Unit
+    state: FlightBriefViewModel.UiState,
+    filterArrivalAirports: (String) -> Unit,
+    clearArrivalInput: () -> Unit
 ) {
     val airports = state.airports
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -190,6 +193,11 @@ fun ArrivalSelectionTab(
             colors = AirbornTextFieldColors,
             singleLine = true,
             label = { Text("Add an arrival airport") },
+            trailingIcon = {
+                IconButton(onClick = { clearArrivalInput() }) {
+                    Icon(Icons.Filled.Close, contentDescription = "clear arrival inputfield")
+                }
+            },
             keyboardActions = KeyboardActions(onDone = {
                 keyboardController?.hide()
             }),
@@ -197,6 +205,7 @@ fun ArrivalSelectionTab(
         val navController = LocalNavController.current
         LazyColumn(modifier = Modifier.imePadding(), content = {
             items(airports) { airport ->
+                // TODO instead of navigating here, we should have a button like in homescreen
                 AirportInfoRow(modifier = Modifier, airport) {
                     navController.popBackStack("home", false)
                     navController.navigate("flightBrief/${state.departureIcao}/${airport.icao.code}")
