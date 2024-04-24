@@ -23,7 +23,7 @@ fun RotatableArrowIcon(
     direction: Direction,
     modifier: Modifier = Modifier,
     iconSize: Dp = 25.dp,
-    iconColor: Color = MaterialTheme.colorScheme.onBackground
+    iconColor: Color = MaterialTheme.colorScheme.primary
 ) {
     val arrowIcon: Painter = painterResource(id = R.drawable.arrow_up)
     Column(
