@@ -177,7 +177,7 @@ class WeatherRepository @Inject constructor(
                             NextHourDetails(
                                 symbol_code = it,
                                 icon = iconMapper(timeSeries.data.next_1_hours.summary.symbol_code),
-                                chanceOfRain = timeSeries.data.next_1_hours.details["precipitation_amount"]
+                                precipitation_amount = timeSeries.data.next_1_hours.details["precipitation_amount"]
                             )
                         } else null,
                         nextSixHour = if (timeSeries.data.next_6_hours != null) english[timeSeries.data.next_6_hours.summary.symbol_code.substringBefore(
@@ -186,7 +186,7 @@ class WeatherRepository @Inject constructor(
                             NextHourDetails(
                                 symbol_code = it,
                                 icon = iconMapper(timeSeries.data.next_6_hours.summary.symbol_code),
-                                chanceOfRain = timeSeries.data.next_6_hours.details["precipitation_amount"]
+                                precipitation_amount = timeSeries.data.next_6_hours.details["precipitation_amount"]
                             )
                         } else null,
                         nextTwelweHour = if (timeSeries.data.next_12_hours != null) english[timeSeries.data.next_12_hours.summary.symbol_code.substringBefore(
@@ -195,7 +195,7 @@ class WeatherRepository @Inject constructor(
                             NextHourDetails(
                                 symbol_code = it,
                                 icon = iconMapper(timeSeries.data.next_12_hours.summary.symbol_code),
-                                chanceOfRain = timeSeries.data.next_12_hours.details["precipitation_amount"]
+                                precipitation_amount = timeSeries.data.next_12_hours.details["precipitation_amount"]
                             )
                         } else null,
                     )

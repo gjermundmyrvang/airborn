@@ -25,7 +25,7 @@ data class WeatherHour(
 data class NextHourDetails(
     val symbol_code: String,
     val icon: Int,
-    val chanceOfRain: Double?,
+    val precipitation_amount: Double?,
 )
 
 data class Meta(

@@ -48,11 +48,13 @@ import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
+import no.uio.ifi.in2000.team18.airborn.model.celsius
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import kotlin.random.Random
 
 
@@ -135,7 +137,7 @@ fun WeatherDayCard(
         weatherHours.minByOrNull { it.weatherDetails.airTemperature.celsius }!!.weatherDetails.airTemperature.celsius
     val isSelected = selected == weatherDay
     val borderColor =
-        if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
+        if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.outline
     val icon =
         if (today) hourNow.nextOneHour?.icon else hourNow.nextTwelweHour?.icon  // if today we want to show current weather, but for the rest of the week we want a overview
 
@@ -170,7 +172,7 @@ fun WeatherDayCard(
                 ), contentDescription = "Weathericon"
             )
             Text(
-                text = "$highestTemp℃/$lowestTemp℃",
+                text = "${highestTemp.celsius} / ${lowestTemp.celsius}",
                 fontSize = 15.sp,
             )
         }
@@ -205,7 +207,9 @@ fun WeatherTodaySection(
 
 @Composable
 fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onClick: () -> Unit) {
-    val precipitationAmount = weatherHour.nextOneHour?.chanceOfRain
+    val nextHourData =
+        weatherHour.nextOneHour ?: weatherHour.nextSixHour ?: weatherHour.nextTwelweHour
+    val precipitationAmount = nextHourData?.precipitation_amount
     val isSelected = weatherHour == selectedHour
     Column(
         modifier = Modifier
@@ -220,7 +224,7 @@ fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onCli
             Text(
                 text = "${precipitationAmount}%",
                 fontSize = 16.sp,
-                color = Color.Blue,
+                color = MaterialTheme.colorScheme.secondary,
             )
         } else {
             Text(text = "")
@@ -245,7 +249,7 @@ fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onCli
                 .height(5.dp)
                 .fillMaxWidth()
                 .background(
-                    color = if (isSelected) MaterialTheme.colorScheme.secondary else Color.Transparent,
+                    color = if (isSelected) MaterialTheme.colorScheme.background else Color.Transparent,
                     shape = RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp)
                 )
         )
@@ -302,7 +306,8 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                 )
             }
             Text(
-                text = "Rain: ${weatherHour.nextTwelweHour?.chanceOfRain} %", fontSize = 12.sp
+                text = "Rain: ${weatherHour.nextTwelweHour?.precipitation_amount} %",
+                fontSize = 12.sp
             )
             Text(
                 text = "Relative Humidity: ${weatherHour.weatherDetails.relativeHumidity}",
@@ -343,7 +348,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
 
 @Composable
 fun WindCard(windSpeed: Speed, fromDegrees: Double) {
-    val fromDirection: Direction = Direction(fromDegrees)
+    val fromDirection = Direction(fromDegrees)
     val direction = when {
         fromDegrees < 90.0 -> "NE"
         fromDegrees < 180.0 -> "SE"
@@ -368,7 +373,7 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
                     painter = painterResource(id = R.drawable.air_icon),
                     contentDescription = "airIcon",
                     colorFilter = ColorFilter.tint(
-                        Color.Gray
+                        MaterialTheme.colorScheme.secondary
                     )
                 )
             }
@@ -382,10 +387,18 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showSystemUi = true)
 @Composable
 fun TestWindCard() {
-    WindCard(windSpeed = Speed(25.89), fromDegrees = 228.43)
+    AirbornTheme {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            WindCard(windSpeed = Speed(25.89), fromDegrees = 228.43)
+        }
+    }
 }
 
 @Preview(showSystemUi = true)
@@ -408,11 +421,15 @@ fun TestWeatherSection() {
             windFromDirection = Direction(Random.nextDouble(0.0, 360.0)),
             windSpeed = Speed(Random.nextDouble(0.0, 20.0))
         ), nextOneHour = NextHourDetails(
-            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            precipitation_amount = 22.98
         ), nextSixHour = NextHourDetails(
-            symbol_code = "Sunny", icon = R.drawable.clearsky_day, chanceOfRain = null
+            symbol_code = "Sunny", icon = R.drawable.clearsky_day, precipitation_amount = null
         ), nextTwelweHour = NextHourDetails(
-            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            precipitation_amount = 22.98
         )
     )
     val day = WeatherDay(
@@ -450,11 +467,15 @@ fun TestWeatherNowSection() {
             windFromDirection = Direction(Random.nextDouble(0.0, 360.0)),
             windSpeed = Speed(Random.nextDouble(0.0, 20.0))
         ), nextOneHour = NextHourDetails(
-            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            precipitation_amount = 22.98
         ), nextSixHour = NextHourDetails(
-            symbol_code = "Sunny", icon = R.drawable.clearsky_day, chanceOfRain = null
+            symbol_code = "Sunny", icon = R.drawable.clearsky_day, precipitation_amount = null
         ), nextTwelweHour = NextHourDetails(
-            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            precipitation_amount = 22.98
         )
     )
     val day = WeatherDay(

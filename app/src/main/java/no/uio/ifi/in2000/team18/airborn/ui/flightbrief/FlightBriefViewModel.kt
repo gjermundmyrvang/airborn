@@ -116,6 +116,12 @@ class FlightBriefViewModel @Inject constructor(
         }
     }
 
+    fun selectArrivalAirport(icao: String) = _state.update {
+        it.copy(
+            arrivalAirportInput = icao
+        )
+    }
+
     fun clearArrivalInput() {
         viewModelScope.launch {
             _state.update {

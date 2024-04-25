@@ -439,7 +439,7 @@ fun GifComposable(uri: String, contentDescription: String) {
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(30.dp),
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.background,
                     strokeWidth = 1.dp
                 )
             }

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -101,10 +102,13 @@ fun OptionList(
             if (indent) Spacer(modifier = Modifier.width(16.dp))
             Icon(
                 imageVector = if (isSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                contentDescription = "Select icon"
+                contentDescription = "Select icon",
+                tint = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
             )
             Text(
-                text = name, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                text = name,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
             )
         }
     }
@@ -125,7 +129,8 @@ fun TimeRow(offshoreList: List<OffshoreMap>, currentlySelected: Int, onTimeClick
             ) {
                 Icon(
                     imageVector = if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange,
-                    contentDescription = ""
+                    contentDescription = "",
+                    tint = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
                 )
                 Text(text = "${map.params.time.dayNumberMonthTime} LT")
             }
