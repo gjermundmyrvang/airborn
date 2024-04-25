@@ -324,19 +324,25 @@ fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
         )
 
         is LoadingState.Success -> AirportInfo(
-            name = airportstate.value.name,
-            icao = airportstate.value.icao.code,
-            pos = airportstate.value.position
+            airport = airportstate.value
         )
     }
 }
 
 @Composable
-fun AirportInfo(name: String, icao: String, pos: Position) = Column(
+fun AirportInfo(airport: Airport) = Row(
     Modifier
         .padding(16.dp)
-        .fillMaxWidth(),
+        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
 ) {
-    Text(text = icao, fontWeight = FontWeight.Bold)
-    Text(text = name, fontWeight = FontWeight.Bold)
+    val hasSeperator = airport.name.contains(",")
+    Text(text = airport.icao.code, fontWeight = FontWeight.Bold)
+    Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+    if (!hasSeperator) {
+        Text(text = airport.name)
+    } else {
+        Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
+        Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+        Text(text = airport.name.substringAfter(","), fontWeight = FontWeight.Bold)
+    }
 }
