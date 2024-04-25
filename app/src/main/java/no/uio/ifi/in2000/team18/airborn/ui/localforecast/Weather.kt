@@ -48,11 +48,13 @@ import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
+import no.uio.ifi.in2000.team18.airborn.model.celsius
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import kotlin.random.Random
 
 
@@ -135,7 +137,7 @@ fun WeatherDayCard(
         weatherHours.minByOrNull { it.weatherDetails.airTemperature.celsius }!!.weatherDetails.airTemperature.celsius
     val isSelected = selected == weatherDay
     val borderColor =
-        if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
+        if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.outline
     val icon =
         if (today) hourNow.nextOneHour?.icon else hourNow.nextTwelweHour?.icon  // if today we want to show current weather, but for the rest of the week we want a overview
 
@@ -170,7 +172,7 @@ fun WeatherDayCard(
                 ), contentDescription = "Weathericon"
             )
             Text(
-                text = "$highestTemp℃/$lowestTemp℃",
+                text = "${highestTemp.celsius} / ${lowestTemp.celsius}",
                 fontSize = 15.sp,
             )
         }
@@ -245,7 +247,7 @@ fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onCli
                 .height(5.dp)
                 .fillMaxWidth()
                 .background(
-                    color = if (isSelected) MaterialTheme.colorScheme.secondary else Color.Transparent,
+                    color = if (isSelected) MaterialTheme.colorScheme.background else Color.Transparent,
                     shape = RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp)
                 )
         )
@@ -301,49 +303,53 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                     fontSize = 18.sp,
                 )
             }
-            Text(
-                text = "Rain: ${weatherHour.nextTwelweHour?.chanceOfRain} %", fontSize = 12.sp
-            )
-            Text(
-                text = "Relative Humidity: ${weatherHour.weatherDetails.relativeHumidity}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Pressure: ${weatherHour.weatherDetails.airPressureAtSeaLevel}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Cloud fraction: ${weatherHour.weatherDetails.cloudAreaFraction}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Cloud fraction high: ${weatherHour.weatherDetails.cloudAreaFractionHigh}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Cloud fraction medium: ${weatherHour.weatherDetails.cloudAreaFractionMedium}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Cloud fraction low: ${weatherHour.weatherDetails.cloudAreaFractionLow}",
-                fontSize = 12.sp
-            )
-            Text(text = "Fog area: ${weatherHour.weatherDetails.fogAreaFraction}", fontSize = 12.sp)
-            Text(
-                text = "Dewpoint temp: ${weatherHour.weatherDetails.dewPointTemperature}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "UV: ${weatherHour.weatherDetails.ultravioletIndexClearSky}",
-                fontSize = 12.sp
-            )
+            Row {
+                Text("Rain: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.nextTwelweHour?.chanceOfRain} %", fontSize = 12.sp)
+            }
+            Row {
+                Text("Relative Humidity: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.relativeHumidity}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Pressure: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.airPressureAtSeaLevel}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Cloud fraction: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFraction}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Cloud fraction high: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionHigh}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Cloud fraction medium: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionMedium}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Cloud fraction low: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionLow}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Fog area: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.fogAreaFraction}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Dewpoint temp: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.dewPointTemperature}", fontSize = 12.sp)
+            }
+            Row {
+                Text("UV: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.ultravioletIndexClearSky}", fontSize = 12.sp)
+            }
         }
     }
 }
 
 @Composable
 fun WindCard(windSpeed: Speed, fromDegrees: Double) {
-    val fromDirection: Direction = Direction(fromDegrees)
+    val fromDirection = Direction(fromDegrees)
     val direction = when {
         fromDegrees < 90.0 -> "NE"
         fromDegrees < 180.0 -> "SE"
@@ -368,7 +374,7 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
                     painter = painterResource(id = R.drawable.air_icon),
                     contentDescription = "airIcon",
                     colorFilter = ColorFilter.tint(
-                        Color.Gray
+                        MaterialTheme.colorScheme.secondary
                     )
                 )
             }
@@ -382,10 +388,18 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showSystemUi = true)
 @Composable
 fun TestWindCard() {
-    WindCard(windSpeed = Speed(25.89), fromDegrees = 228.43)
+    AirbornTheme {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            WindCard(windSpeed = Speed(25.89), fromDegrees = 228.43)
+        }
+    }
 }
 
 @Preview(showSystemUi = true)
