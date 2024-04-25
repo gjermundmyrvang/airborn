@@ -166,20 +166,50 @@ fun FlightBriefScreenContent(
             2 -> OverallAirportBrieftab()
         }
     }
+    // TODO change color of the indicator underneath
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.primary
+        containerColor = MaterialTheme.colorScheme.secondary,
     ) {
-        Tab(selected = pagerState.currentPage == 0,
+        Tab(
+            selected = pagerState.currentPage == 0,
             onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-            text = { Text("Departure") })
-        Tab(selected = pagerState.currentPage == 1,
+            text = { Text("Departure") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.flight_takeoff),
+                    contentDescription = "Flight takeoff"
+                )
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+        )
+        Tab(
+            selected = pagerState.currentPage == 1,
             onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-            text = { Text("Arrival") })
-        Tab(selected = pagerState.currentPage == 2,
+            text = { Text("Arrival") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.flight_landing),
+                    contentDescription = "Flight takeoff"
+                )
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+        )
+        Tab(
+            selected = pagerState.currentPage == 2,
             onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
-            text = { Text("Overall") })
+            text = { Text("Overall") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.connecting_airports_icon),
+                    contentDescription = "Flight takeoff"
+                )
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+        )
     }
 }
 
