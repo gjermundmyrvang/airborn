@@ -13,15 +13,19 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +48,8 @@ import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.Arriv
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.DepartureViewModel
 import no.uio.ifi.in2000.team18.airborn.ui.home.AirportInfoRow
 import no.uio.ifi.in2000.team18.airborn.ui.localforecast.WeatherSection
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import no.uio.ifi.in2000.team18.airborn.ui.webcam.WebcamSection
 
 @Preview(showSystemUi = true)
@@ -52,7 +58,7 @@ fun TestFlightBrief() {
     FlightBriefScreenContent(FlightBriefViewModel.UiState(
         arrivalIcao = null,
         departureIcao = Icao(""),
-    ), filterArrivalAirports = {})
+    ), filterArrivalAirports = {}, clearArrivalInput = {})
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,14 +81,59 @@ fun FlightBriefScreen(
                         contentDescription = "Home"
                     )
                 }
-            })
-        },
+            }, colors = TopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+                navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
+                actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
+            )
+            )
+        }, containerColor = MaterialTheme.colorScheme.primaryContainer
     ) { padding ->
         FlightBriefScreenContent(
             state,
             filterArrivalAirports = { viewModel.filterArrivalAirports(it) },
+            clearArrivalInput = { viewModel.clearArrivalInput() },
             modifier = Modifier.padding(padding),
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun TesFlighBriefScreen() {
+    AirbornTheme {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(title = {
+                    Text(text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 50.sp)
+                }, navigationIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Home"
+                        )
+                    }
+                })
+            },
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                LazyCollapsible(
+                    header = "TEST",
+                    value = LoadingState.Loading,
+                    onExpand = { /*TODO*/ },
+                    expanded = true
+                ) {
+                    Text(text = "Yo")
+                }
+            }
+        }
     }
 }
 
@@ -91,6 +142,7 @@ fun FlightBriefScreen(
 fun FlightBriefScreenContent(
     state: FlightBriefViewModel.UiState,
     filterArrivalAirports: (String) -> Unit,
+    clearArrivalInput: () -> Unit,
     modifier: Modifier = Modifier
 ) = Column(modifier = modifier) {
     val pagerState = rememberPagerState { 3 }
@@ -99,16 +151,18 @@ fun FlightBriefScreenContent(
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureAirportBriefTab()
-            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(state) {
-                filterArrivalAirports(
-                    it
-                )
-            }
+            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(state,
+                filterArrivalAirports = { filterArrivalAirports(it) },
+                clearArrivalInput = { clearArrivalInput() })
 
             2 -> OverallAirportBrieftab()
         }
     }
-    TabRow(selectedTabIndex = pagerState.currentPage) {
+    TabRow(
+        selectedTabIndex = pagerState.currentPage,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.primary
+    ) {
         Tab(selected = pagerState.currentPage == 0,
             onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
             text = { Text("Departure") })
@@ -123,7 +177,9 @@ fun FlightBriefScreenContent(
 
 @Composable
 fun ArrivalSelectionTab(
-    state: FlightBriefViewModel.UiState, filterArrivalAirports: (String) -> Unit
+    state: FlightBriefViewModel.UiState,
+    filterArrivalAirports: (String) -> Unit,
+    clearArrivalInput: () -> Unit
 ) {
     val airports = state.airports
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -138,8 +194,14 @@ fun ArrivalSelectionTab(
             onValueChange = {
                 filterArrivalAirports(it)
             },
+            colors = AirbornTextFieldColors,
             singleLine = true,
             label = { Text("Add an arrival airport") },
+            trailingIcon = {
+                IconButton(onClick = { clearArrivalInput() }) {
+                    Icon(Icons.Filled.Close, contentDescription = "clear arrival inputfield")
+                }
+            },
             keyboardActions = KeyboardActions(onDone = {
                 keyboardController?.hide()
             }),
@@ -147,6 +209,7 @@ fun ArrivalSelectionTab(
         val navController = LocalNavController.current
         LazyColumn(modifier = Modifier.imePadding(), content = {
             items(airports) { airport ->
+                // TODO instead of navigating here, we should have a button like in homescreen
                 AirportInfoRow(modifier = Modifier, airport) {
                     navController.popBackStack("home", false)
                     navController.navigate("flightBrief/${state.departureIcao}/${airport.icao.code}")

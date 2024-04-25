@@ -53,6 +53,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Rvr
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.VisibilityDistance
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import java.time.ZoneId
 
 @Composable
@@ -78,7 +79,8 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                 .clickable { rotated = !rotated },
             shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.secondaryContainer
             ),
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp
@@ -192,7 +194,11 @@ fun DecodedMetar(metar: Metar) = Column(
         Text("Wind: ", fontWeight = FontWeight.Bold)
         val wind = metar.wind.first
         if (wind.direction is MetarWindDirection.Constant) {
-            RotatableArrowIcon(wind.direction.direction, iconSize = 16.dp)
+            RotatableArrowIcon(
+                wind.direction.direction,
+                iconSize = 16.dp,
+                iconColor = MaterialTheme.colorScheme.secondaryContainer
+            )
         }
         Text("${wind.direction.formatAsDegrees(0)} ${wind.speed.formatAsKnots(1)}") // TODO: Arrow pointing in wind direction
         wind.gustSpeed?.let { gusts -> Text(" (gusts: ${gusts.formatAsKnots(1)})") }
@@ -396,19 +402,21 @@ fun rememberFlip(): ImageVector {
 @Preview(showSystemUi = true)
 @Composable
 fun TestMetarDecode() = Column {
-    Box {
-        DecodedMetar(
-            parseMetar(
-                "ENSG 150720Z 07207KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
-                Instant.parse("2024-04-16T00:00:00Z")
-            ).expect()
-        )
-    }
-    Box {
-        DecodedMetar(
-            parseMetar(
-                "ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT="
-            ).expect()
-        )
+    AirbornTheme {
+        Box {
+            DecodedMetar(
+                parseMetar(
+                    "ENSG 150720Z 07207KT 030V100 9999 400N R33/P2000 FEW040 SCT090 BKN100TCU 02/M02 Q1001 RMK WIND 3806FT 10015KT=",
+                    Instant.parse("2024-04-16T00:00:00Z")
+                ).expect()
+            )
+        }
+        Box {
+            DecodedMetar(
+                parseMetar(
+                    "ENSS 152150Z 07014KT 1100 R33/P2000 -SN VCSHRAFGSS -VCSHSNFG -VCFG +FGSQ +SQ +VCTSRASNSQ SCT005 BKN015 OVC038 M01/M02 Q1009 RMK WIND 0500FT VRB04KT="
+                ).expect()
+            )
+        }
     }
 }

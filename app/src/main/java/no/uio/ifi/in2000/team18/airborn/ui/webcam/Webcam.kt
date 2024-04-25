@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -38,7 +39,6 @@ import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.ImageComposable
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
-import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.shadow
 
 @Composable
 fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = LazyCollapsible(
@@ -100,13 +100,14 @@ fun NearbyWebcam(
     webcam: Webcam, current: Webcam, onWebcamClicked: (Webcam) -> Unit
 ) {
     val borderColor =
-        if (webcam == current) MaterialTheme.colorScheme.primary else Color.Transparent
-    OutlinedCard(modifier = Modifier
-        .fillMaxWidth()
-        .clickable { onWebcamClicked(webcam) }
-        .shadow(
-            Color.LightGray, offsetX = (5).dp, offsetY = (5).dp, blurRadius = 5.dp
-        ), border = BorderStroke(1.dp, color = borderColor)) {
+        if (webcam == current) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onWebcamClicked(webcam) },
+        border = BorderStroke(1.dp, color = borderColor),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
         Row(
             modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
         ) {

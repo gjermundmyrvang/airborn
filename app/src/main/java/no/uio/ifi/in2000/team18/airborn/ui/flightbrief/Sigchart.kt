@@ -48,8 +48,8 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
 fun SigchartTimecardRow(
     currentSigchart: Int, sigcharts: List<Sigchart>, onCardClicked: (Int) -> Unit
 ) {
-    val selectedTint = MaterialTheme.colorScheme.surfaceTint
-    val unselectedTint = Color.Unspecified
+    val selectedTint = MaterialTheme.colorScheme.secondary
+    val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
 
     LazyRow(
         horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(all = 10.dp)
@@ -58,7 +58,7 @@ fun SigchartTimecardRow(
         itemsIndexed(sigcharts) { i, sigchart ->
             val isSelected = currentSigchart == i
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
-            val textColor = if (isSelected) Color.White else Color.Unspecified
+            val textColor = if (isSelected) unselectedTint else selectedTint
             val time = ZonedDateTime.parse(sigchart.params.time).withZoneSameInstant(
                 ZoneId.systemDefault()
             )
