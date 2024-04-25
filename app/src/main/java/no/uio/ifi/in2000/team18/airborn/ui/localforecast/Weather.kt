@@ -207,7 +207,9 @@ fun WeatherTodaySection(
 
 @Composable
 fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onClick: () -> Unit) {
-    val precipitationAmount = weatherHour.nextOneHour?.chanceOfRain
+    val nextHourData =
+        weatherHour.nextOneHour ?: weatherHour.nextSixHour ?: weatherHour.nextTwelweHour
+    val precipitationAmount = nextHourData?.precipitation_amount
     val isSelected = weatherHour == selectedHour
     Column(
         modifier = Modifier
@@ -222,7 +224,7 @@ fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onCli
             Text(
                 text = "${precipitationAmount}%",
                 fontSize = 16.sp,
-                color = Color.Blue,
+                color = MaterialTheme.colorScheme.secondary,
             )
         } else {
             Text(text = "")
@@ -303,46 +305,43 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                     fontSize = 18.sp,
                 )
             }
-            Row {
-                Text("Rain: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.nextTwelweHour?.chanceOfRain} %", fontSize = 12.sp)
-            }
-            Row {
-                Text("Relative Humidity: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.relativeHumidity}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Pressure: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.airPressureAtSeaLevel}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Cloud fraction: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.cloudAreaFraction}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Cloud fraction high: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.cloudAreaFractionHigh}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Cloud fraction medium: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.cloudAreaFractionMedium}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Cloud fraction low: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.cloudAreaFractionLow}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Fog area: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.fogAreaFraction}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Dewpoint temp: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.dewPointTemperature}", fontSize = 12.sp)
-            }
-            Row {
-                Text("UV: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.ultravioletIndexClearSky}", fontSize = 12.sp)
-            }
+            Text(
+                text = "Rain: ${weatherHour.nextTwelweHour?.precipitation_amount} %",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Relative Humidity: ${weatherHour.weatherDetails.relativeHumidity}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Pressure: ${weatherHour.weatherDetails.airPressureAtSeaLevel}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Cloud fraction: ${weatherHour.weatherDetails.cloudAreaFraction}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Cloud fraction high: ${weatherHour.weatherDetails.cloudAreaFractionHigh}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Cloud fraction medium: ${weatherHour.weatherDetails.cloudAreaFractionMedium}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Cloud fraction low: ${weatherHour.weatherDetails.cloudAreaFractionLow}",
+                fontSize = 12.sp
+            )
+            Text(text = "Fog area: ${weatherHour.weatherDetails.fogAreaFraction}", fontSize = 12.sp)
+            Text(
+                text = "Dewpoint temp: ${weatherHour.weatherDetails.dewPointTemperature}",
+                fontSize = 12.sp
+            )
+            Text(
+                text = "UV: ${weatherHour.weatherDetails.ultravioletIndexClearSky}",
+                fontSize = 12.sp
+            )
         }
     }
 }
@@ -422,11 +421,15 @@ fun TestWeatherSection() {
             windFromDirection = Direction(Random.nextDouble(0.0, 360.0)),
             windSpeed = Speed(Random.nextDouble(0.0, 20.0))
         ), nextOneHour = NextHourDetails(
-            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            precipitation_amount = 22.98
         ), nextSixHour = NextHourDetails(
-            symbol_code = "Sunny", icon = R.drawable.clearsky_day, chanceOfRain = null
+            symbol_code = "Sunny", icon = R.drawable.clearsky_day, precipitation_amount = null
         ), nextTwelweHour = NextHourDetails(
-            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            precipitation_amount = 22.98
         )
     )
     val day = WeatherDay(
@@ -464,11 +467,15 @@ fun TestWeatherNowSection() {
             windFromDirection = Direction(Random.nextDouble(0.0, 360.0)),
             windSpeed = Speed(Random.nextDouble(0.0, 20.0))
         ), nextOneHour = NextHourDetails(
-            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            precipitation_amount = 22.98
         ), nextSixHour = NextHourDetails(
-            symbol_code = "Sunny", icon = R.drawable.clearsky_day, chanceOfRain = null
+            symbol_code = "Sunny", icon = R.drawable.clearsky_day, precipitation_amount = null
         ), nextTwelweHour = NextHourDetails(
-            symbol_code = "Partly Cloudy", icon = R.drawable.partlycloudy_day, chanceOfRain = 22.98
+            symbol_code = "Partly Cloudy",
+            icon = R.drawable.partlycloudy_day,
+            precipitation_amount = 22.98
         )
     )
     val day = WeatherDay(
