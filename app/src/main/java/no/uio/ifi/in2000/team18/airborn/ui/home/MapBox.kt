@@ -44,10 +44,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
+import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
+import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
@@ -136,28 +138,27 @@ fun Polygons(
 @OptIn(MapboxExperimental::class)
 @Composable
 fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
-    val lon = airport.position.longitude
-    val lat = airport.position.latitude
-    val selfLocationPoint: Point by remember {
-        mutableStateOf(
-            Point.fromLngLat(
-                lon, lat
-            )
-        )
-    }
     ViewAnnotation(
         options = viewAnnotationOptions {
-            geometry(selfLocationPoint)
+            geometry(airport.position.toPoints())
             allowOverlap(true)
+            annotationAnchor {
+                anchor(ViewAnnotationAnchor.CENTER)
+            }
         },
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.local_airport_24),
-            contentDescription = "Marker",
-            modifier = Modifier
-                .size(20.dp)
-                .clickable { onAirportClicked(airport) },
-        )
+        Box(
+            Modifier
+                .size(26.dp)
+                .background(Color.Transparent)
+                .clickable { onAirportClicked(airport) }, contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.local_airport_24),
+                contentDescription = "Marker",
+                modifier = Modifier.size(12.dp),
+            )
+        }
     }
 }
 
