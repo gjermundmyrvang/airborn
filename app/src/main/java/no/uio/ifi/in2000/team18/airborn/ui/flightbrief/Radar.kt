@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -104,7 +106,13 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
         Button(
             onClick = {
                 dropdownExpanded = !dropdownExpanded
-            }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.primaryContainer
+            )
         ) {
             Text("Change area")
         }
@@ -116,21 +124,29 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
             DropdownMenu(
                 expanded = dropdownExpanded,
                 onDismissRequest = { dropdownExpanded = false },
-                Modifier.height(300.dp),
+                Modifier
+                    .height(300.dp)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
             ) {
                 options.forEach { area ->
-                    DropdownMenuItem(text = { Text(area.second) }, onClick = {
+                    DropdownMenuItem(text = {
+                        Text(
+                            area.second, color = MaterialTheme.colorScheme.primary
+                        )
+                    }, onClick = {
                         selectedArea = area.first
                         selectedTypeIndex = 0
                         dropdownExpanded = false
                     }, leadingIcon = {
                         Icon(
-                            imageVector = Icons.Filled.LocationOn, contentDescription = ""
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.background
                         )
                     })
                     HorizontalDivider(
                         thickness = 2.dp,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.background,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(5.dp)
@@ -150,7 +166,8 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
                     ) {
                         Icon(
                             imageVector = if (isSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                            contentDescription = "Select icon"
+                            contentDescription = "Select icon",
+                            tint = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.tertiaryContainer
                         )
                         typeList[type]?.let {
                             Text(
