@@ -94,7 +94,6 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
         var selectedArea by rememberSaveable { mutableStateOf(options[0].first) }
         val selectedList = radarList.filter { it.params.area == selectedArea }
         val types = selectedList.map { it.params.type }
-        var currentlySelectedType by rememberSaveable { mutableStateOf(types[0]) }
 
         options.firstOrNull { it.first == selectedArea }?.second?.let {
             Text(
@@ -155,13 +154,12 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
             }
             LazyColumn(modifier = Modifier.fillMaxWidth(), content = {
                 itemsIndexed(types) { i, type ->
-                    val isSelected = type == currentlySelectedType
+                    val isSelected = i == selectedTypeIndex
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 selectedTypeIndex = i
-                                currentlySelectedType = type
                             }, verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
