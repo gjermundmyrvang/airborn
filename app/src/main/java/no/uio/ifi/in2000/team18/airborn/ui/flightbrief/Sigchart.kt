@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -40,7 +41,11 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
             sigcharts = sigchartList,
             onCardClicked = { selectedSigchart = it })
 
-        ImageComposable(uri = sigchartList[selectedSigchart].uri, "Image of sigchart")
+        ImageComposable(
+            uri = sigchartList[selectedSigchart].uri,
+            "Image of sigchart",
+            modifier = Modifier.aspectRatio(595f / 841f),
+        )
     }
 
 
