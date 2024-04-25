@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -76,7 +77,8 @@ fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffsho
                 onTimeClicked = { selectedOffshoreMapTime = it })
             ImageComposable(
                 uri = offshoreMapList[selectedOffshoreMapTime].uri,
-                contentDescription = "Offshore picture"
+                contentDescription = "Offshore picture",
+                modifier = Modifier.aspectRatio(1f),
             )
         }
     }
