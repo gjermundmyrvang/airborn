@@ -1,11 +1,13 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -33,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
+import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
@@ -71,7 +75,11 @@ fun FlightBriefScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(title = {
-                Text(text = "AIRBORN", fontWeight = FontWeight.Bold, fontSize = 50.sp)
+                Image(
+                    painter = painterResource(id = R.drawable.newtextlogo2),
+                    contentDescription = "",
+                    modifier = Modifier.size(200.dp)
+                )
             }, navigationIcon = {
                 IconButton(onClick = {
                     navController.popBackStack()
@@ -158,20 +166,50 @@ fun FlightBriefScreenContent(
             2 -> OverallAirportBrieftab()
         }
     }
+    // TODO change color of the indicator underneath
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.primary
+        containerColor = MaterialTheme.colorScheme.secondary,
     ) {
-        Tab(selected = pagerState.currentPage == 0,
+        Tab(
+            selected = pagerState.currentPage == 0,
             onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-            text = { Text("Departure") })
-        Tab(selected = pagerState.currentPage == 1,
+            text = { Text("Departure") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.flight_takeoff),
+                    contentDescription = "Flight takeoff"
+                )
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+        )
+        Tab(
+            selected = pagerState.currentPage == 1,
             onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-            text = { Text("Arrival") })
-        Tab(selected = pagerState.currentPage == 2,
+            text = { Text("Arrival") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.flight_landing),
+                    contentDescription = "Flight takeoff"
+                )
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+        )
+        Tab(
+            selected = pagerState.currentPage == 2,
             onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
-            text = { Text("Overall") })
+            text = { Text("Overall") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.connecting_airports_icon),
+                    contentDescription = "Flight takeoff"
+                )
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+        )
     }
 }
 
