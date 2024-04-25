@@ -73,8 +73,8 @@ fun Map(homeViewModel: HomeViewModel, modifier: Modifier = Modifier) = Column(
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
-            zoom(3.2)
-            center(Point.fromLngLat(18.06, 59.00))
+            zoom(3.15)
+            center(Point.fromLngLat(15.00, 69.69))
             pitch(0.0)
             bearing(0.0)
         }
