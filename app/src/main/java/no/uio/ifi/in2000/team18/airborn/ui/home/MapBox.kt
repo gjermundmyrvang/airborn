@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,11 +19,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,8 +44,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -99,9 +105,11 @@ fun Map(homeViewModel: HomeViewModel, modifier: Modifier = Modifier) = Column(
         Column(modifier = Modifier.padding(top = 16.dp)) {
             selectedAirport?.let { airport ->
                 homeViewModel.updateSunriseAirport(airport)
-                InfoBox(airport = airport, state) {
-                    selectedAirport = null
-                }
+                InfoBox(airport = airport,
+                    state,
+                    onClose = { selectedAirport = null },
+                    addDeparture = { homeViewModel.selectDepartureAirport(it) },
+                    addArrival = { homeViewModel.selectArrivalAirport(it) })
             }
             if (isClicked) {
                 SigmetInfoBox(sigmet = sigmets[sigmetClicked]) {
@@ -257,7 +265,13 @@ fun TestSigmetInfoBox() {
 }
 
 @Composable
-fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit) = Box(
+fun InfoBox(
+    airport: Airport,
+    state: HomeViewModel.UiState,
+    onClose: () -> Unit,
+    addDeparture: (Icao) -> Unit,
+    addArrival: (Icao) -> Unit
+) = Box(
     modifier = Modifier
         .padding(16.dp)
         .fillMaxWidth()
@@ -274,7 +288,7 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = "Close icon",
-            tint = MaterialTheme.colorScheme.primary
+            tint = MaterialTheme.colorScheme.secondary
         )
     }
     Column(
@@ -315,6 +329,52 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
 
             is LoadingState.Success -> state.sun.value?.let { SunComposable(sun = it) }
         }
+        Row(
+            Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedButton(
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+                onClick = { addDeparture(airport.icao) },
+                modifier = Modifier
+                    .height(35.dp)
+                    .padding(end = 5.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+                    Text(
+                        text = " Departure",
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(0.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            OutlinedButton(
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+                onClick = { addArrival(airport.icao) },
+                modifier = Modifier.height(height = 35.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+                    Text(
+                        text = " Arrival",
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(0.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -322,11 +382,9 @@ fun InfoBox(airport: Airport, state: HomeViewModel.UiState, onClose: () -> Unit)
 @Preview(showSystemUi = true)
 @Composable
 fun TestInfoBox() {
-    InfoBox(
-        airport = Airport(
-            icao = Icao("ENGM"), name = "Gardermoen", position = Position(59.11, 11.59)
-        ), state = HomeViewModel.UiState()
-    ) { }
+    InfoBox(airport = Airport(
+        icao = Icao("ENGM"), name = "Gardermoen", position = Position(59.11, 11.59)
+    ), state = HomeViewModel.UiState(), {}, {}, {})
 }
 
 
