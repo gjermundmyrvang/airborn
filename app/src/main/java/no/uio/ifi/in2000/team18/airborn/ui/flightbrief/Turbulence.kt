@@ -79,6 +79,7 @@ fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>, initTurbulence: () -
 fun TurbulenceTimecardRow(
     currentTime: ZonedDateTime, times: List<ZonedDateTime>, onCardClicked: (ZonedDateTime) -> Unit
 ) {
+
     val selectedTint = MaterialTheme.colorScheme.background
     val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
     Text(text = "Local time:", fontSize = 15.sp)

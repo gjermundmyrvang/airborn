@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -61,9 +62,11 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
 fun SigchartTimecardRow(
     currentSigchart: Int, sigcharts: List<Sigchart>, onCardClicked: (Int) -> Unit
 ) {
+
     val selectedTint = MaterialTheme.colorScheme.background
     val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
     Text(text = "Local time:", fontSize = 15.sp)
+
     LazyRow(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.padding(bottom = 10.dp)
