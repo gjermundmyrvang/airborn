@@ -256,9 +256,9 @@ fun <T> LazyCollapsible(
 fun LazyCollapsibleContent(content: @Composable ColumnScope.() -> Unit) = Column(content = content)
 
 @Composable
-fun ImageComposable(uri: String, contentDescription: String) {
+fun ImageComposable(uri: String, contentDescription: String, modifier: Modifier = Modifier) {
     val zoomState = rememberZoomState()
-    SubcomposeAsyncImage(modifier = Modifier
+    SubcomposeAsyncImage(modifier = modifier
         .fillMaxWidth()
         .graphicsLayer { clip = true }
         .zoomable(zoomState),

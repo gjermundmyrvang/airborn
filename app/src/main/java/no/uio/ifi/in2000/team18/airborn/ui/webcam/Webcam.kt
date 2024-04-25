@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,7 +65,8 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
         var selectedWebcam by rememberSaveable { mutableIntStateOf(0) }
         ImageComposable(
             uri = webcams[selectedWebcam].images.current.preview,
-            contentDescription = "Webcam image"
+            contentDescription = "Webcam image",
+            modifier = Modifier.aspectRatio(1920f / 1080f),
         )
         HyperlinkText(
             fullText = "Webcams provided by windy.com — add a webcam",
