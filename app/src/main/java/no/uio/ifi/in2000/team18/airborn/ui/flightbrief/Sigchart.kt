@@ -1,12 +1,20 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,8 +24,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
@@ -53,33 +62,38 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
 fun SigchartTimecardRow(
     currentSigchart: Int, sigcharts: List<Sigchart>, onCardClicked: (Int) -> Unit
 ) {
-    val selectedTint = MaterialTheme.colorScheme.secondary
+
+    val selectedTint = MaterialTheme.colorScheme.background
     val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
+    Text(text = "Local time:", fontSize = 15.sp)
 
     LazyRow(
-        horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(all = 10.dp)
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(bottom = 10.dp)
     ) {
 
         itemsIndexed(sigcharts) { i, sigchart ->
             val isSelected = currentSigchart == i
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
-            val textColor = if (isSelected) unselectedTint else selectedTint
             val time = ZonedDateTime.parse(sigchart.params.time).withZoneSameInstant(
                 ZoneId.systemDefault()
             )
-
-            Card(colors = CardColors(
-                containerColor = backgroundTint,
-                contentColor = backgroundTint,
-                disabledContainerColor = backgroundTint,
-                disabledContentColor = backgroundTint
-            ),
-                modifier = Modifier.padding(start = 5.dp, end = 5.dp),
-                onClick = { onCardClicked(i) }) {
+            Column(
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .clickable { onCardClicked(i) }
+                    .width(intrinsicSize = IntrinsicSize.Min)
+                    .padding(bottom = 4.dp)
+            ) {
                 Text(
-                    modifier = Modifier.padding(all = 5.dp),
                     text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
-                    color = textColor
+                    fontWeight = FontWeight.Medium
+                )
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .background(backgroundTint, RoundedCornerShape(10.dp))
                 )
             }
         }
