@@ -76,7 +76,7 @@ fun FlightBriefScreen(
         topBar = {
             CenterAlignedTopAppBar(title = {
                 Image(
-                    painter = painterResource(id = R.drawable.textlogowhite),
+                    painter = painterResource(id = R.drawable.newtextlogo2),
                     contentDescription = "",
                     modifier = Modifier.size(200.dp)
                 )
