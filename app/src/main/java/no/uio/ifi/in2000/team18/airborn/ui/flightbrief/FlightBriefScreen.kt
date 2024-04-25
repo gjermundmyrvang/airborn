@@ -2,7 +2,9 @@ package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -12,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -34,6 +37,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,7 +49,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.R
-import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
@@ -81,12 +85,15 @@ fun FlightBriefScreen(
                     modifier = Modifier.size(200.dp)
                 )
             }, navigationIcon = {
-                IconButton(onClick = {
-                    navController.popBackStack()
-                }) {
+                IconButton(
+                    onClick = {
+                        navController.popBackStack()
+                    },
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Home"
+                        contentDescription = "Home",
+                        tint = MaterialTheme.colorScheme.secondary
                     )
                 }
             }, colors = TopAppBarColors(
@@ -169,7 +176,12 @@ fun FlightBriefScreenContent(
     // TODO change color of the indicator underneath
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        containerColor = MaterialTheme.colorScheme.secondary,
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        indicator = {},
+        divider = {},
+        modifier = Modifier
+            .padding(16.dp)
+            .clip(RoundedCornerShape(16.dp))
     ) {
         Tab(
             selected = pagerState.currentPage == 0,
@@ -181,8 +193,8 @@ fun FlightBriefScreenContent(
                     contentDescription = "Flight takeoff"
                 )
             },
-            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
-            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+            selectedContentColor = MaterialTheme.colorScheme.background,
+            unselectedContentColor = Color.LightGray
         )
         Tab(
             selected = pagerState.currentPage == 1,
@@ -194,8 +206,8 @@ fun FlightBriefScreenContent(
                     contentDescription = "Flight takeoff"
                 )
             },
-            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
-            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+            selectedContentColor = MaterialTheme.colorScheme.background,
+            unselectedContentColor = Color.LightGray
         )
         Tab(
             selected = pagerState.currentPage == 2,
@@ -207,8 +219,8 @@ fun FlightBriefScreenContent(
                     contentDescription = "Flight takeoff"
                 )
             },
-            selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
-            unselectedContentColor = MaterialTheme.colorScheme.onTertiary,
+            selectedContentColor = MaterialTheme.colorScheme.background,
+            unselectedContentColor = Color.LightGray
         )
     }
 }
@@ -312,19 +324,25 @@ fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
         )
 
         is LoadingState.Success -> AirportInfo(
-            name = airportstate.value.name,
-            icao = airportstate.value.icao.code,
-            pos = airportstate.value.position
+            airport = airportstate.value
         )
     }
 }
 
 @Composable
-fun AirportInfo(name: String, icao: String, pos: Position) = Column(
+fun AirportInfo(airport: Airport) = Row(
     Modifier
         .padding(16.dp)
-        .fillMaxWidth(),
+        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
 ) {
-    Text(text = icao, fontWeight = FontWeight.Bold)
-    Text(text = name, fontWeight = FontWeight.Bold)
+    val hasSeperator = airport.name.contains(",")
+    Text(text = airport.icao.code, fontWeight = FontWeight.Bold)
+    Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+    if (!hasSeperator) {
+        Text(text = airport.name)
+    } else {
+        Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
+        Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+        Text(text = airport.name.substringAfter(","), fontWeight = FontWeight.Bold)
+    }
 }

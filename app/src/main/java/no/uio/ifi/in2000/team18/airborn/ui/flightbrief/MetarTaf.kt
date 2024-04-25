@@ -79,12 +79,9 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                 .clickable { rotated = !rotated },
             shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.secondaryContainer
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.primary
             ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 6.dp
-            )
         ) {
             if (!rotated) {
                 Column(

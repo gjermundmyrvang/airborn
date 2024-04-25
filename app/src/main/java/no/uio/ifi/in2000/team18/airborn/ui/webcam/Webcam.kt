@@ -102,7 +102,7 @@ fun NearbyWebcam(
     webcam: Webcam, current: Webcam, onWebcamClicked: (Webcam) -> Unit
 ) {
     val borderColor =
-        if (webcam == current) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
+        if (webcam == current) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.outline
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,11 +134,11 @@ fun HyperlinkText(
     modifier: Modifier = Modifier,
     fullText: String,
     linkText: List<String>,
-    linkTextColor: Color = Color.Blue,
+    linkTextColor: Color = MaterialTheme.colorScheme.secondary,
     linkTextFontWeight: FontWeight = FontWeight.Medium,
     linkTextDecoration: TextDecoration = TextDecoration.Underline,
     hyperlinks: List<String>,
-    fontSize: TextUnit = TextUnit.Unspecified
+    fontSize: TextUnit = 12.sp
 ) {
     val annotatedString = buildAnnotatedString {
         append(fullText)
@@ -159,7 +159,8 @@ fun HyperlinkText(
         }
         addStyle(
             style = SpanStyle(
-                fontSize = fontSize
+                fontSize = fontSize,
+                color = MaterialTheme.colorScheme.secondary
             ), start = 0, end = fullText.length
         )
     }
