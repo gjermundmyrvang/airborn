@@ -90,7 +90,7 @@ dependencies {
     implementation("com.mapbox.extension:maps-compose:11.2.2")
     implementation("io.github.alexmaryin.metarkt:parser:1.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0-RC.2")
-
+    implementation("io.coil-kt:coil-gif:2.6.0")
     dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.9.20")
     implementation("net.engawapg.lib:zoomable:1.6.1")
     implementation("edu.ucar:netcdf4:4.5.5") {

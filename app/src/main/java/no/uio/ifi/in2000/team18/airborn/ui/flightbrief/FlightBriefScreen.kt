@@ -291,6 +291,7 @@ fun OverallAirportBrieftab(
         item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMpas() } }
         item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
         item { Route(state.route) { viewModel.initRouteIsobaric() } }
+        item { RadarAnimations(state.radarAnimations) { viewModel.initRadarAnimations() } }
     }
 }
 

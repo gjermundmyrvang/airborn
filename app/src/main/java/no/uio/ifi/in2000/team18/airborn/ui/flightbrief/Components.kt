@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import android.graphics.BlurMaskFilter
+import android.os.Build.VERSION.SDK_INT
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -58,7 +59,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.ImageLoader
 import coil.compose.SubcomposeAsyncImage
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
@@ -295,6 +299,47 @@ fun ImageComposable(uri: String, contentDescription: String, modifier: Modifier 
 }
 
 @Composable
+fun RowScope.TableCell(
+    text: String,
+    weight: Float,
+    alignment: TextAlign = TextAlign.Center,
+    title: Boolean = false,
+) {
+    Text(
+        text = text,
+        Modifier
+            .weight(weight)
+            .padding(10.dp),
+        fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
+        textAlign = alignment,
+    )
+}
+
+@Composable
+fun RowScope.IconCell(
+    text: String,
+    weight: Float,
+    arrangement: Arrangement.Horizontal,
+    title: Boolean = false,
+    windDirection: Direction
+) {
+    Row(
+        Modifier
+            .weight(weight)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = arrangement
+    ) {
+        Text(
+            text = text,
+            Modifier.padding(10.dp),
+            fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
+        )
+        RotatableArrowIcon(direction = windDirection)
+    }
+}
+
+@Composable
 fun TableContent(isobaricData: IsobaricData) {
     LazyColumn(
         Modifier
@@ -368,42 +413,37 @@ fun TableContent(isobaricData: IsobaricData) {
 }
 
 @Composable
-fun RowScope.TableCell(
-    text: String,
-    weight: Float,
-    alignment: TextAlign = TextAlign.Center,
-    title: Boolean = false,
-) {
-    Text(
-        text = text,
-        Modifier
-            .weight(weight)
-            .padding(10.dp),
-        fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
-        textAlign = alignment,
+fun GifComposable(uri: String, contentDescription: String) {
+    val zoomState = rememberZoomState()
+    val imageLoader = ImageLoader.Builder(LocalContext.current)
+        .components {
+            if (SDK_INT >= 28) {
+                add(ImageDecoderDecoder.Factory())
+            } else {
+                add(GifDecoder.Factory())
+            }
+        }
+        .build()
+    SubcomposeAsyncImage(modifier = Modifier
+        .fillMaxWidth()
+        .graphicsLayer { clip = true }
+        .zoomable(zoomState),
+        contentScale = ContentScale.FillWidth,
+        model = ImageRequest.Builder(LocalContext.current).data(uri)
+            .setHeader("User-Agent", "Team18").crossfade(500).build(),
+        imageLoader = imageLoader,
+        loading = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(30.dp),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    strokeWidth = 1.dp
+                )
+            }
+        },
+        contentDescription = contentDescription
     )
-}
-
-@Composable
-fun RowScope.IconCell(
-    text: String,
-    weight: Float,
-    arrangement: Arrangement.Horizontal,
-    title: Boolean = false,
-    windDirection: Direction
-) {
-    Row(
-        Modifier
-            .weight(weight)
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = arrangement
-    ) {
-        Text(
-            text = text,
-            Modifier.padding(10.dp),
-            fontWeight = if (title) FontWeight.Bold else FontWeight.Normal,
-        )
-        RotatableArrowIcon(direction = windDirection)
-    }
 }
