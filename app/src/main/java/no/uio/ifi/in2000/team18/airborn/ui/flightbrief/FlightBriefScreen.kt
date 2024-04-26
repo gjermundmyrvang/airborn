@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -368,16 +369,22 @@ fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
 fun AirportInfo(airport: Airport) = Row(
     Modifier
         .padding(16.dp)
-        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+        .fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.Center
 ) {
     val hasSeperator = airport.name.contains(",")
     Text(text = airport.icao.code, fontWeight = FontWeight.Bold)
+    Spacer(modifier = Modifier.width(5.dp))
     Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+    Spacer(modifier = Modifier.width(5.dp))
     if (!hasSeperator) {
         Text(text = airport.name)
     } else {
         Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.width(5.dp))
         Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+        Spacer(modifier = Modifier.width(5.dp))
         Text(text = airport.name.substringAfter(","), fontWeight = FontWeight.Bold)
     }
 }
