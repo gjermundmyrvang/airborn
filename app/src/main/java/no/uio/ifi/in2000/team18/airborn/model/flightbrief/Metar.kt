@@ -16,18 +16,27 @@ import no.uio.ifi.in2000.team18.airborn.model.Pressure
 import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
 
-data class Metar(
-    val station: Icao,
-    val time: ParsedDateTime,
-    val wind: Pair<MetarWind, Pair<Direction, Direction>?>,
-    val cav: Cav,
-    val temperatures: Pair<Temperature, Temperature>,
-    val altimeterSetting: Pressure,
-    val rest: String,
-    val text: String = "",
-    val downloaded: Instant?,
-) {
-    val instant: Instant? get() = downloaded?.let { time.resolveInstant(it) }
+
+sealed interface Metar {
+    data class DecodedMetar(
+        val station: Icao,
+        val time: ParsedDateTime,
+        val wind: Pair<MetarWind, Pair<Direction, Direction>?>,
+        val cav: Cav,
+        val temperatures: Pair<Temperature, Temperature>,
+        val altimeterSetting: Pressure,
+        val rest: String,
+        override val text: String = "",
+        val downloaded: Instant?,
+    ) : Metar {
+        val instant: Instant? get() = downloaded?.let { time.resolveInstant(it) }
+    }
+
+    data class OpaqueMetar(override val text: String) : Metar {
+
+    }
+
+    val text: String
 }
 
 

@@ -333,7 +333,7 @@ private val metarParser = Unit.let {
         altimeterSetting.skipSpace(),
         chars { it != '=' },
     ) { header, wind, cav, temperatures, altimeterSetting, rest ->
-        Metar(
+        Metar.DecodedMetar(
             header.second, header.third,
             wind,
             cav,
@@ -346,8 +346,9 @@ private val metarParser = Unit.let {
     }.skip(char('='))
 }
 
-fun parseMetar(source: String, downloaded: Instant? = null): ParseResult<Metar> =
+fun parseMetar(source: String, downloaded: Instant? = null): ParseResult<Metar.DecodedMetar> =
     metarParser.parse(source).map { it.copy(text = source, downloaded = downloaded) }
+// ParseResult.Error(listOf())
 
 private fun <T, U> ParseResult<T>.map(f: (T) -> U): ParseResult<U> = when (this) {
     is ParseResult.Ok -> ParseResult.Ok(f(this.value), state)
