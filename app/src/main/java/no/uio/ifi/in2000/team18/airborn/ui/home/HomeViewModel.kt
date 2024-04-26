@@ -58,6 +58,10 @@ class HomeViewModel @Inject constructor(
                     departureAirportIcao = null
                 )
             }
+            val airports = airportRepository.all()
+            _state.update {
+                it.copy(searchResults = airports)
+            }
         }
     }
 
@@ -68,6 +72,10 @@ class HomeViewModel @Inject constructor(
                     arrivalAirportInput = "",
                     arrivalAirportIcao = null
                 )
+            }
+            val airports = airportRepository.all()
+            _state.update {
+                it.copy(searchResults = airports)
             }
         }
     }

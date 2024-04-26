@@ -1,8 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,56 +19,108 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
+import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-) {
+) = Box {
     var airportInputSelected by remember { mutableStateOf(false) }
-    Column(
-        modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer),
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Map(viewModel,
-            modifier = Modifier
-                .height(0.dp)
-                .let { if (airportInputSelected) it else it.weight(1.0f) })
-        AirportSelection(modifier = modifier.padding(16.dp),
-            viewModel = viewModel,
-            onFocusChange = { airportInputSelected = it })
-    }
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            false,
+            LocalDensity.current,
+            skipHiddenState = false,
+            initialValue = SheetValue.PartiallyExpanded
+        )
+    )
+    val scope = rememberCoroutineScope()
+
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
+        sheetPeekHeight = 300.dp,
+        sheetShadowElevation = 5.dp,
+        sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        sheetContent = {
+            AirportSelection(modifier = modifier.padding(16.dp),
+                viewModel = viewModel,
+                onFocusChange = { airportInputSelected = it
+                if (it){
+                    scope.launch {
+                        bottomSheetScaffoldState.bottomSheetState.expand()
+                    }
+                }}
+            )
+        },
+        content = {
+            Map(
+                viewModel,
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+            Button(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    ),
+                border = BorderStroke(2.dp,color = MaterialTheme.colorScheme.background),
+                onClick = {
+                    scope.launch {
+                        if(airportInputSelected){
+                            bottomSheetScaffoldState.bottomSheetState.expand()
+                        }else{
+                            bottomSheetScaffoldState.bottomSheetState.partialExpand()
+                        }
+                    }
+                }) {
+                Text("Select Airport")
+            }
+        }
+
+    )
 }
 
 
@@ -94,6 +147,15 @@ private fun AirportSelection(
         colors = AirbornTextFieldColors,
         singleLine = true,
         label = { Text("Departure airport") },
+        leadingIcon = {
+                      Icon(
+                          painter = painterResource(
+                              id = R.drawable.flight_takeoff
+                          ),
+                          contentDescription = "takeoff icon",
+                          tint = MaterialTheme.colorScheme.background
+                      )
+        },
         trailingIcon = {
             IconButton(onClick = { viewModel.clearDepartureInput() }) {
                 Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
@@ -117,6 +179,14 @@ private fun AirportSelection(
         singleLine = true,
         enabled = state.departureAirportIcao != null,
         label = { Text("Arrival airport") },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(
+                    id = R.drawable.flight_landing
+                ),
+                contentDescription = "landing icon",
+                tint = MaterialTheme.colorScheme.background)
+        },
         trailingIcon = {
             IconButton(onClick = { viewModel.clearArrivalInput() }) {
                 Icon(Icons.Filled.Close, contentDescription = "clear arrival inputfield")
