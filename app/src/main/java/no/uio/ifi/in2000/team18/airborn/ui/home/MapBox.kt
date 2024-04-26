@@ -70,7 +70,11 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @OptIn(MapboxExperimental::class)
 @Composable
-fun Map(homeViewModel: HomeViewModel, modifier: Modifier = Modifier) = Column(
+fun Map(
+    homeViewModel: HomeViewModel,
+    modifier: Modifier = Modifier,
+    airportSelected: () -> Unit = {}
+) = Column(
     modifier = modifier,
 ) {
     val state by homeViewModel.state.collectAsState()
@@ -81,8 +85,8 @@ fun Map(homeViewModel: HomeViewModel, modifier: Modifier = Modifier) = Column(
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
-            zoom(3.15)
-            center(Point.fromLngLat(15.00, 69.69))
+            zoom(3.420)
+            center(Point.fromLngLat(15.00, 69.69 - 8))
             pitch(0.0)
             bearing(0.0)
         }
@@ -107,11 +111,19 @@ fun Map(homeViewModel: HomeViewModel, modifier: Modifier = Modifier) = Column(
         Column(modifier = Modifier.padding(top = 16.dp)) {
             selectedAirport?.let { airport ->
                 homeViewModel.updateSunriseAirport(airport)
-                InfoBox(airport = airport,
+                InfoBox(
+                    airport = airport,
                     state,
                     onClose = { selectedAirport = null },
-                    addDeparture = { homeViewModel.selectDepartureAirport(it) },
-                    addArrival = { homeViewModel.selectArrivalAirport(it) })
+                    addDeparture = {
+                        homeViewModel.selectDepartureAirport(it)
+                        airportSelected()
+                    },
+                    addArrival = {
+                        homeViewModel.selectArrivalAirport(it)
+                        airportSelected()
+                    },
+                )
             }
             if (isClicked) {
                 SigmetInfoBox(sigmet = sigmets[sigmetClicked]) {

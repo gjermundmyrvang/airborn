@@ -79,39 +79,39 @@ fun HomeScreen(
     )
     val scope = rememberCoroutineScope()
 
-    BottomSheetScaffold(
-        scaffoldState = bottomSheetScaffoldState,
+    BottomSheetScaffold(scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 300.dp,
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         sheetContent = {
-            AirportSelection(modifier = modifier.padding(16.dp),
+            AirportSelection(
+                modifier = modifier.padding(16.dp),
                 viewModel = viewModel,
-                onFocusChange = { airportInputSelected = it
-                if (it){
-                    scope.launch {
-                        bottomSheetScaffoldState.bottomSheetState.expand()
+                onFocusChange = {
+                    airportInputSelected = it
+                    if (it) {
+                        scope.launch {
+                            bottomSheetScaffoldState.bottomSheetState.expand()
+                        }
                     }
-                }}
-            )
+                })
         },
         content = {
-            Map(
-                viewModel,
-                modifier = Modifier
-                    .fillMaxSize()
-            )
-            Button(
-                modifier = Modifier.align(Alignment.BottomCenter),
+            Map(viewModel, modifier = Modifier.fillMaxSize(), airportSelected = {
+                scope.launch {
+                    bottomSheetScaffoldState.bottomSheetState.partialExpand()
+                }
+            })
+            Button(modifier = Modifier.align(Alignment.BottomCenter),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    ),
-                border = BorderStroke(2.dp,color = MaterialTheme.colorScheme.background),
+                ),
+                border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.background),
                 onClick = {
                     scope.launch {
-                        if(airportInputSelected){
+                        if (airportInputSelected) {
                             bottomSheetScaffoldState.bottomSheetState.expand()
-                        }else{
+                        } else {
                             bottomSheetScaffoldState.bottomSheetState.partialExpand()
                         }
                     }
@@ -148,13 +148,11 @@ private fun AirportSelection(
         singleLine = true,
         label = { Text("Departure airport") },
         leadingIcon = {
-                      Icon(
-                          painter = painterResource(
-                              id = R.drawable.flight_takeoff
-                          ),
-                          contentDescription = "takeoff icon",
-                          tint = MaterialTheme.colorScheme.background
-                      )
+            Icon(
+                painter = painterResource(
+                    id = R.drawable.flight_takeoff
+                ), contentDescription = "takeoff icon", tint = MaterialTheme.colorScheme.background
+            )
         },
         trailingIcon = {
             IconButton(onClick = { viewModel.clearDepartureInput() }) {
@@ -183,9 +181,8 @@ private fun AirportSelection(
             Icon(
                 painter = painterResource(
                     id = R.drawable.flight_landing
-                ),
-                contentDescription = "landing icon",
-                tint = MaterialTheme.colorScheme.background)
+                ), contentDescription = "landing icon", tint = MaterialTheme.colorScheme.background
+            )
         },
         trailingIcon = {
             IconButton(onClick = { viewModel.clearArrivalInput() }) {
@@ -287,8 +284,7 @@ fun TestTextField() {
                 keyboardActions = KeyboardActions(onDone = { }),
             )
             Button(
-                onClick = {
-                },
+                onClick = {},
                 colors = ButtonColors(
                     containerColor = Color(0xFFFB9B50),
                     contentColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -301,8 +297,7 @@ fun TestTextField() {
                 shape = RoundedCornerShape(8.dp),
             ) { Text("Go to brief") }
             Button(
-                onClick = {
-                },
+                onClick = {},
                 colors = ButtonColors(
                     containerColor = MaterialTheme.colorScheme.secondary,
                     contentColor = MaterialTheme.colorScheme.secondaryContainer,
