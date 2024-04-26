@@ -365,19 +365,30 @@ fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
 }
 
 @Composable
-fun AirportInfo(airport: Airport) = Row(
+fun AirportInfo(airport: Airport) = Column(
     Modifier
         .padding(16.dp)
-        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+        .fillMaxWidth(),
 ) {
     val hasSeperator = airport.name.contains(",")
-    Text(text = airport.icao.code, fontWeight = FontWeight.Bold)
-    Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
-    if (!hasSeperator) {
-        Text(text = airport.name)
-    } else {
-        Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
-        Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
-        Text(text = airport.name.substringAfter(","), fontWeight = FontWeight.Bold)
+    Row(
+        Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        if (!hasSeperator) {
+            Column {
+                Text(text = airport.icao.code, color = MaterialTheme.colorScheme.secondary)
+                Text(text = airport.name)
+            }
+        } else {
+            Column {
+                Text(text = airport.icao.code, color = MaterialTheme.colorScheme.secondary)
+                Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
+            }
+            Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+            Text(text = airport.name.substringAfter(","), fontWeight = FontWeight.Bold)
+        }
     }
 }
