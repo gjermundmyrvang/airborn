@@ -371,16 +371,19 @@ fun AirportInfo(airport: Airport) = Column(
         .fillMaxWidth(),
 ) {
     val hasSeperator = airport.name.contains(",")
-    Row {
-        Text(text = airport.icao.code, fontWeight = FontWeight.Bold)
-    }
-    Row {
+    Text(text = airport.icao.code, fontWeight = FontWeight.Bold)
+    Row(
+        Modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         if (!hasSeperator) {
             Text(text = airport.name)
         } else {
             Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.width(5.dp))
+            Spacer(modifier = Modifier.width(16.dp))
             Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+            Spacer(modifier = Modifier.width(16.dp))
             Text(text = airport.name.substringAfter(","), fontWeight = FontWeight.Bold)
         }
     }
