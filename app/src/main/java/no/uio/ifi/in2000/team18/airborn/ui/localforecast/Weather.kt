@@ -161,7 +161,7 @@ fun WeatherDayCard(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = if (today) "today" else weatherDay.date.day,
+                text = if (today) "Today" else weatherDay.date.day,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
