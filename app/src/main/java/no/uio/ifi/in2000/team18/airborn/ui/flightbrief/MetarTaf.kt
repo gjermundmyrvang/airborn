@@ -69,6 +69,11 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
             targetValue = if (rotated) 180f else 0f
         )
 
+        if (metar == null && taf == null) {
+            Text("No metar or taf for this airport")
+            return@LazyCollapsible
+        }
+
         Card(
             modifier = Modifier
                 .fillMaxSize()
