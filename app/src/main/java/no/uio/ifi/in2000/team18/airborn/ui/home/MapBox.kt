@@ -70,7 +70,11 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @OptIn(MapboxExperimental::class)
 @Composable
-fun Map(homeViewModel: HomeViewModel, modifier: Modifier = Modifier) = Column(
+fun Map(
+    homeViewModel: HomeViewModel,
+    modifier: Modifier = Modifier,
+    airportSelected: () -> Unit = {}
+) = Column(
     modifier = modifier,
 ) {
     val state by homeViewModel.state.collectAsState()
@@ -107,11 +111,19 @@ fun Map(homeViewModel: HomeViewModel, modifier: Modifier = Modifier) = Column(
         Column(modifier = Modifier.padding(top = 16.dp)) {
             selectedAirport?.let { airport ->
                 homeViewModel.updateSunriseAirport(airport)
-                InfoBox(airport = airport,
+                InfoBox(
+                    airport = airport,
                     state,
                     onClose = { selectedAirport = null },
-                    addDeparture = { homeViewModel.selectDepartureAirport(it) },
-                    addArrival = { homeViewModel.selectArrivalAirport(it) })
+                    addDeparture = {
+                        homeViewModel.selectDepartureAirport(it)
+                        airportSelected()
+                    },
+                    addArrival = {
+                        homeViewModel.selectArrivalAirport(it)
+                        airportSelected()
+                    },
+                )
             }
             if (isClicked) {
                 SigmetInfoBox(sigmet = sigmets[sigmetClicked]) {
