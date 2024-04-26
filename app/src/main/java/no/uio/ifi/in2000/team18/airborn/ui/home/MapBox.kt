@@ -85,8 +85,8 @@ fun Map(
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
-            zoom(3.15)
-            center(Point.fromLngLat(15.00, 69.69))
+            zoom(3.420)
+            center(Point.fromLngLat(15.00, 69.69 - 8))
             pitch(0.0)
             bearing(0.0)
         }
