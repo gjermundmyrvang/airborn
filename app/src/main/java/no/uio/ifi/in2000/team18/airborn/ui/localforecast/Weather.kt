@@ -342,6 +342,18 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                 text = "UV: ${weatherHour.weatherDetails.ultravioletIndexClearSky}",
                 fontSize = 12.sp
             )
+            weatherHour.weatherDetails.fogAreaFraction?.let {
+                Row {
+                    Text("Fog area: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(it.toString(), fontSize = 12.sp)
+                }
+            }
+            weatherHour.weatherDetails.ultravioletIndexClearSky?.let {
+                Row {
+                    Text("UV: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(it.toString(), fontSize = 12.sp)
+                }
+            }
         }
     }
 }
