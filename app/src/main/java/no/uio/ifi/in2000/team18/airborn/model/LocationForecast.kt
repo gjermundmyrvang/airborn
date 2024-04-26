@@ -74,9 +74,9 @@ data class Details(
     @SerializedName("cloud_area_fraction_low") @JsonAdapter(FractionAdapter::class) val cloudAreaFractionLow: Fraction,
     @SerializedName("cloud_area_fraction_medium") @JsonAdapter(FractionAdapter::class) val cloudAreaFractionMedium: Fraction,
     @SerializedName("dew_point_temperature") @JsonAdapter(CelsiusAdapter::class) val dewPointTemperature: Temperature,
-    @SerializedName("fog_area_fraction") @JsonAdapter(FractionAdapter::class) val fogAreaFraction: Fraction,
+    @SerializedName("fog_area_fraction") @JsonAdapter(FractionAdapter::class) val fogAreaFraction: Fraction?,
     @SerializedName("relative_humidity") @JsonAdapter(HumidityAdapter::class) val relativeHumidity: Humidity,
-    @SerializedName("ultraviolet_index_clear_sky") @JsonAdapter(UvAdapter::class) val ultravioletIndexClearSky: UvIndex,
+    @SerializedName("ultraviolet_index_clear_sky") @JsonAdapter(UvAdapter::class) val ultravioletIndexClearSky: UvIndex?,
     @SerializedName("wind_from_direction") @JsonAdapter(DirectionAdapter::class) val windFromDirection: Direction,
     @SerializedName("wind_speed") @JsonAdapter(MpsAdapter::class) val windSpeed: Speed
 )

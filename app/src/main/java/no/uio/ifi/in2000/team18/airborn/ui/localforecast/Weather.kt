@@ -161,7 +161,7 @@ fun WeatherDayCard(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = if (today) "today" else weatherDay.date.day,
+                text = if (today) "Today" else weatherDay.date.day,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -305,43 +305,50 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                     fontSize = 18.sp,
                 )
             }
-            Text(
-                text = "Rain: ${weatherHour.nextTwelweHour?.precipitation_amount} %",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Relative Humidity: ${weatherHour.weatherDetails.relativeHumidity}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Pressure: ${weatherHour.weatherDetails.airPressureAtSeaLevel}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Cloud fraction: ${weatherHour.weatherDetails.cloudAreaFraction}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Cloud fraction high: ${weatherHour.weatherDetails.cloudAreaFractionHigh}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Cloud fraction medium: ${weatherHour.weatherDetails.cloudAreaFractionMedium}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Cloud fraction low: ${weatherHour.weatherDetails.cloudAreaFractionLow}",
-                fontSize = 12.sp
-            )
-            Text(text = "Fog area: ${weatherHour.weatherDetails.fogAreaFraction}", fontSize = 12.sp)
-            Text(
-                text = "Dewpoint temp: ${weatherHour.weatherDetails.dewPointTemperature}",
-                fontSize = 12.sp
-            )
-            Text(
-                text = "UV: ${weatherHour.weatherDetails.ultravioletIndexClearSky}",
-                fontSize = 12.sp
-            )
+            Row {
+                Text("Rain: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${nextHours?.precipitation_amount} %", fontSize = 12.sp)
+            }
+            Row {
+                Text("Relative Humidity: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.relativeHumidity}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Pressure: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.airPressureAtSeaLevel}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Cloud fraction: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFraction}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Cloud fraction high: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionHigh}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Cloud fraction medium: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionMedium}", fontSize = 12.sp)
+            }
+            Row {
+                Text("Cloud fraction low: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionLow}", fontSize = 12.sp)
+            }
+            weatherHour.weatherDetails.fogAreaFraction?.let {
+                Row {
+                    Text("Fog area: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(it.toString(), fontSize = 12.sp)
+                }
+            }
+            Row {
+                Text("Dewpoint temp: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.dewPointTemperature}", fontSize = 12.sp)
+            }
+            weatherHour.weatherDetails.ultravioletIndexClearSky?.let {
+                Row {
+                    Text("UV: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(it.toString(), fontSize = 12.sp)
+                }
+            }
         }
     }
 }
