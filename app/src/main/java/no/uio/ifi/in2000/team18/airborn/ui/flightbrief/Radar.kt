@@ -58,6 +58,24 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
             "western_norway" to "Western Norway",
             "xband" to "X-band"
         )
+        val ratioMap = mapOf(
+            "central_norway" to Pair(700f, 640f),
+            "eastern_norway" to Pair(579f, 677f),
+            "finnmark" to Pair(820f, 653f),
+            "nordic" to Pair(659f, 761f),
+            "nordland" to Pair(580f, 756f),
+            "northern_nordland" to Pair(737f, 680f),
+            "northwestern_norway" to Pair(834f, 658f),
+            "norway" to Pair(726f, 1037f),
+            "southeastern_norway" to Pair(771f, 631f),
+            "southern_nordland" to Pair(663f, 661f),
+            "southern_norway" to Pair(890f, 919f),
+            "southwestern_norway" to Pair(696f, 664f),
+            "troms" to Pair(870f, 642f),
+            "western_norway" to Pair(579f, 758f),
+            "xband" to Pair(893f, 809f),
+        )
+
         val typeList = mapOf(
             "5level_reflectivity" to "Reflectivity (5 levels)",
             "accumulated_01h" to "Accumulated Precipitation (1h)",
