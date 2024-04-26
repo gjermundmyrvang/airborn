@@ -2,7 +2,6 @@ package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -366,25 +365,23 @@ fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
 }
 
 @Composable
-fun AirportInfo(airport: Airport) = Row(
+fun AirportInfo(airport: Airport) = Column(
     Modifier
         .padding(16.dp)
         .fillMaxWidth(),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.Center
 ) {
     val hasSeperator = airport.name.contains(",")
-    Text(text = airport.icao.code, fontWeight = FontWeight.Bold)
-    Spacer(modifier = Modifier.width(5.dp))
-    Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
-    Spacer(modifier = Modifier.width(5.dp))
-    if (!hasSeperator) {
-        Text(text = airport.name)
-    } else {
-        Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.width(5.dp))
-        Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
-        Spacer(modifier = Modifier.width(5.dp))
-        Text(text = airport.name.substringAfter(","), fontWeight = FontWeight.Bold)
+    Row {
+        Text(text = airport.icao.code, fontWeight = FontWeight.Bold)
+    }
+    Row {
+        if (!hasSeperator) {
+            Text(text = airport.name)
+        } else {
+            Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.width(5.dp))
+            Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+            Text(text = airport.name.substringAfter(","), fontWeight = FontWeight.Bold)
+        }
     }
 }
