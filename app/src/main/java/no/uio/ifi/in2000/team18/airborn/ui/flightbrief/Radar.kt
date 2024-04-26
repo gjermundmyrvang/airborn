@@ -76,7 +76,6 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
             "western_norway" to Pair(579f, 758f),
             "xband" to Pair(893f, 809f),
         )
-
         val typeList = mapOf(
             "5level_reflectivity" to "Reflectivity (5 levels)",
             "accumulated_01h" to "Accumulated Precipitation (1h)",
@@ -108,6 +107,7 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
             "preciptype" to "Precipitation Type",
             "reflectivity" to "Reflectivity"
         )
+
         var dropdownExpanded by rememberSaveable { mutableStateOf(false) }
         var selectedTypeIndex by rememberSaveable { mutableIntStateOf(0) }
         var selectedArea by rememberSaveable { mutableStateOf(options[0].first) }
