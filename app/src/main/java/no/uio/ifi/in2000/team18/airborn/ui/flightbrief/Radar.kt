@@ -119,14 +119,13 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
                 text = it, fontWeight = FontWeight.Bold, fontSize = 22.sp
             )
         }
+        val widtRatio = ratioMap[selectedArea]?.first ?: 700f
+        val heightRatio = ratioMap[selectedArea]?.second ?: 700f
         Spacer(modifier = Modifier.height(8.dp))
         GifComposable(
             uri = selectedList[selectedTypeIndex].uri,
             contentDescription = "",
-            modifier = Modifier.aspectRatio(
-                ratioMap[selectedArea]?.first?.div(ratioMap[selectedArea]?.second!!)
-                    ?: (700f / 700f)
-            )
+            modifier = Modifier.aspectRatio(widtRatio / heightRatio)
         )
         Button(
             onClick = {
