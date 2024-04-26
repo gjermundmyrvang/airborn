@@ -413,7 +413,7 @@ fun TableContent(isobaricData: IsobaricData) {
 }
 
 @Composable
-fun GifComposable(uri: String, contentDescription: String) {
+fun GifComposable(uri: String, contentDescription: String, modifier: Modifier = Modifier) {
     val zoomState = rememberZoomState()
     val imageLoader = ImageLoader.Builder(LocalContext.current)
         .components {
@@ -434,6 +434,7 @@ fun GifComposable(uri: String, contentDescription: String) {
         imageLoader = imageLoader,
         loading = {
             Column(
+                modifier = modifier,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

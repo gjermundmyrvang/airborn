@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -119,7 +120,14 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) =
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        GifComposable(uri = selectedList[selectedTypeIndex].uri, contentDescription = "")
+        GifComposable(
+            uri = selectedList[selectedTypeIndex].uri,
+            contentDescription = "",
+            modifier = Modifier.aspectRatio(
+                ratioMap[selectedArea]?.first?.div(ratioMap[selectedArea]?.second!!)
+                    ?: (700f / 700f)
+            )
+        )
         Button(
             onClick = {
                 dropdownExpanded = !dropdownExpanded
