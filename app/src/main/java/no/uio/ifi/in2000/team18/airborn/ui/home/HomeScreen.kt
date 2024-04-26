@@ -78,7 +78,7 @@ private fun AirportSelection(
     modifier = modifier
 ) {
     val state by viewModel.state.collectAsState()
-    val airports = state.airports
+    val searchResults = state.searchResults
     val navController = LocalNavController.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -155,7 +155,7 @@ private fun AirportSelection(
     val configuration = LocalConfiguration.current
     if (!(departureFocused || arrivalFocused)) return@Column
     LazyColumn(modifier = Modifier.height(configuration.screenHeightDp.dp)) {
-        items(airports) { airport ->
+        items(searchResults) { airport ->
             AirportInfoRow(item = airport) { clickedAirport ->
                 keyboardController?.hide()
                 if (departureFocused) {
