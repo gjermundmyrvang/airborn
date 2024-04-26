@@ -28,6 +28,7 @@ class HomeViewModel @Inject constructor(
         val arrivalAirportInput: String = "",
         val departureAirportIcao: Icao? = null,
         val arrivalAirportIcao: Icao? = null,
+        val searchResults: List<Airport> = listOf(),
         val airports: List<Airport> = listOf(),
         val sigmets: List<Sigmet> = listOf(),
         val sun: LoadingState<Sun?> = LoadingState.Loading
@@ -39,10 +40,12 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             initSigmets()
+        }
+
+        viewModelScope.launch {
+            val airports = airportRepository.all()
             _state.update {
-                it.copy(
-                    airports = airportRepository.all(),
-                )
+                it.copy(searchResults = airports, airports = airports)
             }
         }
     }
@@ -88,7 +91,7 @@ class HomeViewModel @Inject constructor(
         _state.update { it.copy(departureAirportInput = input) }
         viewModelScope.launch {
             val result = airportRepository.search(input)
-            _state.update { it.copy(airports = result) }
+            _state.update { it.copy(searchResults = result) }
         }
     }
 
@@ -96,7 +99,7 @@ class HomeViewModel @Inject constructor(
         _state.update { it.copy(arrivalAirportInput = input) }
         viewModelScope.launch {
             val result = airportRepository.search(input)
-            _state.update { it.copy(airports = result) }
+            _state.update { it.copy(searchResults = result) }
         }
     }
 
