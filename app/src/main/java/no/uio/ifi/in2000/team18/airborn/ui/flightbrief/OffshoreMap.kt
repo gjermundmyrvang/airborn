@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,11 +40,12 @@ import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreParams
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 @Composable
 fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffshoreMap: () -> Unit) =
     LazyCollapsible(
-        header = "Offshore maps", value = state, onExpand = initOffshoreMap
+        header = "Offshore maps", value = state, onExpand = initOffshoreMap, padding = 0.dp
     ) { offshoreMap ->
         val options = remember {
             listOf(
@@ -73,8 +76,11 @@ fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffsho
         if (offshoreMapList.isNullOrEmpty()) {
             Text("Unable to find images that matches selected parameters")
         } else {
-            TimeRow(offshoreList = offshoreMapList,
-                currentlySelected = selectedOffshoreMapTime,
+            TimeRow(current = selectedOffshoreMapTime,
+                times = offshoreMapList.map { it.params.time.time },
+                selectedColor = MaterialTheme.colorScheme.secondary,
+                notSelectedColor = MaterialTheme.colorScheme.tertiaryContainer,
+                modifier = Modifier.padding(start = 10.dp),
                 onTimeClicked = { selectedOffshoreMapTime = it })
             ImageComposable(
                 uri = offshoreMapList[selectedOffshoreMapTime].uri,
@@ -96,6 +102,7 @@ fun OptionList(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(start = 10.dp)
                 .clickable { onOptionClicked(option) },
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -110,31 +117,6 @@ fun OptionList(
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
             )
-        }
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-}
-
-@Composable
-fun TimeRow(offshoreList: List<OffshoreMap>, currentlySelected: Int, onTimeClicked: (Int) -> Unit) {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
-    ) {
-        itemsIndexed(offshoreList) { i, map ->
-            val selected = i == currentlySelected
-            Row(
-                modifier = Modifier.clickable { onTimeClicked(i) },
-                horizontalArrangement = Arrangement.Absolute.Left,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange,
-                    contentDescription = "",
-                    tint = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
-                )
-                Text(text = "${map.params.time.dayNumberMonthTime} LT")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
         }
     }
     Spacer(modifier = Modifier.height(8.dp))
@@ -179,68 +161,77 @@ fun TestOffshoreMaps() {
     var selectedArea by rememberSaveable { mutableStateOf(areaOptions[0]) }
     var selectedOffshoreMapTime by rememberSaveable { mutableIntStateOf(0) }
     val offshoreMapList = testMap[selectedMap]?.filter { it.params.area == selectedArea }
-
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        mapTypeOptions.forEach { mapType ->
-            val isSelected = mapType == selectedMap
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { selectedMap = mapType },
-                horizontalArrangement = Arrangement.Absolute.Left,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = if (isSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                    contentDescription = ""
-                )
-                Text(
-                    text = mapType.uppercase(),
-                    fontWeight = if (mapType == selectedMap) FontWeight.Bold else FontWeight.Normal
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        areaOptions.forEach { areaType ->
-            val areaIsSelected = areaType == selectedArea
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Absolute.Left,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(16.dp))
-                Icon(
-                    imageVector = if (areaIsSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                    contentDescription = ""
-                )
-                Text(text = areaType.uppercase().replace("_", " "),
-                    fontWeight = if (areaIsSelected) FontWeight.Bold else FontWeight.Normal,
-                    modifier = Modifier.clickable { selectedArea = areaType })
-            }
-        }
-        if (offshoreMapList == null) return@Column
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+    AirbornTheme {
+        Surface(
+            Modifier
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .fillMaxSize()
         ) {
-            itemsIndexed(offshoreMapList) { i, map ->
-                val selected = i == selectedOffshoreMapTime
-                Row(
-                    modifier = Modifier.clickable { selectedOffshoreMapTime = i },
-                    horizontalArrangement = Arrangement.Absolute.Left,
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                mapTypeOptions.forEach { mapType ->
+                    val isSelected = mapType == selectedMap
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedMap = mapType },
+                        horizontalArrangement = Arrangement.Absolute.Left,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = if (isSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
+                            contentDescription = ""
+                        )
+                        Text(
+                            text = mapType.uppercase(),
+                            fontWeight = if (mapType == selectedMap) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                areaOptions.forEach { areaType ->
+                    val areaIsSelected = areaType == selectedArea
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Absolute.Left,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Icon(
+                            imageVector = if (areaIsSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
+                            contentDescription = ""
+                        )
+                        Text(text = areaType.uppercase().replace("_", " "),
+                            fontWeight = if (areaIsSelected) FontWeight.Bold else FontWeight.Normal,
+                            modifier = Modifier.clickable { selectedArea = areaType })
+                    }
+                }
+                if (offshoreMapList == null) return@Column
+                Spacer(modifier = Modifier.height(8.dp))
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange,
-                        contentDescription = ""
-                    )
-                    Text(text = "${map.updated.dayMonthHour} LT")
+                    itemsIndexed(offshoreMapList) { i, map ->
+                        val selected = i == selectedOffshoreMapTime
+                        Row(
+                            modifier = Modifier.clickable { selectedOffshoreMapTime = i },
+                            horizontalArrangement = Arrangement.Absolute.Left,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange,
+                                contentDescription = ""
+                            )
+                            Text(text = "${map.updated.dayMonthHour} LT")
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                    }
                 }
-                Spacer(modifier = Modifier.width(16.dp))
             }
         }
     }
