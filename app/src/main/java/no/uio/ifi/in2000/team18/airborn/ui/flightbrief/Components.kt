@@ -158,14 +158,13 @@ fun Modifier.shadow(
 fun MultiToggleButton(
     currentSelection: String, toggleStates: List<String>, onToggleChange: (String) -> Unit
 ) {
-
     val selectedTint = MaterialTheme.colorScheme.background
     val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
 
     Row(
         modifier = Modifier
             .height(IntrinsicSize.Min)
-            .padding(bottom = 5.dp)
+            .padding(start = 10.dp)
     ) {
         toggleStates.forEachIndexed { _, toggleState ->
             val isSelected = currentSelection.lowercase() == toggleState.lowercase()
@@ -447,4 +446,6 @@ fun GifComposable(uri: String, contentDescription: String, modifier: Modifier = 
         },
         contentDescription = contentDescription
     )
+}
+
 }
