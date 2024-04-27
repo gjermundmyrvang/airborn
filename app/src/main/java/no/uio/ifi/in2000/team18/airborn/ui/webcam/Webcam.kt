@@ -63,6 +63,19 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         var selectedWebcam by rememberSaveable { mutableIntStateOf(0) }
+        Column(
+            Modifier
+                .align(Alignment.Start)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = webcams[selectedWebcam].title, fontWeight = FontWeight.Bold, fontSize = 14.sp
+            )
+            Text(
+                text = "updated: ${webcams[selectedWebcam].lastUpdatedOn.dayNumberMonthTime} (LT)",
+                fontSize = 12.sp
+            )
+        }
         ImageComposable(
             uri = webcams[selectedWebcam].images.current.preview,
             contentDescription = "Webcam image",
