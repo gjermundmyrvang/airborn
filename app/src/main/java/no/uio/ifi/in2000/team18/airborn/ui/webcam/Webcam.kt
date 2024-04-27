@@ -1,12 +1,16 @@
 package no.uio.ifi.in2000.team18.airborn.ui.webcam
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -57,9 +61,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
         return@LazyCollapsible
     }
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 5.dp, start = 5.dp, end = 5.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         var selectedWebcam by rememberSaveable { mutableIntStateOf(0) }
@@ -102,28 +104,40 @@ fun NearbyWebcam(
     webcam: Webcam, current: Webcam, onWebcamClicked: (Webcam) -> Unit
 ) {
     val borderColor =
-        if (webcam == current) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.outline
+        if (webcam == current) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
     OutlinedCard(
         modifier = Modifier
+            .height(IntrinsicSize.Min)
+            .padding(2.dp)
             .fillMaxWidth()
             .clickable { onWebcamClicked(webcam) },
-        border = BorderStroke(1.dp, color = borderColor),
+        border = BorderStroke(1.dp, color = borderColor.copy(alpha = 0.5f)),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(0.dp), verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = webcam.images.current.thumbnail,
-                contentDescription = webcam.title,
+            Box(
+                Modifier
+                    .fillMaxHeight()
+                    .width(5.dp)
+                    .background(borderColor)
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            Column {
-                Text(text = webcam.title, fontWeight = FontWeight.Bold)
-                Text(
-                    text = "updated: ${webcam.lastUpdatedOn.dayNumberMonthTime} (LT)",
-                    fontSize = 15.sp
+            Row(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                AsyncImage(
+                    model = webcam.images.current.thumbnail,
+                    contentDescription = webcam.title,
                 )
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text(text = webcam.title, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "updated: ${webcam.lastUpdatedOn.dayNumberMonthTime} (LT)",
+                        fontSize = 15.sp
+                    )
+                }
             }
         }
     }
@@ -159,8 +173,7 @@ fun HyperlinkText(
         }
         addStyle(
             style = SpanStyle(
-                fontSize = fontSize,
-                color = MaterialTheme.colorScheme.secondary
+                fontSize = fontSize, color = MaterialTheme.colorScheme.secondary
             ), start = 0, end = fullText.length
         )
     }
