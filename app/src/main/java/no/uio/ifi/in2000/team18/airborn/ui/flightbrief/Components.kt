@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,7 +25,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -448,4 +452,40 @@ fun GifComposable(uri: String, contentDescription: String, modifier: Modifier = 
     )
 }
 
+@Composable
+fun TimeRow(
+    current: Int,
+    times: List<String>,
+    selectedColor: Color,
+    notSelectedColor: Color,
+    modifier: Modifier = Modifier,
+    onTimeClicked: (Int) -> Unit
+) {
+    Text(text = "Local time:", fontSize = 15.sp, modifier = modifier)
+    LazyRow(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(bottom = 10.dp)
+    ) {
+        itemsIndexed(times) { i, time ->
+            val isSelected = current == i
+            val backgroundTint = if (isSelected) selectedColor else notSelectedColor
+            Column(
+                modifier = modifier
+                    .clickable { onTimeClicked(i) }
+                    .width(intrinsicSize = IntrinsicSize.Min)
+            ) {
+                Text(
+                    text = time,
+                    fontWeight = FontWeight.Medium
+                )
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .background(color = backgroundTint, shape = RoundedCornerShape(8.dp))
+                )
+            }
+            Spacer(modifier = Modifier.width(5.dp))
+        }
+    }
 }
