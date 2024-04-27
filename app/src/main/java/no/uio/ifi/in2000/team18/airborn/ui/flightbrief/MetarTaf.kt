@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -69,6 +70,11 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
             targetValue = if (rotated) 180f else 0f
         )
 
+        if (metar == null && taf == null) {
+            Text("No metar or taf for this airport")
+            return@LazyCollapsible
+        }
+
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -102,8 +108,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                     }
                     if (metar != null) {
                         Text(
-                            text = "METAR:",
-                            fontWeight = FontWeight.Bold
+                            text = "METAR:", fontWeight = FontWeight.Bold
                         )
                         Text(text = metar.text, modifier = Modifier.clickable {
                             clipboardManager.setText(
@@ -125,12 +130,26 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
                     }
                 }
             } else {
-                if (metar != null) {
-                    Box(modifier = Modifier.graphicsLayer { rotationY = 180f }) {
-                        DecodedMetar(metar = metar)
+                Box(modifier = Modifier.graphicsLayer {
+                    rotationY = 180f
+                }) {
+                    Icon(
+                        imageVector = rememberFlip(),
+                        contentDescription = "Flip",
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(10.dp)
+                    )
+                    when (metar) {
+                        is Metar.DecodedMetar -> DecodedMetar(metar)
+                        null -> Text("No METAR available")
+                        else -> Text(
+                            "Failed to decode Metar",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
                     }
-                } else {
-                    Text("No METAR available")
                 }
             }
         }
@@ -140,26 +159,20 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
 fun LocalDateTime.format(format: String) = format(LocalDateTime.Format { byUnicodePattern(format) })
 
 @Composable
-fun DecodedMetar(metar: Metar) = Column(
+fun DecodedMetar(metar: Metar.DecodedMetar) = Column(
     modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth()
 ) {
-    Row {
-        Text(
-            text = "DECODED",
-            fontSize = 25.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .weight(1F)
-                .fillMaxSize()
-        )
-        Icon(imageVector = rememberFlip(), contentDescription = "Flip")
-    }
     Text(
-        text = "METAR",
-        fontWeight = FontWeight.Bold
+        text = "DECODED",
+        fontSize = 25.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .weight(1F)
+            .fillMaxSize()
     )
+    Text(text = "METAR", fontWeight = FontWeight.Bold)
     Row {
         Text("Station Name: ", fontWeight = FontWeight.Bold)
         Text("${metar.station}")

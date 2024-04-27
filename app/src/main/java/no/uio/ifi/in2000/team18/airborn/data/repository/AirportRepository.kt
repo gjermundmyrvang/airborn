@@ -10,9 +10,11 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.SunriseSunsetDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.WebcamDataSource
+import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.ParseResult
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Taf
@@ -40,17 +42,20 @@ class AirportRepository @Inject constructor(
     suspend fun search(query: String) = airportDataSource.search(query)
     suspend fun all() = airportDataSource.all()
 
-    private val sunDataCache =
-        mutableMapOf<Icao, no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun>()
+    private val sunDataCache = mutableMapOf<Icao, Sun>()
 
     // TAF/METAR logic
     suspend fun fetchTafMetar(icao: Icao): MetarTaf {
         val tafLines = tafmetarDataSource.fetchTaf(icao).lines().filter(String::isNotBlank)
         val metarLines = tafmetarDataSource.fetchMetar(icao).lines().filter(String::isNotBlank)
-        val metars =
-            metarLines.asSequence().map { parseMetar(it, Clock.System.now()) }.toMutableList()
+        val metars = metarLines.asSequence().map {
+            when (val res = parseMetar(it, Clock.System.now())) {
+                is ParseResult.Ok -> res.value
+                is ParseResult.Error -> Metar.OpaqueMetar(it)
+            }
+        }.toMutableList()
         val tafs = tafLines.asSequence().map { Taf(it) }.toMutableList()
-        return MetarTaf(metars.map { it.expect() }, tafs)
+        return MetarTaf(metars, tafs)
     }
 
     // Sigchart logic
