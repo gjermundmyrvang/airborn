@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -214,16 +216,16 @@ fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onCli
     Column(
         modifier = Modifier
             .padding(5.dp)
-            .width(60.dp)
+            .width(IntrinsicSize.Min)
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(text = weatherHour.time)
-        if ((precipitationAmount != null) && (precipitationAmount > 1)) {
+        if (precipitationAmount != null && precipitationAmount > 0.0) {
             Text(
-                text = "${precipitationAmount}%",
-                fontSize = 16.sp,
+                text = "$precipitationAmount mm",
+                fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.secondary,
             )
         } else {
@@ -264,9 +266,14 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
+            .padding(10.dp)
+            .background(Color(0x801D1D1D), RoundedCornerShape(5.dp))
+            .clip(RoundedCornerShape(5.dp)),
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+        ) {
             Row {
                 Column {
                     Text(
@@ -296,18 +303,17 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                 fromDegrees = weatherHour.weatherDetails.windFromDirection.degrees
             )
         }
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
+        Spacer(modifier = Modifier.width(IntrinsicSize.Max))
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+        ) {
             if (nextHours != null) {
                 Text(
                     text = nextHours.symbol_code,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                 )
-            }
-            Row {
-                Text("Rain: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${nextHours?.precipitation_amount} %", fontSize = 12.sp)
             }
             Row {
                 Text("Relative Humidity: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
@@ -364,6 +370,7 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
         else -> "NE"
     }
     OutlinedCard(
+        Modifier.width(IntrinsicSize.Max),
         border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.secondary),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {

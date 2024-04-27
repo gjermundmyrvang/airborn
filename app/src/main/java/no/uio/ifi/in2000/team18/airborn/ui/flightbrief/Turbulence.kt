@@ -34,27 +34,38 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>, initTurbulence: () -> Unit) =
-    LazyCollapsible(header = "Turbulence", value = state, onExpand = initTurbulence) { turbulence ->
-        var selectedTime by rememberSaveable { mutableStateOf(turbulence?.currentTurbulenceTime()) }
-        var selectedDay by rememberSaveable { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
-
-        val mapDict = turbulence?.mapDict
-        val crossDict = turbulence?.crossSectionDict
-
-        val timeMap = turbulence?.allTurbulenceTimes()
-        val times = timeMap?.get(selectedDay)
-
-        if (times == null || selectedTime == null) {
-            Text(text = "Turbulence not available")
+    LazyCollapsible(
+        header = "Turbulence", value = state, onExpand = initTurbulence, padding = 0.dp
+    ) { turbulence ->
+        if (turbulence == null) {
+            Error(
+                message = "Selected airport does not have turbulence data",
+                modifier = Modifier.padding(5.dp)
+            )
             return@LazyCollapsible
         }
+        var selectedTime by rememberSaveable { mutableStateOf(turbulence.currentTurbulenceTime()) }
+        var selectedDay by rememberSaveable { mutableStateOf(ZonedDateTime.now(ZoneOffset.UTC).dayOfWeek.name) }
 
-        MultiToggleButton(currentSelection = selectedDay, toggleStates = timeMap.keys.toList()) {
-            selectedDay = it
+        val mapDict = turbulence.mapDict
+        val crossDict = turbulence.crossSectionDict
+
+        val timeMap = turbulence.allTurbulenceTimes()
+        val times = timeMap?.get(selectedDay)
+
+
+        if (timeMap != null) {
+            MultiToggleButton(
+                currentSelection = selectedDay, toggleStates = timeMap.keys.toList()
+            ) {
+                selectedDay = it
+            }
         }
 
-        TurbulenceTimecardRow(selectedTime!!, times) { onCardClicked ->
-            selectedTime = onCardClicked
+        if (times != null) {
+            TurbulenceTimecardRow(selectedTime, times) { onCardClicked ->
+                selectedTime = onCardClicked
+            }
         }
 
         mapDict?.get(selectedTime)?.let { ImageComposable(uri = it, "Image of turbulence map") }
@@ -79,24 +90,23 @@ fun Turbulence(state: LoadingState<TurbulenceMapAndCross?>, initTurbulence: () -
 fun TurbulenceTimecardRow(
     currentTime: ZonedDateTime, times: List<ZonedDateTime>, onCardClicked: (ZonedDateTime) -> Unit
 ) {
-
-    val selectedTint = MaterialTheme.colorScheme.background
+    val selectedTint = MaterialTheme.colorScheme.secondary
     val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
-    Text(text = "Local time:", fontSize = 15.sp)
+
+    Text(text = "Local time:", fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp))
     LazyRow(
-        horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(bottom = 10.dp)
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(start = 10.dp, bottom = 10.dp)
     ) {
         itemsIndexed(times) { _, time ->
             val isSelected = currentTime == time
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .width(intrinsicSize = IntrinsicSize.Min)
                     .padding(end = 10.dp)
-                    .clickable { onCardClicked(time) }
-            ) {
+                    .clickable { onCardClicked(time) }) {
                 Text(
                     text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
                     fontWeight = FontWeight.Medium,
@@ -104,8 +114,7 @@ fun TurbulenceTimecardRow(
                 Box(
                     Modifier
                         .background(
-                            backgroundTint,
-                            RoundedCornerShape(5.dp)
+                            backgroundTint, RoundedCornerShape(5.dp)
                         )
                         .fillMaxWidth()
                         .height(3.dp)
