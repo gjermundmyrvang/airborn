@@ -114,8 +114,8 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
 fun NearbyWebcam(
     webcam: Webcam, current: Webcam, onWebcamClicked: (Webcam) -> Unit
 ) {
-    val borderColor =
-        if (webcam == current) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.outline
+    val indicatorColor =
+        if (webcam == current) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.tertiaryContainer
     Row(
         modifier = Modifier
             .height(50.dp)
@@ -129,7 +129,7 @@ fun NearbyWebcam(
             Modifier
                 .fillMaxHeight()
                 .width(5.dp)
-                .background(borderColor)
+                .background(indicatorColor)
         )
         AsyncImage(
             model = webcam.images.current.thumbnail,
@@ -137,7 +137,7 @@ fun NearbyWebcam(
             contentDescription = webcam.title,
         )
         Spacer(modifier = Modifier.width(10.dp))
-        Text(text = webcam.title, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+        Text(text = webcam.title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
     }
 }
 
