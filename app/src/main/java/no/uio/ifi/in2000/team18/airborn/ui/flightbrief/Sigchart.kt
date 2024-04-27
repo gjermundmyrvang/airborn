@@ -34,7 +34,7 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
 
         TimeRow(current = selectedSigchart,
             times = sigchartList.map { it.params.time.time },
-            selectedColor = MaterialTheme.colorScheme.background,
+            selectedColor = MaterialTheme.colorScheme.secondary,
             notSelectedColor = MaterialTheme.colorScheme.secondaryContainer,
             modifier = Modifier.padding(start = 10.dp),
             onTimeClicked = { selectedSigchart = it })

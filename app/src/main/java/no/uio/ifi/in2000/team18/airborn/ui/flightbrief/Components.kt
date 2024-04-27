@@ -162,7 +162,7 @@ fun Modifier.shadow(
 fun MultiToggleButton(
     currentSelection: String, toggleStates: List<String>, onToggleChange: (String) -> Unit
 ) {
-    val selectedTint = MaterialTheme.colorScheme.background
+    val selectedTint = MaterialTheme.colorScheme.secondary
     val unselectedTint = MaterialTheme.colorScheme.secondaryContainer
 
     Row(
