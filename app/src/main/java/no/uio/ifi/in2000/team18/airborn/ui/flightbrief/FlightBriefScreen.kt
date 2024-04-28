@@ -58,6 +58,7 @@ import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.ArrivalViewModel
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.AirportTabViewModel.DepartureViewModel
@@ -334,6 +335,7 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
     val state by viewModel.state.collectAsState()
     val sections: List<@Composable () -> Unit> = listOf(
         { AirportBriefHeader(state.airport) },
+        { Sundata(sun = state.sun) },
         { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
         { IsobaricData(state.isobaric) { viewModel.initIsobaric() } },
         { Turbulence(state.turbulence) { viewModel.initTurbulence() } },
@@ -365,9 +367,25 @@ fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
 }
 
 @Composable
+fun Sundata(sun: LoadingState<Sun?>) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SunComposable(
+            modifier = Modifier.padding(end = 10.dp),
+            sun = sun,
+            header = ""
+        )
+    }
+}
+
+@Composable
 fun AirportInfo(airport: Airport) = Column(
     Modifier
-        .padding(16.dp)
+        .padding(horizontal = 16.dp)
+        .padding(top = 16.dp)
         .fillMaxWidth(),
 ) {
     val hasSeperator = airport.name.contains(",")
