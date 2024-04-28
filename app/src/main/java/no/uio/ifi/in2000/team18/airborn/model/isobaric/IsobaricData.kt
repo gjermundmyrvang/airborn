@@ -1,10 +1,10 @@
 package no.uio.ifi.in2000.team18.airborn.model.isobaric
 
 import no.uio.ifi.in2000.team18.airborn.model.Position
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 data class IsobaricData(
     val position: Position,
-    val time: LocalDateTime,
+    val time: ZonedDateTime,
     val data: List<IsobaricLayer>
 )
