@@ -31,7 +31,12 @@ class HomeViewModel @Inject constructor(
         val airports: List<Airport> = listOf(),
         val sigmets: List<Sigmet> = listOf(),
         val sun: LoadingState<Sun?> = LoadingState.Loading
-    )
+    ) {
+        val airportPair
+            get() = departureAirport?.let { d ->
+                arrivalAirport?.let { Pair(d, it) }
+            }
+    }
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()

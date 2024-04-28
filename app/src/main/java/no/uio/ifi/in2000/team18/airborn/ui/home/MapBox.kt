@@ -60,6 +60,7 @@ import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseSigmet
+import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
@@ -92,6 +93,9 @@ fun Map(
         }
     }
     Box {
+        val distance = state.airportPair?.let {
+            it.first.position.distanceTo(it.second.position)
+        }
         MapboxMap(
             mapViewportState = mapViewportState,
 
@@ -109,6 +113,9 @@ fun Map(
             }
         }
         Column(modifier = Modifier.padding(top = 16.dp)) {
+            if (distance != null) {
+                state.airportPair?.let { DistanceInfoBox(distance = distance, airportPair = it) }
+            }
             selectedAirport?.let { airport ->
                 homeViewModel.updateSunriseAirport(airport)
                 InfoBox(
@@ -181,6 +188,57 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
                 modifier = Modifier.size(12.dp),
             )
         }
+    }
+}
+
+@Composable
+fun DistanceInfoBox(distance: Distance, airportPair: Pair<Airport, Airport>) = Box(
+    modifier = Modifier
+        .padding(16.dp)
+        .fillMaxWidth()
+        .border(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = RoundedCornerShape(5.dp)
+        )
+        .background(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+            shape = RoundedCornerShape(5.dp)
+        )
+        .clip(
+            RoundedCornerShape(5.dp)
+        )
+) {
+    Column(
+        Modifier
+            .padding(16.dp)
+            .fillMaxWidth(), horizontalAlignment = Alignment.Start
+    ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            val tint = MaterialTheme.colorScheme.secondary
+            Text(
+                airportPair.first.name.substringBefore(","),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp
+            )
+            Icon(painterResource(R.drawable.flight_takeoff), "takeoff", tint = tint)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                airportPair.second.name.substringBefore(","),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp
+            )
+            Icon(painterResource(R.drawable.flight_landing), "takeoff", tint = tint)
+        }
+        Text(
+            "Distance between airports: ${distance.formatAsNm()}",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 14.sp
+        )
     }
 }
 
