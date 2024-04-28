@@ -369,9 +369,13 @@ fun InfoBox(
     modifier = Modifier
         .padding(16.dp)
         .fillMaxWidth()
-        .border(width = 2.dp, color = Color.Gray, shape = RoundedCornerShape(5.dp))
+        .border(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = RoundedCornerShape(5.dp)
+        )
         .background(
-            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
             shape = RoundedCornerShape(5.dp)
         )
         .clip(RoundedCornerShape(5.dp))
