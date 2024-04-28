@@ -34,8 +34,7 @@ fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulen
             )
             return@LazyCollapsible
         }
-        val options = listOf("map" to "Map", "cross_section" to "Cross section")
-        var currentlySelectedType by rememberSaveable { mutableStateOf(options[0].first) }
+        var currentlySelectedType by rememberSaveable { mutableStateOf(turbulence.keys.first()) }
         var selectedTime by rememberSaveable { mutableIntStateOf(0) }
         val selectedMap = turbulence[currentlySelectedType]
         var date by rememberSaveable { mutableStateOf("") }
