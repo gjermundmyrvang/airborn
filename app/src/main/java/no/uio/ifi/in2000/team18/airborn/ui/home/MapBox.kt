@@ -284,8 +284,8 @@ fun InfoBox(
     airport: Airport,
     state: HomeViewModel.UiState,
     onClose: () -> Unit,
-    addDeparture: (Icao) -> Unit,
-    addArrival: (Icao) -> Unit
+    addDeparture: (Airport) -> Unit,
+    addArrival: (Airport) -> Unit
 ) = Box(
     modifier = Modifier
         .padding(16.dp)
@@ -354,7 +354,7 @@ fun InfoBox(
                     containerColor = Color.Transparent,
                     contentColor = MaterialTheme.colorScheme.primary,
                 ),
-                onClick = { addDeparture(airport.icao) },
+                onClick = { addDeparture(airport) },
                 modifier = Modifier
                     .height(35.dp)
                     .padding(end = 5.dp),
@@ -376,7 +376,7 @@ fun InfoBox(
                     containerColor = Color.Transparent,
                     contentColor = MaterialTheme.colorScheme.primary,
                 ),
-                onClick = { addArrival(airport.icao) },
+                onClick = { addArrival(airport) },
                 modifier = Modifier.height(height = 35.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

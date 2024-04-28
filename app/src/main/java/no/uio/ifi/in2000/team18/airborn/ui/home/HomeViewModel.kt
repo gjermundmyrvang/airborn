@@ -11,7 +11,6 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.SigmetRepository
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
@@ -26,8 +25,8 @@ class HomeViewModel @Inject constructor(
     data class UiState(
         val departureAirportInput: String = "",
         val arrivalAirportInput: String = "",
-        val departureAirportIcao: Icao? = null,
-        val arrivalAirportIcao: Icao? = null,
+        val departureAirport: Airport? = null,
+        val arrivalAirport: Airport? = null,
         val searchResults: List<Airport> = listOf(),
         val airports: List<Airport> = listOf(),
         val sigmets: List<Sigmet> = listOf(),
@@ -55,7 +54,7 @@ class HomeViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     departureAirportInput = "",
-                    departureAirportIcao = null
+                    departureAirport = null
                 )
             }
             val airports = airportRepository.all()
@@ -70,7 +69,7 @@ class HomeViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     arrivalAirportInput = "",
-                    arrivalAirportIcao = null
+                    arrivalAirport = null
                 )
             }
             val airports = airportRepository.all()
@@ -111,13 +110,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun selectDepartureAirport(airport: Icao) = _state.update {
-        it.copy(departureAirportInput = airport.code, departureAirportIcao = airport)
+    fun selectDepartureAirport(airport: Airport) = _state.update {
+        it.copy(departureAirportInput = airport.icao.code, departureAirport = airport)
     }
 
-    fun selectArrivalAirport(airport: Icao) = _state.update {
+    fun selectArrivalAirport(airport: Airport) = _state.update {
         it.copy(
-            arrivalAirportInput = airport.code, arrivalAirportIcao
+            arrivalAirportInput = airport.icao.code, arrivalAirport
             = airport
         )
     }

@@ -175,7 +175,7 @@ private fun AirportSelection(
         },
         colors = AirbornTextFieldColors,
         singleLine = true,
-        enabled = state.departureAirportIcao != null,
+        enabled = state.departureAirport != null,
         label = { Text("Arrival airport") },
         leadingIcon = {
             Icon(
@@ -203,7 +203,7 @@ private fun AirportSelection(
     if (!(departureFocused || arrivalFocused)) {
         Button(
             onClick = {
-                navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirportIcao?.code ?: "null"}")
+                navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirport?.icao?.code ?: "null"}")
             },
             colors = ButtonColors(
                 containerColor = MaterialTheme.colorScheme.background,
@@ -211,7 +211,7 @@ private fun AirportSelection(
                 disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
             ),
-            enabled = state.departureAirportIcao != null,
+            enabled = state.departureAirport != null,
             modifier = Modifier
                 .width(200.dp)
                 .align(Alignment.CenterHorizontally),
@@ -226,10 +226,10 @@ private fun AirportSelection(
             AirportInfoRow(item = airport) { clickedAirport ->
                 keyboardController?.hide()
                 if (departureFocused) {
-                    viewModel.selectDepartureAirport(clickedAirport.icao)
+                    viewModel.selectDepartureAirport(clickedAirport)
                     focusManager.clearFocus(true)
                 } else {
-                    viewModel.selectArrivalAirport(clickedAirport.icao)
+                    viewModel.selectArrivalAirport(clickedAirport)
                     focusManager.clearFocus(true)
                 }
             }
