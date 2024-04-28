@@ -14,15 +14,8 @@ class TurbulenceDataSource @Inject constructor(
     val client: HttpClient
 ) {
 
-    suspend fun fetchTurbulenceCrossSection(icao: Icao): List<Turbulence>? {
-        val url = "weatherapi/turbulence/2.0/available.json?type=cross_section&icao=$icao"
-        val res = client.get(url)
-        return if (res.status.value >= 400) null else res.body()
-    }
-
     suspend fun fetchTurbulenceMap(icao: Icao): List<Turbulence>? {
-        val url = "weatherapi/turbulence/2.0/available.json?type=map&icao=$icao"
-        val res = client.get(url)
+        val res = client.get("weatherapi/turbulence/2.0/available.json?icao=$icao")
         return if (res.status.value >= 400) null else res.body()
     }
 }

@@ -18,7 +18,6 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Taf
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.TurbulenceMapAndCross
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -62,12 +61,9 @@ class AirportRepository @Inject constructor(
     suspend fun getSigcharts() = sigchartDataSource.fetchSigcharts().groupBy { it.params.area }
 
     // Turbulence logic
-    suspend fun fetchTurbulence(icao: Icao): TurbulenceMapAndCross? {
-        val map = turbulenceDataSource.fetchTurbulenceMap(icao)
-        val crossSection = turbulenceDataSource.fetchTurbulenceCrossSection(icao)
-        if (map == null || crossSection == null) return null
-        return TurbulenceMapAndCross(map, crossSection)
-    }
+    suspend fun fetchTurbulence(icao: Icao) =
+        turbulenceDataSource.fetchTurbulenceMap(icao)
+            ?.groupBy { it.params.type }
 
     // Webcam Logic
     suspend fun fetchWebcamImages(airport: Airport) = webcamDataSource.fetchImage(airport).webcams

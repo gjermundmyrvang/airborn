@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
+import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.TurbulenceMapAndCross
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
@@ -37,7 +37,7 @@ sealed class AirportTabViewModel(
         val airport: LoadingState<Airport> = Loading,
         val metarTaf: LoadingState<MetarTaf> = Loading,
         val isobaric: LoadingState<IsobaricData> = Loading,
-        val turbulence: LoadingState<TurbulenceMapAndCross?> = Loading,
+        val turbulence: LoadingState<Map<String, List<Turbulence>>?> = Loading,
         val webcams: LoadingState<List<Webcam>> = Loading,
         val weather: LoadingState<List<WeatherDay>> = Loading,
     )
