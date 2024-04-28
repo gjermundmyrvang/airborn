@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -36,7 +37,6 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
         onExpand = initRouteIsobaric,
         padding = 0.dp
     ) { routeIsobaric ->
-
         Column(
             Modifier.padding(vertical = 10.dp),
         ) {
@@ -48,13 +48,14 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 Column {
-                    Text(text = "Departure")
                     Text(
-                        text = "${routeIsobaric.departure.name.substringBefore(" ")} (${routeIsobaric.departure.icao})",
+                        text = "${routeIsobaric.departure.icao}",
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = routeIsobaric.departure.name.substringBefore(" "),
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
-                        modifier = Modifier
-                            .padding(end = 0.dp)
                     )
                 }
                 Icon(
@@ -65,15 +66,16 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                         .align(Alignment.Bottom)
                 )
                 Column {
-                    Text(text = "Arrival")
                     Text(
-                        text = "${routeIsobaric.arrival.name.substringBefore(" ")} " +
-                                "(${routeIsobaric.departure.icao})",
+                        text = "${routeIsobaric.departure.icao}",
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = "${routeIsobaric.arrival.name.substringBefore(" ")} ",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .height(IntrinsicSize.Max)
-                            .padding(start = 0.dp)
                     )
                 }
             }
@@ -82,7 +84,11 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedCard(
-                    Modifier.padding(horizontal = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
                 ) {
                     Row(
@@ -96,7 +102,11 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                     }
                 }
                 OutlinedCard(
-                    Modifier.padding(horizontal = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
                 ) {
                     Row(
@@ -104,15 +114,16 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = "Bearing: ${routeIsobaric.bearing}",
+                            text = "Bearing from ${routeIsobaric.departure.name.substringBefore(" ")}: ${routeIsobaric.bearing}",
                             style = TextStyle(fontWeight = FontWeight.Bold)
                         )
-                        RotatableArrowIcon(direction = Direction(routeIsobaric.bearing.degrees - 180.0))
+                        RotatableArrowIcon(
+                            direction = Direction(routeIsobaric.bearing - 180.0),
+                            iconColor = MaterialTheme.colorScheme.primaryContainer
+                        )
                     }
                 }
             }
             TableContent(isobaricData = routeIsobaric.isobaric)
-            val validTo = routeIsobaric.isobaric.time.plusHours(3)
-            Text(text = "Valid until: $validTo", Modifier.padding(all = 8.dp))
         }
     }

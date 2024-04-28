@@ -74,6 +74,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
+import no.uio.ifi.in2000.team18.airborn.ui.common.monthDayHourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 @Composable
@@ -413,6 +414,14 @@ fun TableContent(isobaricData: IsobaricData) {
             )
         }
     }
+    Text(
+        text = "Valid: ${isobaricData.time.monthDayHourMinute()} -> ${
+            isobaricData.time.plusHours(3)
+                .monthDayHourMinute()
+        }(LT)",
+        fontSize = 15.sp,
+        modifier = Modifier.padding(8.dp)
+    )
 }
 
 @Composable
