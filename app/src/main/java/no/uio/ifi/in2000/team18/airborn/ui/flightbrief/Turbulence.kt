@@ -45,24 +45,20 @@ fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulen
             })
         if (selectedMap != null) {
             date = selectedMap[selectedTime].params.time.dayNumberMonth
-            TimeRow(
-                modifier = Modifier.padding(start = 10.dp),
+            TimeRow(modifier = Modifier.padding(start = 10.dp),
                 current = selectedTime,
                 times = selectedMap.map { it.params.time.time },
                 selectedColor = MaterialTheme.colorScheme.secondary,
                 notSelectedColor = MaterialTheme.colorScheme.tertiaryContainer,
-                onTimeClicked = { selectedTime = it }
+                onTimeClicked = { selectedTime = it })
+        }
+        selectedMap?.get(selectedTime)?.let {
+            ImageComposable(
+                uri = it.uri,
+                contentDescription = "",
+                modifier = Modifier.aspectRatio(700f / 622f)
             )
         }
-        selectedMap?.get(selectedTime)
-            ?.let {
-                ImageComposable(
-                    uri = it.uri,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .aspectRatio(700f / 622f)
-                )
-            }
         Row(
             Modifier
                 .fillMaxWidth()
@@ -79,4 +75,3 @@ fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulen
         }
 
     }
-
