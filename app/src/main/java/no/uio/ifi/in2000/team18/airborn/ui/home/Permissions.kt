@@ -101,9 +101,7 @@ fun PermissionDeniedContent(
             }
         )
 
-    }
-    else {
+    } else {
         Content(onClick = onRequestPermission)
     }
-
 }
