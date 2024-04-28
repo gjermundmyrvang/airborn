@@ -54,12 +54,46 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun switchDepartureArrival() {
+        val departureInput = _state.value.departureAirportInput
+        val departureAirport = _state.value.departureAirport
+        _state.update {
+            it.copy(
+                departureAirportInput = _state.value.arrivalAirportInput,
+                departureAirport = _state.value.arrivalAirport,
+                arrivalAirportInput = departureInput,
+                arrivalAirport = departureAirport
+            )
+        }
+    }
+
+    fun switchToDeparture() {
+        _state.update {
+            it.copy(
+                departureAirportInput = _state.value.arrivalAirportInput,
+                departureAirport = _state.value.arrivalAirport,
+                arrivalAirportInput = "",
+                arrivalAirport = null
+            )
+        }
+    }
+
+    fun switchToArrival() {
+        _state.update {
+            it.copy(
+                arrivalAirportInput = _state.value.departureAirportInput,
+                arrivalAirport = _state.value.departureAirport,
+                departureAirportInput = "",
+                departureAirport = null
+            )
+        }
+    }
+
     fun clearDepartureInput() {
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    departureAirportInput = "",
-                    departureAirport = null
+                    departureAirportInput = "", departureAirport = null
                 )
             }
             val airports = airportRepository.all()
@@ -73,8 +107,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    arrivalAirportInput = "",
-                    arrivalAirport = null
+                    arrivalAirportInput = "", arrivalAirport = null
                 )
             }
             val airports = airportRepository.all()
@@ -121,8 +154,7 @@ class HomeViewModel @Inject constructor(
 
     fun selectArrivalAirport(airport: Airport) = _state.update {
         it.copy(
-            arrivalAirportInput = airport.icao.code, arrivalAirport
-            = airport
+            arrivalAirportInput = airport.icao.code, arrivalAirport = airport
         )
     }
 
