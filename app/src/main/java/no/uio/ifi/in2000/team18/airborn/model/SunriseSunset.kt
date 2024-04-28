@@ -1,8 +1,10 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
 import com.google.gson.TypeAdapter
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import no.uio.ifi.in2000.team18.airborn.ui.common.ZDTAdapter
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -40,7 +42,8 @@ class ZonedDateTimeAdapter : TypeAdapter<ZonedDateTime>() {
 }
 
 data class Sun(
-    val time: String?, val azimuth: Double?
+    @JsonAdapter(ZDTAdapter::class) val time: ZonedDateTime?,
+    val azimuth: Double?
 )
 
 data class When(

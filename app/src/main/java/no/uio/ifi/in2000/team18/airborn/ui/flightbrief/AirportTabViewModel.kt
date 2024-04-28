@@ -16,6 +16,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
@@ -40,12 +41,18 @@ sealed class AirportTabViewModel(
         val turbulence: LoadingState<Map<String, List<Turbulence>>?> = Loading,
         val webcams: LoadingState<List<Webcam>> = Loading,
         val weather: LoadingState<List<WeatherDay>> = Loading,
+        val sun: LoadingState<Sun?> = Loading,
     )
 
     init {
         viewModelScope.launch {
             val airport = load { airportRepository.getByIcao(icao) }
             _state.update { it.copy(airport = airport.map { it!! }) }
+
+            airportRepository.getByIcao(icao)?.let {
+                val sun = load { airportRepository.fetchSunriseSunset(it) }
+                _state.update { it.copy(sun = sun) }
+            }
         }
     }
 
@@ -63,8 +70,7 @@ sealed class AirportTabViewModel(
                 _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
                 return@launch
             }
-            val isobaric =
-                load { weatherRepository.getIsobaricData(airport.position) }
+            val isobaric = load { weatherRepository.getIsobaricData(airport.position) }
             _state.update { it.copy(isobaric = isobaric) }
         }
     }

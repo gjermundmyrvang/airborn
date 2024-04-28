@@ -6,6 +6,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -50,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -57,6 +59,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,7 +73,9 @@ import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
+import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
@@ -495,6 +500,65 @@ fun TimeRow(
                 )
             }
             Spacer(modifier = Modifier.width(5.dp))
+        }
+    }
+}
+
+@Composable
+fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header: String? = null) {
+    when (sun) {
+        is LoadingState.Loading -> LinearProgressIndicator(
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
+        )
+
+        is LoadingState.Error -> Text(
+            text = sun.message, color = MaterialTheme.colorScheme.background
+        )
+
+        is LoadingState.Success -> sun.value?.let { sun ->
+
+            Column(modifier = modifier) {
+                if (header != null) {
+                    Text(
+                        text = header,
+                        style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = sun.sunrise,
+                        modifier = Modifier.height(IntrinsicSize.Min),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.clearsky_polartwilight),
+                        contentDescription = "sunrise",
+                        Modifier
+                            .rotate(180F)
+                            .size(35.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Text(
+                        text = sun.sunset, color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Image(
+                        painter = painterResource(id = R.drawable.clearsky_polartwilight),
+                        contentDescription = "sunset",
+                        Modifier.size(35.dp)
+                    )
+                    Text(
+                        text = "(LT)", color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+            }
         }
     }
 }
