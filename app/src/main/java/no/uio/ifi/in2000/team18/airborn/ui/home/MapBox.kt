@@ -116,10 +116,12 @@ fun Map(
                     state,
                     onClose = { selectedAirport = null },
                     addDeparture = {
+                        selectedAirport = null
                         homeViewModel.selectDepartureAirport(it)
                         airportSelected()
                     },
                     addArrival = {
+                        selectedAirport = null
                         homeViewModel.selectArrivalAirport(it)
                         airportSelected()
                     },
