@@ -18,9 +18,8 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Taf
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
+import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import javax.inject.Inject
 
 // Refactored to use a single instance of Json for serialization to avoid unnecessary instantiation.
@@ -74,15 +73,16 @@ class AirportRepository @Inject constructor(
         val sun = sunriseSunsetDataSource.fetchSunriseSunset(
             airport.position.latitude, airport.position.longitude
         )
-        if (sun.properties.sunrise.time == null) {
-            return Sun("N/A", "N/A")
-        }
-        val formatter = DateTimeFormatter.ofPattern("kk:mm")
-        val sunrise = ZonedDateTime.parse(sun.properties.sunrise.time)
-            .withZoneSameInstant(ZoneId.systemDefault()).format(formatter)
-        val sunset = ZonedDateTime.parse(sun.properties.sunset.time)
-            .withZoneSameInstant(ZoneId.systemDefault()).format(formatter)
-        val newSun = Sun(sunrise, sunset)
+        val newSun =
+            if (sun.properties.sunrise.time == null || sun.properties.sunset.time == null) {
+                Sun("N/A", "N/A")
+            } else {
+                val sunrise = sun.properties.sunrise.time
+                    .toSystemZoneOffset().hourMinute()
+                val sunset = sun.properties.sunset.time
+                    .toSystemZoneOffset().hourMinute()
+                Sun(sunrise, sunset)
+            }
         sunDataCache[airport.icao] = newSun
         return newSun
     }
