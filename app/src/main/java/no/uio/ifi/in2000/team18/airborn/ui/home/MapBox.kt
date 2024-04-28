@@ -55,6 +55,7 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
+import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
@@ -111,6 +112,11 @@ fun Map(
                     sigmetClicked = it
                 }
             }
+            state.airportPair?.let {
+                Polyline(
+                    positions = it
+                )
+            }
         }
         Column(modifier = Modifier.padding(top = 16.dp)) {
             if (distance != null) {
@@ -161,6 +167,21 @@ fun Polygons(
                 true
             })
     }
+}
+
+@OptIn(MapboxExperimental::class)
+@Composable
+fun Polyline(positions: Pair<Airport, Airport>) {
+    val pos1 = positions.first.position
+    val pos2 = positions.second.position
+    PolylineAnnotation(
+        points = listOf(pos1, pos2).map { it.toPoints() },
+        lineColorInt = Color(0xFF1D1D1D).toArgb(),
+        lineWidth = 3.0,
+        onClick = {
+            true
+        },
+    )
 }
 
 
