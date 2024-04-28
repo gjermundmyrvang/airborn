@@ -29,9 +29,9 @@ fun ZonedDateTime.hourMinute(): String {
         "${this.hour}"
     } else "0${this.hour}"
 
-    val minute = if (this.minute > 10) {
+    val minute = if (this.minute > 9) {
         "${this.minute}"
-    } else "${this.minute}0"
+    } else "0${this.minute}"
 
     return "$hour:$minute"
 }
