@@ -55,11 +55,13 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
+import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseSigmet
+import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.SigmetType
@@ -92,6 +94,9 @@ fun Map(
         }
     }
     Box {
+        val distance = state.airportPair?.let {
+            it.first.position.distanceTo(it.second.position)
+        }
         MapboxMap(
             mapViewportState = mapViewportState,
 
@@ -107,8 +112,16 @@ fun Map(
                     sigmetClicked = it
                 }
             }
+            state.airportPair?.let {
+                Polyline(
+                    positions = it
+                )
+            }
         }
         Column(modifier = Modifier.padding(top = 16.dp)) {
+            if (distance != null) {
+                state.airportPair?.let { DistanceInfoBox(distance = distance, airportPair = it) }
+            }
             selectedAirport?.let { airport ->
                 homeViewModel.updateSunriseAirport(airport)
                 InfoBox(
@@ -116,10 +129,12 @@ fun Map(
                     state,
                     onClose = { selectedAirport = null },
                     addDeparture = {
+                        selectedAirport = null
                         homeViewModel.selectDepartureAirport(it)
                         airportSelected()
                     },
                     addArrival = {
+                        selectedAirport = null
                         homeViewModel.selectArrivalAirport(it)
                         airportSelected()
                     },
@@ -154,6 +169,21 @@ fun Polygons(
     }
 }
 
+@OptIn(MapboxExperimental::class)
+@Composable
+fun Polyline(positions: Pair<Airport, Airport>) {
+    val pos1 = positions.first.position
+    val pos2 = positions.second.position
+    PolylineAnnotation(
+        points = listOf(pos1, pos2).map { it.toPoints() },
+        lineColorInt = Color(0xFF1D1D1D).toArgb(),
+        lineWidth = 3.0,
+        onClick = {
+            true
+        },
+    )
+}
+
 
 @OptIn(MapboxExperimental::class)
 @Composable
@@ -179,6 +209,57 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
                 modifier = Modifier.size(12.dp),
             )
         }
+    }
+}
+
+@Composable
+fun DistanceInfoBox(distance: Distance, airportPair: Pair<Airport, Airport>) = Box(
+    modifier = Modifier
+        .padding(16.dp)
+        .fillMaxWidth()
+        .border(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = RoundedCornerShape(5.dp)
+        )
+        .background(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+            shape = RoundedCornerShape(5.dp)
+        )
+        .clip(
+            RoundedCornerShape(5.dp)
+        )
+) {
+    Column(
+        Modifier
+            .padding(16.dp)
+            .fillMaxWidth(), horizontalAlignment = Alignment.Start
+    ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            val tint = MaterialTheme.colorScheme.secondary
+            Text(
+                airportPair.first.name.substringBefore(","),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp
+            )
+            Icon(painterResource(R.drawable.flight_takeoff), "takeoff", tint = tint)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                airportPair.second.name.substringBefore(","),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp
+            )
+            Icon(painterResource(R.drawable.flight_landing), "takeoff", tint = tint)
+        }
+        Text(
+            "Distance between airports: ${distance.formatAsNm()}",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 14.sp
+        )
     }
 }
 
@@ -282,15 +363,19 @@ fun InfoBox(
     airport: Airport,
     state: HomeViewModel.UiState,
     onClose: () -> Unit,
-    addDeparture: (Icao) -> Unit,
-    addArrival: (Icao) -> Unit
+    addDeparture: (Airport) -> Unit,
+    addArrival: (Airport) -> Unit
 ) = Box(
     modifier = Modifier
         .padding(16.dp)
         .fillMaxWidth()
-        .border(width = 2.dp, color = Color.Gray, shape = RoundedCornerShape(5.dp))
+        .border(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = RoundedCornerShape(5.dp)
+        )
         .background(
-            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
             shape = RoundedCornerShape(5.dp)
         )
         .clip(RoundedCornerShape(5.dp))
@@ -352,7 +437,7 @@ fun InfoBox(
                     containerColor = Color.Transparent,
                     contentColor = MaterialTheme.colorScheme.primary,
                 ),
-                onClick = { addDeparture(airport.icao) },
+                onClick = { addDeparture(airport) },
                 modifier = Modifier
                     .height(35.dp)
                     .padding(end = 5.dp),
@@ -374,7 +459,7 @@ fun InfoBox(
                     containerColor = Color.Transparent,
                     contentColor = MaterialTheme.colorScheme.primary,
                 ),
-                onClick = { addArrival(airport.icao) },
+                onClick = { addArrival(airport) },
                 modifier = Modifier.height(height = 35.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

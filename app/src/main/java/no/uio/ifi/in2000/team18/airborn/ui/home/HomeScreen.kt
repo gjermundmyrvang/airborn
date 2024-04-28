@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -138,62 +140,98 @@ private fun AirportSelection(
 
     var departureFocused by remember { mutableStateOf(false) }
     var arrivalFocused by remember { mutableStateOf(false) }
-    OutlinedTextField(
-        value = state.departureAirportInput,
-        modifier = Modifier
-            .fillMaxWidth()
-            .onFocusChanged { departureFocused = it.isFocused },
-        onValueChange = { viewModel.filterDepartureAirports(it) },
-        colors = AirbornTextFieldColors,
-        singleLine = true,
-        label = { Text("Departure airport") },
-        leadingIcon = {
-            Icon(
-                painter = painterResource(
-                    id = R.drawable.flight_takeoff
-                ), contentDescription = "takeoff icon", tint = MaterialTheme.colorScheme.background
+
+    val departureAirport = state.departureAirport
+    val arrivalAirport = state.arrivalAirport
+
+
+    Box(
+        Modifier.fillMaxWidth()
+    ) {
+        Column {
+            OutlinedTextField(
+                value = state.departureAirportInput,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { departureFocused = it.isFocused },
+                onValueChange = { viewModel.filterDepartureAirports(it) },
+                colors = AirbornTextFieldColors,
+                singleLine = true,
+                label = { Text("Departure airport") },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(
+                            id = R.drawable.flight_takeoff
+                        ),
+                        contentDescription = "takeoff icon",
+                        tint = MaterialTheme.colorScheme.background
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = { viewModel.clearDepartureInput() }) {
+                        Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
+                    }
+                },
+                keyboardActions = KeyboardActions(onDone = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }),
             )
-        },
-        trailingIcon = {
-            IconButton(onClick = { viewModel.clearDepartureInput() }) {
-                Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
-            }
-        },
-        keyboardActions = KeyboardActions(onDone = {
-            keyboardController?.hide()
-            focusManager.clearFocus()
-        }),
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    OutlinedTextField(
-        value = state.arrivalAirportInput,
-        modifier = Modifier
-            .fillMaxWidth()
-            .onFocusChanged { arrivalFocused = it.isFocused },
-        onValueChange = {
-            viewModel.filterArrivalAirports(it)
-        },
-        colors = AirbornTextFieldColors,
-        singleLine = true,
-        enabled = state.departureAirportIcao != null,
-        label = { Text("Arrival airport") },
-        leadingIcon = {
-            Icon(
-                painter = painterResource(
-                    id = R.drawable.flight_landing
-                ), contentDescription = "landing icon", tint = MaterialTheme.colorScheme.background
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = state.arrivalAirportInput,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { arrivalFocused = it.isFocused },
+                onValueChange = {
+                    viewModel.filterArrivalAirports(it)
+                },
+                colors = AirbornTextFieldColors,
+                singleLine = true,
+                enabled = state.departureAirport != null,
+                label = { Text("Arrival airport") },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(
+                            id = R.drawable.flight_landing
+                        ),
+                        contentDescription = "landing icon",
+                        tint = MaterialTheme.colorScheme.background
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = { viewModel.clearArrivalInput() }) {
+                        Icon(Icons.Filled.Close, contentDescription = "clear arrival inputfield")
+                    }
+                },
+                keyboardActions = KeyboardActions(onDone = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }),
             )
-        },
-        trailingIcon = {
-            IconButton(onClick = { viewModel.clearArrivalInput() }) {
-                Icon(Icons.Filled.Close, contentDescription = "clear arrival inputfield")
-            }
-        },
-        keyboardActions = KeyboardActions(onDone = {
-            keyboardController?.hide()
-            focusManager.clearFocus()
-        }),
-    )
+        }
+        IconButton(
+            onClick = {
+                if (departureAirport != null || arrivalAirport != null) {
+                    if (departureAirport == null) viewModel.switchToDeparture()
+                    else if (arrivalAirport == null) viewModel.switchToArrival()
+                    else viewModel.switchDepartureArrival()
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 50.dp)
+                .height(IntrinsicSize.Max)
+                .background(Color(0xFF1D1D1D), RoundedCornerShape(5.dp))
+                .clip(RoundedCornerShape(5.dp))
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.switch_departure_arrival),
+                contentDescription = "Your icon",
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
+    }
 
     LaunchedEffect(arrivalFocused || departureFocused) {
         onFocusChange(arrivalFocused || departureFocused)
@@ -203,7 +241,7 @@ private fun AirportSelection(
     if (!(departureFocused || arrivalFocused)) {
         Button(
             onClick = {
-                navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirportIcao?.code ?: "null"}")
+                navController.navigate("flightBrief/${state.departureAirportInput}/${state.arrivalAirport?.icao?.code ?: "null"}")
             },
             colors = ButtonColors(
                 containerColor = MaterialTheme.colorScheme.background,
@@ -211,7 +249,7 @@ private fun AirportSelection(
                 disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
             ),
-            enabled = state.departureAirportIcao != null,
+            enabled = state.departureAirport != null,
             modifier = Modifier
                 .width(200.dp)
                 .align(Alignment.CenterHorizontally),
@@ -226,10 +264,10 @@ private fun AirportSelection(
             AirportInfoRow(item = airport) { clickedAirport ->
                 keyboardController?.hide()
                 if (departureFocused) {
-                    viewModel.selectDepartureAirport(clickedAirport.icao)
+                    viewModel.selectDepartureAirport(clickedAirport)
                     focusManager.clearFocus(true)
                 } else {
-                    viewModel.selectArrivalAirport(clickedAirport.icao)
+                    viewModel.selectArrivalAirport(clickedAirport)
                     focusManager.clearFocus(true)
                 }
             }

@@ -322,10 +322,10 @@ fun OverallAirportBrieftab(
         modifier = Modifier.fillMaxSize()
     ) {
         item { Sigchart(state.sigcharts) { viewModel.initSigchart() } }
-        item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMpas() } }
-        item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
         item { Route(state.route) { viewModel.initRouteIsobaric() } }
         item { RadarAnimations(state.radarAnimations) { viewModel.initRadarAnimations() } }
+        item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
+        item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMpas() } }
     }
 }
 

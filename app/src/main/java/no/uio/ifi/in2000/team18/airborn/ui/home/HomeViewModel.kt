@@ -11,7 +11,6 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.SigmetRepository
 import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
@@ -26,13 +25,18 @@ class HomeViewModel @Inject constructor(
     data class UiState(
         val departureAirportInput: String = "",
         val arrivalAirportInput: String = "",
-        val departureAirportIcao: Icao? = null,
-        val arrivalAirportIcao: Icao? = null,
+        val departureAirport: Airport? = null,
+        val arrivalAirport: Airport? = null,
         val searchResults: List<Airport> = listOf(),
         val airports: List<Airport> = listOf(),
         val sigmets: List<Sigmet> = listOf(),
         val sun: LoadingState<Sun?> = LoadingState.Loading
-    )
+    ) {
+        val airportPair
+            get() = departureAirport?.let { d ->
+                arrivalAirport?.let { Pair(d, it) }
+            }
+    }
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -50,12 +54,46 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun switchDepartureArrival() {
+        val departureInput = _state.value.departureAirportInput
+        val departureAirport = _state.value.departureAirport
+        _state.update {
+            it.copy(
+                departureAirportInput = _state.value.arrivalAirportInput,
+                departureAirport = _state.value.arrivalAirport,
+                arrivalAirportInput = departureInput,
+                arrivalAirport = departureAirport
+            )
+        }
+    }
+
+    fun switchToDeparture() {
+        _state.update {
+            it.copy(
+                departureAirportInput = _state.value.arrivalAirportInput,
+                departureAirport = _state.value.arrivalAirport,
+                arrivalAirportInput = "",
+                arrivalAirport = null
+            )
+        }
+    }
+
+    fun switchToArrival() {
+        _state.update {
+            it.copy(
+                arrivalAirportInput = _state.value.departureAirportInput,
+                arrivalAirport = _state.value.departureAirport,
+                departureAirportInput = "",
+                departureAirport = null
+            )
+        }
+    }
+
     fun clearDepartureInput() {
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    departureAirportInput = "",
-                    departureAirportIcao = null
+                    departureAirportInput = "", departureAirport = null
                 )
             }
             val airports = airportRepository.all()
@@ -69,8 +107,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    arrivalAirportInput = "",
-                    arrivalAirportIcao = null
+                    arrivalAirportInput = "", arrivalAirport = null
                 )
             }
             val airports = airportRepository.all()
@@ -111,14 +148,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun selectDepartureAirport(airport: Icao) = _state.update {
-        it.copy(departureAirportInput = airport.code, departureAirportIcao = airport)
+    fun selectDepartureAirport(airport: Airport) = _state.update {
+        it.copy(departureAirportInput = airport.icao.code, departureAirport = airport)
     }
 
-    fun selectArrivalAirport(airport: Icao) = _state.update {
+    fun selectArrivalAirport(airport: Airport) = _state.update {
         it.copy(
-            arrivalAirportInput = airport.code, arrivalAirportIcao
-            = airport
+            arrivalAirportInput = airport.icao.code, arrivalAirport = airport
         )
     }
 
