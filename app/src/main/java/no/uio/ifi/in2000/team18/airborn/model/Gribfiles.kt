@@ -1,5 +1,9 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
+import com.google.gson.annotations.JsonAdapter
+import no.uio.ifi.in2000.team18.airborn.ui.common.ZDTAdapter
+import java.time.ZonedDateTime
+
 typealias GribFiles = ArrayList<GribFile>
 
 data class GribFile(
@@ -11,5 +15,7 @@ data class GribFile(
 
 data class GribFileParams(
     val area: String,
-    val time: String
+    @JsonAdapter(ZDTAdapter::class) val time: ZonedDateTime
 )
+
+

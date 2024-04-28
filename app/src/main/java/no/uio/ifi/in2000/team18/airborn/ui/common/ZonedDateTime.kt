@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team18.airborn.ui.common
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -16,7 +17,6 @@ class ZDTAdapter : TypeAdapter<ZonedDateTime>() {
         return ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_ZONED_DATE_TIME)
     }
 }
-
 
 fun ZonedDateTime.monthDayHourMinute(): String {
     return "${
@@ -34,4 +34,8 @@ fun ZonedDateTime.hourMinute(): String {
     } else "${this.minute}0"
 
     return "$hour:$minute"
+}
+
+fun ZonedDateTime.toSystemZoneOffset(): ZonedDateTime {
+    return this.withZoneSameInstant(ZoneId.systemDefault())
 }
