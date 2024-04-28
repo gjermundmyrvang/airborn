@@ -271,8 +271,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
             .clip(RoundedCornerShape(5.dp)),
     ) {
         Column(
-            modifier = Modifier
-                .padding(10.dp)
+            modifier = Modifier.padding(10.dp)
         ) {
             Row {
                 Column {
@@ -305,8 +304,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
         }
         Spacer(modifier = Modifier.width(IntrinsicSize.Max))
         Column(
-            modifier = Modifier
-                .padding(10.dp)
+            modifier = Modifier.padding(10.dp)
         ) {
             if (nextHours != null) {
                 Text(
@@ -323,22 +321,6 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                 Text("Pressure: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 Text("${weatherHour.weatherDetails.airPressureAtSeaLevel}", fontSize = 12.sp)
             }
-            Row {
-                Text("Cloud fraction: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.cloudAreaFraction}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Cloud fraction high: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.cloudAreaFractionHigh}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Cloud fraction medium: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.cloudAreaFractionMedium}", fontSize = 12.sp)
-            }
-            Row {
-                Text("Cloud fraction low: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text("${weatherHour.weatherDetails.cloudAreaFractionLow}", fontSize = 12.sp)
-            }
             weatherHour.weatherDetails.fogAreaFraction?.let {
                 Row {
                     Text("Fog area: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
@@ -354,6 +336,25 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                     Text("UV: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     Text(it.toString(), fontSize = 12.sp)
                 }
+            }
+            Row {
+                Text("Cloud fraction: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFraction}", fontSize = 12.sp)
+            }
+            Row {
+                Spacer(Modifier.width(10.dp))
+                Text("high: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionHigh}", fontSize = 12.sp)
+            }
+            Row {
+                Spacer(Modifier.width(10.dp))
+                Text("medium: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionMedium}", fontSize = 12.sp)
+            }
+            Row {
+                Spacer(Modifier.width(10.dp))
+                Text("low: ", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("${weatherHour.weatherDetails.cloudAreaFractionLow}", fontSize = 12.sp)
             }
         }
     }
