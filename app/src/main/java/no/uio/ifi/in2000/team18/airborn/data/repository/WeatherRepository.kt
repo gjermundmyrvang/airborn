@@ -19,7 +19,6 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
-import no.uio.ifi.in2000.team18.airborn.model.round
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import ucar.nc2.dt.GridDatatype
@@ -87,7 +86,7 @@ class WeatherRepository @Inject constructor(
 
     suspend fun getRouteIsobaric(departure: Airport, arrival: Airport): RouteIsobaric {
         val distance = departure.position.distanceTo(arrival.position)
-        val bearing = departure.position.bearingTo(arrival.position).round(0)
+        val bearing = departure.position.bearingTo(arrival.position)
         return RouteIsobaric(
             departure = departure,
             arrival = arrival,
