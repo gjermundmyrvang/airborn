@@ -178,7 +178,6 @@ private fun AirportSelection(
                 }),
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text("${state.networkStatus}")
             OutlinedTextField(
                 value = state.arrivalAirportInput,
                 modifier = Modifier
