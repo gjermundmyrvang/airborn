@@ -121,7 +121,6 @@ fun HomeScreen(
                 Text("Select Airport")
             }
         }
-
     )
 }
 
