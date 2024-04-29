@@ -5,8 +5,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -19,7 +21,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 @Composable
 fun RequestPermission(
     permission: String,
-    rationaleMessage: String = "To use this app's functionalities, you need to give us the permission.",
+    rationaleMessage: String = "Grant this permission in order to see your live location",
 ) {
     val permissionState = rememberPermissionState(permission)
 
@@ -32,10 +34,7 @@ fun RequestPermission(
             ) { permissionState.launchPermissionRequest() }
         },
         content = {
-            /*   Content(
-                   text = "PERMISSION GRANTED!",
-                   showButton = false
-               ) {}*/
+            // Don't need to display anything here
         }
     )
 }
@@ -75,32 +74,39 @@ fun Content(showButton: Boolean = true, onClick: () -> Unit) {
 fun PermissionDeniedContent(
     rationaleMessage: String,
     shouldShowRationale: Boolean,
-    onRequestPermission: () -> Unit
+    onRequestPermission: () -> Unit,
 ) {
 
     if (shouldShowRationale) {
-
-        AlertDialog(
-            onDismissRequest = {},
-            title = {
-                Text(
-                    text = "Permission Request",
-                    style = TextStyle(
-                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                        fontWeight = FontWeight.Bold
+        var dialogVisible by remember { mutableStateOf(true) }
+        if (dialogVisible) {
+            AlertDialog(
+                onDismissRequest = {},
+                title = {
+                    Text(
+                        text = "Permission Request",
+                        style = TextStyle(
+                            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
-                )
-            },
-            text = {
-                Text(rationaleMessage)
-            },
-            confirmButton = {
-                Button(onClick = onRequestPermission) {
-                    Text("Give Permission")
+                },
+                text = {
+                    Text(rationaleMessage)
+                },
+                confirmButton = {
+                    Button(onClick = onRequestPermission) {
+                        Text("Give Permission")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { dialogVisible = false }
+                    ){
+                        Text(text = "Dismiss")
+                    }
                 }
-            }
-        )
-
+            )
+        }
     }
     else {
         Content(onClick = onRequestPermission)
