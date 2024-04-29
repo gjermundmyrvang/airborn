@@ -28,7 +28,6 @@ import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 
-
 @Composable
 fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
     LazyCollapsible(
@@ -131,6 +130,9 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                         )
                     }
                 }
+            }
+            Row {
+                Text("TESTING Nearby airports: ${getAirportsNearby routeIsobaric.departure.icao}")
             }
             TableContent(isobaricData = routeIsobaric.isobaric)
         }

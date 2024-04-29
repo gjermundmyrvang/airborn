@@ -17,4 +17,11 @@ interface BuiltinAirportDao {
 
     @Query("SELECT * FROM builtin_airport WHERE icao = :icao")
     fun getByIcao(icao: String): BuiltinAirport?
+
+    @Query(
+        "SELECT * FROM builtin_airport " +
+                "WHERE (lat BETWEEN (:latitude - 1.0) AND (:latitude + 1.0))" +
+                "AND (lon BETWEEN (:longitude - 2.0) AND (:longitude + 2.0));"
+    )
+    fun getAirportsNearby(latitude: Double, longitude: Double): List<BuiltinAirport>?
 }
