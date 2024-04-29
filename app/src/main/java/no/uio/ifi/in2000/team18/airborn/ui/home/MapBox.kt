@@ -87,8 +87,7 @@ fun Map(
             bearing(0.0)
         }
     }
-    var showNoSigmetBox by rememberSaveable { mutableStateOf(false) }
-    var messageShown by rememberSaveable { mutableStateOf(false) }
+    var showNoSigmetMessage = state.showNoSigmetMessage
     Box {
         val distance = state.airportPair?.let {
             it.first.position.distanceTo(it.second.position)
@@ -107,8 +106,6 @@ fun Map(
                     isClicked = true
                     sigmetClicked = it
                 }
-            } else {
-                showNoSigmetBox = true
             }
             state.airportPair?.let {
                 Polyline(
@@ -118,10 +115,9 @@ fun Map(
         }
         Column(modifier = Modifier.padding(top = 6.dp)) {
             Spacer(modifier = Modifier.height(10.dp))
-            if (showNoSigmetBox && !messageShown) { // Maybe a bit hacky solution
+            if (showNoSigmetMessage) {
                 NoSigmetInfoBox {
-                    messageShown = true
-                    showNoSigmetBox = false
+                    homeViewModel.dismissNoSigmetMessage()
                 }
             }
             if (distance != null) {

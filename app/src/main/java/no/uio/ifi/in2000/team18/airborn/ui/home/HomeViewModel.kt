@@ -30,7 +30,8 @@ class HomeViewModel @Inject constructor(
         val searchResults: List<Airport> = listOf(),
         val airports: List<Airport> = listOf(),
         val sigmets: List<Sigmet> = listOf(),
-        val sun: LoadingState<Sun?> = LoadingState.Loading
+        val sun: LoadingState<Sun?> = LoadingState.Loading,
+        val showNoSigmetMessage: Boolean = false,
     ) {
         val airportPair
             get() = departureAirport?.let { d ->
@@ -127,8 +128,15 @@ class HomeViewModel @Inject constructor(
                 listOf()
             }
             _state.update {
-                it.copy(sigmets = sigmets)
+                val isEmpty = sigmets.isEmpty()
+                it.copy(sigmets = sigmets, showNoSigmetMessage = isEmpty)
             }
+        }
+    }
+
+    fun dismissNoSigmetMessage() {
+        _state.update {
+            it.copy(showNoSigmetMessage = false)
         }
     }
 
