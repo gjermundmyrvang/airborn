@@ -238,7 +238,7 @@ fun NoSigmetInfoBox(onClose: () -> Unit) {
     )
     {
         Text(
-            "No sigmets/airmets available",
+            "Currently no sigmets/airmets",
             Modifier.padding(start = 5.dp),
             MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
