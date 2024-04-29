@@ -60,6 +60,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
@@ -86,8 +87,7 @@ fun HomeScreen(
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         sheetContent = {
-            AirportSelection(
-                modifier = modifier.padding(16.dp),
+            AirportSelection(modifier = modifier.padding(16.dp),
                 viewModel = viewModel,
                 onFocusChange = {
                     airportInputSelected = it
@@ -178,6 +178,7 @@ private fun AirportSelection(
                 }),
             )
             Spacer(modifier = Modifier.height(8.dp))
+            Text("${state.networkStatus}")
             OutlinedTextField(
                 value = state.arrivalAirportInput,
                 modifier = Modifier
@@ -249,7 +250,7 @@ private fun AirportSelection(
                 disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
             ),
-            enabled = state.departureAirport != null,
+            enabled = state.departureAirport != null && state.networkStatus == ConnectivityObserver.Status.Available,
             modifier = Modifier
                 .width(200.dp)
                 .align(Alignment.CenterHorizontally),
