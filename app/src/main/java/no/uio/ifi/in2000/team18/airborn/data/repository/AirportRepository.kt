@@ -5,6 +5,7 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GeosatelliteDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.OffshoreMapsDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.RadarDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.RouteDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SunriseSunsetDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
@@ -34,6 +35,7 @@ class AirportRepository @Inject constructor(
     private val offshoreMapsDataSource: OffshoreMapsDataSource,
     private val geosatelliteDataSource: GeosatelliteDataSource,
     private val radarDataSource: RadarDataSource,
+    private val routeDataSource: RouteDataSource,
 ) {
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
@@ -104,4 +106,8 @@ class AirportRepository @Inject constructor(
 
         return uri.replaceRange(startIndex, endIdex + 1, "")
     }
+
+    suspend fun isRoute(route: String) = route in routeDataSource.fetchAllAvailableRoutes()
+    suspend fun fetchRoute(route: String) = routeDataSource.fetchRoute(route)
+
 }
