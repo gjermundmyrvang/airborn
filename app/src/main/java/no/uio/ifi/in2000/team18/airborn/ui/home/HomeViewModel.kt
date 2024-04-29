@@ -14,6 +14,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
@@ -21,6 +22,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val airportRepository: AirportRepository,
     private val sigmetRepository: SigmetRepository,
+    private val connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
     data class UiState(
         val departureAirportInput: String = "",
@@ -30,7 +32,8 @@ class HomeViewModel @Inject constructor(
         val searchResults: List<Airport> = listOf(),
         val airports: List<Airport> = listOf(),
         val sigmets: List<Sigmet> = listOf(),
-        val sun: LoadingState<Sun?> = LoadingState.Loading
+        val sun: LoadingState<Sun?> = LoadingState.Loading,
+        val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
     ) {
         val airportPair
             get() = departureAirport?.let { d ->
@@ -50,6 +53,12 @@ class HomeViewModel @Inject constructor(
             val airports = airportRepository.all()
             _state.update {
                 it.copy(searchResults = airports, airports = airports)
+            }
+        }
+
+        viewModelScope.launch {
+            connectivityObserver.observe().collect { status ->
+                _state.update { it.copy(networkStatus = status) }
             }
         }
     }
