@@ -11,7 +11,7 @@ import no.uio.ifi.in2000.team18.airborn.model.GribFiles
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
-import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
+import no.uio.ifi.in2000.team18.airborn.model.Route
 import no.uio.ifi.in2000.team18.airborn.model.Speed
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
@@ -19,7 +19,6 @@ import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
-import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricDataPoint
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
@@ -39,9 +38,10 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    suspend fun fetchIsobaricDatapoint(): GribFiles {
+    suspend fun fetchGribFiles(): GribFiles {
         return gribDataSource.availableGribFiles()
     }
+    // TODO: make function that reads out and returns the times available in GribFiles
 
     suspend fun currentGribFile(gribFiles: GribFiles): GribFile {
         val now = ZonedDateTime.now(ZoneOffset.UTC)
@@ -94,20 +94,15 @@ class WeatherRepository @Inject constructor(
     }
 
 
-    suspend fun getRouteIsobaric(departure: Airport, arrival: Airport): RouteIsobaric {
-        val gribFiles = fetchIsobaricDatapoint()
+    suspend fun updateRouteIsobaric(route: Route, fraction: Double, time: ZonedDateTime) {
+        val gribFiles = fetchGribFiles()
 
-        val distance = departure.position.distanceTo(arrival.position)
-        val bearing = departure.position.bearingTo(arrival.position)
+        // TODO: change to use position at specific FRACTION, update IsobaricPosition-values
+        val distance = route.departure.position.distanceTo(route.arrival.position)
+        val bearing = route.departure.position.bearingTo(route.arrival.position)
 
-        return RouteIsobaric(
-            departure = departure,
-            arrival = arrival,
-            timeSeries = gribFiles.groupBy { it.params.time },
-            isobaric = ,
-            distance = distance,
-            bearing = bearing
-        )
+        // TODO: something like updating
+        //  route.positions.fraction.value.timeSeries.time with fetching IsobaricData
     }
 
     private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =

@@ -14,14 +14,16 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Radar
-import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
+import no.uio.ifi.in2000.team18.airborn.model.Route
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
+import no.uio.ifi.in2000.team18.airborn.model.findAlongRoute
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import java.nio.channels.UnresolvedAddressException
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,7 +41,7 @@ class FlightBriefViewModel @Inject constructor(
         val departureIcao: Icao,
         val offshoreMaps: LoadingState<Map<String, List<OffshoreMap>>> = Loading,
         val geoSatelliteImage: LoadingState<String> = Loading,
-        val route: LoadingState<RouteIsobaric> = Loading,
+        val route: LoadingState<Route> = Loading,
         val radarAnimations: LoadingState<List<Radar>> = Loading,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
@@ -100,9 +102,18 @@ class FlightBriefViewModel @Inject constructor(
             } else {
                 val departure = airportRepository.getByIcao(state.value.departureIcao)!!
                 val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
+                val positions = findAlongRoute(departure.position, arrival.position, 1)
+                val routeInit = Route(departure, arrival)
+                routeInit.initializePositions(positions)
 
-                val data = load { weatherRepository.getRouteIsobaric(departure, arrival) }
-                _state.update { it.copy(route = data) }
+                val route = load {
+                    weatherRepository.updateRouteIsobaric(
+                        routeInit, 0.5, ZonedDateTime.now()
+                    )
+                    routeInit
+                }
+                // TODO: ZonedDateTime not correct... Find a way to fix this, using currentGribFile adjusted?
+                _state.update { it.copy(route = route) }
             }
         }
     }

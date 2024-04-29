@@ -337,7 +337,6 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
         { AirportBriefHeader(state.airport) },
         { Sundata(sun = state.sun) },
         { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
-        { IsobaricData(state.isobaric) { viewModel.initIsobaric() } },
         { Turbulence(state.turbulence) { viewModel.initTurbulence() } },
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },

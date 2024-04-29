@@ -24,19 +24,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.model.Direction
-import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
+import no.uio.ifi.in2000.team18.airborn.model.Route
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 
 
 @Composable
-fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
+fun Route(state: LoadingState<Route>, initRouteIsobaric: () -> Unit) =
     LazyCollapsible(
         header = "Route isobaric",
         value = state,
         onExpand = initRouteIsobaric,
         padding = 0.dp
-    ) { routeIsobaric ->
+    ) { route ->
         Column(
             Modifier.padding(vertical = 10.dp),
         ) {
@@ -49,11 +49,11 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
             ) {
                 Column {
                     Text(
-                        text = "${routeIsobaric.departure.icao}",
+                        text = "${route.departure.icao}",
                         color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
-                        text = routeIsobaric.departure.name.substringBefore(" "),
+                        text = route.departure.name.substringBefore(" "),
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                     )
@@ -67,11 +67,11 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                 )
                 Column {
                     Text(
-                        text = "${routeIsobaric.departure.icao}",
+                        text = "${route.departure.icao}",
                         color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
-                        text = "${routeIsobaric.arrival.name.substringBefore(" ")} ",
+                        text = "${route.arrival.name.substringBefore(" ")} ",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
@@ -101,7 +101,7 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                             .fillMaxHeight(),
                     ) {
                         Text(
-                            text = "Distance: ${routeIsobaric.distance.formatAsNm()}",
+                            text = "Distance: ${route.position?.distance?.formatAsNm()}",
                             style = TextStyle(fontWeight = FontWeight.Bold)
                         )
                     }
@@ -122,16 +122,21 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Bearing from ${routeIsobaric.departure.name.substringBefore(" ")}: ${routeIsobaric.bearing}",
+                            text = "Bearing : ${route.position?.bearing}",
                             style = TextStyle(fontWeight = FontWeight.Bold)
                         )
-                        RotatableArrowIcon(
-                            direction = Direction(routeIsobaric.bearing.degrees - 180.0),
-                            iconColor = MaterialTheme.colorScheme.primaryContainer
-                        )
+                        val bearing = route.position?.bearing
+                        if (bearing != null) {
+                            RotatableArrowIcon(
+                                direction = Direction(bearing.degrees - 180.0),
+                                iconColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        }
                     }
                 }
             }
-            TableContent(isobaricData = routeIsobaric.isobaric)
+        }
+        if (route.isobaric != null) {
+            TableContent(isobaricData = route.isobaric!!)
         }
     }

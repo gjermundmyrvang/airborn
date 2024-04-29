@@ -63,7 +63,8 @@ sealed class AirportTabViewModel(
         }
     }
 
-    fun initIsobaric() {
+    //TODO: probably to be deleted (moved to FlightBriefViewModel, Overall section)
+    /*fun initIsobaric() {
         viewModelScope.launch {
             val airport = airportRepository.getByIcao(icao)
             if (airport == null) {
@@ -73,7 +74,7 @@ sealed class AirportTabViewModel(
             val isobaric = load { weatherRepository.fetchGribFiles(airport.position) }
             _state.update { it.copy(isobaric = isobaric) }
         }
-    }
+    }*/
 
     fun initTurbulence() {
         viewModelScope.launch {
