@@ -14,6 +14,7 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Radar
+import no.uio.ifi.in2000.team18.airborn.model.RouteForecast
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -44,6 +45,8 @@ class FlightBriefViewModel @Inject constructor(
         val route: LoadingState<RouteIsobaric> = Loading,
         val radarAnimations: LoadingState<List<Radar>> = Loading,
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
+        val routeForecast: LoadingState<List<RouteForecast>> = Loading,
+        val isIgaRoute: Boolean = false,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
     }
@@ -68,6 +71,13 @@ class FlightBriefViewModel @Inject constructor(
         viewModelScope.launch {
             connectivityObserver.observe().collect { status ->
                 _state.update { it.copy(networkStatus = status) }
+            }
+        }
+        viewModelScope.launch {
+            val departureIcao = _state.value.departureIcao.code
+            val arrivalIcao = _state.value.arrivalIcao?.code
+            arrivalIcao?.let {
+                _state.update { it.copy(isIgaRoute = airportRepository.isRoute("iga-$departureIcao-$arrivalIcao")) }
             }
         }
     }
@@ -110,6 +120,18 @@ class FlightBriefViewModel @Inject constructor(
 
                 val data = load { weatherRepository.getRouteIsobaric(departure, arrival) }
                 _state.update { it.copy(route = data) }
+            }
+        }
+    }
+
+    fun initRoute() {
+        viewModelScope.launch {
+            val departure = _state.value.departureIcao.code
+            val arrival = _state.value.arrivalIcao?.code
+            val route = "iga-$departure-$arrival"
+            val routeForecast = load { airportRepository.fetchRoute(route) }
+            _state.update {
+                it.copy(routeForecast = routeForecast)
             }
         }
     }
