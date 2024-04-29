@@ -21,6 +21,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
@@ -29,6 +30,7 @@ class FlightBriefViewModel @Inject constructor(
     private val airportRepository: AirportRepository,
     private val weatherRepository: WeatherRepository,
     savedStateHandle: SavedStateHandle,
+    private val connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
 
     data class UiState(
@@ -41,10 +43,10 @@ class FlightBriefViewModel @Inject constructor(
         val geoSatelliteImage: LoadingState<String> = Loading,
         val route: LoadingState<RouteIsobaric> = Loading,
         val radarAnimations: LoadingState<List<Radar>> = Loading,
+        val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
     }
-
 
     private val _state = MutableStateFlow(
         UiState(
@@ -61,6 +63,11 @@ class FlightBriefViewModel @Inject constructor(
                 it.copy(
                     airports = airportRepository.all()
                 )
+            }
+        }
+        viewModelScope.launch {
+            connectivityObserver.observe().collect { status ->
+                _state.update { it.copy(networkStatus = status) }
             }
         }
     }
@@ -133,6 +140,9 @@ class FlightBriefViewModel @Inject constructor(
     }
 
     private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+        if (state.value.networkStatus != ConnectivityObserver.Status.Available) {
+            return LoadingState.Error(message = "Network Unavailable")
+        }
         return try {
             f().toSuccess()
         } catch (e: UnresolvedAddressException) {
