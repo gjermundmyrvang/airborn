@@ -6,6 +6,8 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
+import no.uio.ifi.in2000.team18.airborn.model.GribFile
+import no.uio.ifi.in2000.team18.airborn.model.GribFiles
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
@@ -17,6 +19,7 @@ import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
+import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricDataPoint
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
@@ -36,16 +39,22 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    suspend fun getIsobaricData(position: Position): IsobaricData {
-        val gribFiles = gribDataSource.availableGribFiles()
+    suspend fun fetchIsobaricDatapoint(): GribFiles {
+        return gribDataSource.availableGribFiles()
+    }
+
+    suspend fun currentGribFile(gribFiles: GribFiles): GribFile {
         val now = ZonedDateTime.now(ZoneOffset.UTC)
-        val gribFile = gribFiles.find {
+        return gribFiles.find {
             it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
                 3
             ).isAfter(
                 now
             )
         } ?: gribFiles.last()
+    }
+
+    suspend fun fetchIsobaricData(gribFile: GribFile, position: Position): IsobaricData {
         val windsAloft = gribDataSource.useGribFile(gribFile) { dataset ->
             val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
             val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
@@ -84,13 +93,18 @@ class WeatherRepository @Inject constructor(
         )
     }
 
+
     suspend fun getRouteIsobaric(departure: Airport, arrival: Airport): RouteIsobaric {
+        val gribFiles = fetchIsobaricDatapoint()
+
         val distance = departure.position.distanceTo(arrival.position)
         val bearing = departure.position.bearingTo(arrival.position)
+
         return RouteIsobaric(
             departure = departure,
             arrival = arrival,
-            isobaric = getIsobaricData(departure.position.halfwayTo(departure.position)),
+            timeSeries = gribFiles.groupBy { it.params.time },
+            isobaric = ,
             distance = distance,
             bearing = bearing
         )

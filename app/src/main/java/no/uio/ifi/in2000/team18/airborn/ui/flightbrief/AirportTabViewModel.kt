@@ -70,7 +70,7 @@ sealed class AirportTabViewModel(
                 _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
                 return@launch
             }
-            val isobaric = load { weatherRepository.getIsobaricData(airport.position) }
+            val isobaric = load { weatherRepository.fetchGribFiles(airport.position) }
             _state.update { it.copy(isobaric = isobaric) }
         }
     }
