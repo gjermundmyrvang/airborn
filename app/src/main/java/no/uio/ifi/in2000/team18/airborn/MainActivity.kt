@@ -58,7 +58,7 @@ class MainActivity @Inject constructor() : ComponentActivity() {
     }
 }
 
-@Composable
+    @Composable
 fun NetworkStatus(status: ConnectivityObserver.Status, content: @Composable () -> Unit) = Column {
     Box(
         modifier = Modifier
