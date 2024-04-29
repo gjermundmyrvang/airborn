@@ -8,5 +8,5 @@ data class RouteIsobaric(
     val arrival: Airport,
     val isobaric: IsobaricData,
     val distance: Distance,
-    val bearing: Double,
+    val bearing: Direction,
 )

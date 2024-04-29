@@ -1,11 +1,11 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -60,7 +60,7 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                 }
                 Icon(
                     Icons.AutoMirrored.Rounded.ArrowForward,
-                    contentDescription = "Arrow",
+                    contentDescription = "Arrow forward",
                     modifier = Modifier
                         .height(30.dp)
                         .align(Alignment.Bottom)
@@ -81,19 +81,24 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
             }
             Row(
                 horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(intrinsicSize = IntrinsicSize.Min)
             ) {
                 OutlinedCard(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.primaryContainer
                     ),
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .fillMaxHeight(),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp, vertical = 8.dp)
+                            .fillMaxHeight(),
                     ) {
                         Text(
                             text = "Distance: ${routeIsobaric.distance.formatAsNm()}",
@@ -106,19 +111,22 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.primaryContainer
                     ),
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .fillMaxHeight(),
                 ) {
                     Row(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp, vertical = 8.dp)
+                            .fillMaxHeight(),
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
                     ) {
                         Text(
                             text = "Bearing from ${routeIsobaric.departure.name.substringBefore(" ")}: ${routeIsobaric.bearing}",
                             style = TextStyle(fontWeight = FontWeight.Bold)
                         )
                         RotatableArrowIcon(
-                            direction = Direction(routeIsobaric.bearing - 180.0),
+                            direction = Direction(routeIsobaric.bearing.degrees - 180.0),
                             iconColor = MaterialTheme.colorScheme.primaryContainer
                         )
                     }
