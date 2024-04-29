@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -27,31 +30,37 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import no.uio.ifi.in2000.team18.airborn.R
 
+@Preview(showSystemUi = true)
+@Composable
+fun PreviewPermissionDialog(){
+    val enableLocation = remember { mutableStateOf(false) }
+    CustomDialogLocation(enableLocation = enableLocation)
+}
 @Composable
 fun CustomDialogLocation(
-    title: String? = "Message",
-    desc: String? = "Your Message",
     enableLocation: MutableState<Boolean>,
-    onClick: () -> Unit
+    onClick: () -> Unit = {}
 ) {
     Dialog(
         onDismissRequest = { enableLocation.value = false}
     ) {
         Box(
-            modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
-                // .width(300.dp)
-                // .height(164.dp)
+            modifier = Modifier
+                .padding(top = 20.dp, bottom = 20.dp)
+                .width(300.dp)
+                .height(370.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    shape = RoundedCornerShape(25.dp,5.dp,25.dp,5.dp)
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(25.dp, 5.dp, 25.dp, 5.dp)
                 )
-                .verticalScroll(rememberScrollState())
-
+                .verticalScroll(rememberScrollState()),
+            contentAlignment = Alignment.TopCenter
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -64,19 +73,18 @@ fun CustomDialogLocation(
                     painter = painterResource(id = R.drawable.red_marker),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    /*  colorFilter  = ColorFilter.tint(
-                          color = MaterialTheme.colorScheme.primary
-                      ),*/
+                    /*
+                    colorFilter  = ColorFilter.tint(
+                        color = MaterialTheme.colorScheme.primary
+                    ),*/
                     modifier = Modifier
                         .padding(top = 5.dp)
-                        .height(320.dp)
+                        .height(120.dp)
                         .fillMaxWidth(),
 
                     )
-                //.........................Spacer
-                //.........................Text: title
                 Text(
-                    text = title!!,
+                    text = "Enable location",
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         //  .padding(top = 5.dp)
@@ -86,10 +94,10 @@ fun CustomDialogLocation(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                //Spacer(modifier = Modifier.height(8.dp))
                 //.........................Text : description
                 Text(
-                    text = desc!!,
+                    "This app uses your live location",
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = 10.dp, start = 25.dp, end = 25.dp)
