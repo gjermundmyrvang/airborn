@@ -87,6 +87,8 @@ fun Map(
             bearing(0.0)
         }
     }
+    var showNoSigmetBox by rememberSaveable { mutableStateOf(false) }
+    var messageShown by rememberSaveable { mutableStateOf(false) }
     Box {
         val distance = state.airportPair?.let {
             it.first.position.distanceTo(it.second.position)
@@ -105,6 +107,8 @@ fun Map(
                     isClicked = true
                     sigmetClicked = it
                 }
+            } else {
+                showNoSigmetBox = true
             }
             state.airportPair?.let {
                 Polyline(
@@ -112,7 +116,14 @@ fun Map(
                 )
             }
         }
-        Column(modifier = Modifier.padding(top = 16.dp)) {
+        Column(modifier = Modifier.padding(top = 6.dp)) {
+            Spacer(modifier = Modifier.height(10.dp))
+            if (showNoSigmetBox && !messageShown) { // Maybe a bit hacky solution
+                NoSigmetInfoBox {
+                    messageShown = true
+                    showNoSigmetBox = false
+                }
+            }
             if (distance != null) {
                 state.airportPair?.let { DistanceInfoBox(distance = distance, airportPair = it) }
             }
@@ -201,6 +212,42 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
                 painter = painterResource(id = R.drawable.local_airport_24),
                 contentDescription = "Marker",
                 modifier = Modifier.size(12.dp),
+            )
+        }
+    }
+}
+
+@Composable
+fun NoSigmetInfoBox(onClose: () -> Unit) {
+    Row(
+        Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .clip(RoundedCornerShape(5.dp))
+            .background(
+                Color(0xD5263842),
+                shape = RoundedCornerShape(5.dp)
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    )
+    {
+        Text(
+            "No sigmets/airmets available",
+            Modifier.padding(start = 5.dp),
+            MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
+        )
+        IconButton(onClick = { onClose() }) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Close icon",
+                tint = MaterialTheme.colorScheme.secondary
             )
         }
     }
