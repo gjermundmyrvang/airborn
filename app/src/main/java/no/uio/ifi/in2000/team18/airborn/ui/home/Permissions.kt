@@ -1,206 +1,111 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
-import android.Manifest
-import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team18.airborn.ui.theme.LocationPermissionsTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
+
+@ExperimentalPermissionsApi
+@Composable
+fun RequestPermission(
+    permission: String,
+    rationaleMessage: String = "To use this app's functionalities, you need to give us the permission.",
+) {
+    val permissionState = rememberPermissionState(permission)
+
+    HandleRequest(
+        permissionState = permissionState,
+        deniedContent = { shouldShowRationale ->
+            PermissionDeniedContent(
+                rationaleMessage = rationaleMessage,
+                shouldShowRationale = shouldShowRationale
+            ) { permissionState.launchPermissionRequest() }
+        },
+        content = {
+            /*   Content(
+                   text = "PERMISSION GRANTED!",
+                   showButton = false
+               ) {}*/
+        }
+    )
+}
+
+@ExperimentalPermissionsApi
+@Composable
+fun HandleRequest(
+    permissionState: PermissionState,
+    deniedContent: @Composable (Boolean) -> Unit,
+    content: @Composable () -> Unit
+) {
+    when (permissionState.status) {
+        is PermissionStatus.Granted -> {
+            content()
+        }
+        is PermissionStatus.Denied -> {
+            deniedContent(permissionState.status.shouldShowRationale)
+        }
+    }
+}
 
 @Composable
-fun PermissionsScreen() {
-    var locationPermissionsGranted by remember { mutableStateOf(areLocationPermissionsAlreadyGranted()) }
-    var shouldShowPermissionRationale by remember {
-        mutableStateOf(
-            shouldShowRequestPermissionRationale(
-                Activity(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
+fun Content(showButton: Boolean = true, onClick: () -> Unit) {
+    if (showButton) {
+        val enableLocation = remember { mutableStateOf(true) }
+        if (enableLocation.value) {
+            CustomDialogLocation(
+                title = "Turn On Location Service",
+                desc = "Explore the world without getting lost and keep the track of your location.\n\nGive this app a permission to proceed. If it doesn't work, then you'll have to do it manually from the settings.",
+                enableLocation,
+                onClick
             )
-        )
-    }
-
-    var shouldDirectUserToApplicationSettings by remember {
-        mutableStateOf(false)
-    }
-
-    var currentPermissionsStatus by remember {
-        mutableStateOf(
-            decideCurrentPermissionStatus(
-                locationPermissionsGranted,
-                shouldShowPermissionRationale
-            )
-        )
-    }
-
-    val locationPermissions = arrayOf(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    )
-
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permissions ->
-            locationPermissionsGranted = permissions.values.reduce { acc, isPermissionGranted ->
-                acc && isPermissionGranted
-            }
-
-            if (!locationPermissionsGranted) {
-                shouldShowPermissionRationale =
-                    shouldShowRequestPermissionRationale(
-                        Activity(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
-            }
-            shouldDirectUserToApplicationSettings =
-                !shouldShowPermissionRationale && !locationPermissionsGranted
-            currentPermissionsStatus = decideCurrentPermissionStatus(
-                locationPermissionsGranted,
-                shouldShowPermissionRationale
-            )
-        })
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(key1 = lifecycleOwner, effect = {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_START &&
-                !locationPermissionsGranted &&
-                !shouldShowPermissionRationale
-            ) {
-                locationPermissionLauncher.launch(locationPermissions)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
-    )
+}
 
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+@ExperimentalPermissionsApi
+@Composable
+fun PermissionDeniedContent(
+    rationaleMessage: String,
+    shouldShowRationale: Boolean,
+    onRequestPermission: () -> Unit
+) {
 
-    LocationPermissionsTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Scaffold(snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            }) { contentPadding ->
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(contentPadding)
-                            .fillMaxWidth(),
-                        text = "Location Permissions",
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.padding(20.dp))
-                    Text(
-                        modifier = Modifier
-                            .padding(contentPadding)
-                            .fillMaxWidth(),
-                        text = "Current Permission Status: $currentPermissionsStatus",
-                        textAlign = TextAlign.Center,
+    if (shouldShowRationale) {
+
+        AlertDialog(
+            onDismissRequest = {},
+            title = {
+                Text(
+                    text = "Permission Request",
+                    style = TextStyle(
+                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                         fontWeight = FontWeight.Bold
                     )
-                }
-                if (shouldShowPermissionRationale) {
-                    LaunchedEffect(Unit) {
-                        scope.launch {
-                            val userAction = snackbarHostState.showSnackbar(
-                                message = "Please authorize location permissions",
-                                actionLabel = "Approve",
-                                duration = SnackbarDuration.Indefinite,
-                                withDismissAction = true
-                            )
-                            when (userAction) {
-                                SnackbarResult.ActionPerformed -> {
-                                    shouldShowPermissionRationale = false
-                                    locationPermissionLauncher.launch(locationPermissions)
-                                }
-
-                                SnackbarResult.Dismissed -> {
-                                    shouldShowPermissionRationale = false
-                                }
-                            }
-                        }
-                    }
-                }
-                if (shouldDirectUserToApplicationSettings) {
-                    openApplicationSettings()
+                )
+            },
+            text = {
+                Text(rationaleMessage)
+            },
+            confirmButton = {
+                Button(onClick = onRequestPermission) {
+                    Text("Give Permission")
                 }
             }
-        }
+        )
+
     }
-}
-
-private fun decideCurrentPermissionStatus(
-    locationPermissionsGranted: Boolean,
-    shouldShowPermissionRationale: Boolean
-): String {
-    return if (locationPermissionsGranted) "Granted"
-    else if (shouldShowPermissionRationale) "Rejected"
-    else "Denied"
-}
-
-private fun openApplicationSettings() {
-    /*
-    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)).also {
-        startActivity(pplicationContext)
+    else {
+        Content(onClick = onRequestPermission)
     }
-     */
-    // TODO // Make this work
-}
 
-private fun areLocationPermissionsAlreadyGranted(): Boolean {
-    /*
-    return ContextCompat.checkSelfPermission(
-        this,
-        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-
-     */ // TODO // Make this work
-    return true
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun TestPermissionScreen() {
-    PermissionsScreen()
 }
