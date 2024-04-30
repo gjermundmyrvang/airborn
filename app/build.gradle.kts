@@ -64,11 +64,11 @@ dependencies {
     val navVersion = "2.7.7"
     val ktorVersion = "2.3.9"
     val roomVersion = "2.6.1"
-
-    implementation("androidx.room:room-runtime:$roomVersion")
+   
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
 
+    implementation("androidx.room:room-runtime:$roomVersion")
     implementation("com.google.accompanist:accompanist-permissions:0.24.13-rc")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
@@ -88,7 +88,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$navVersion")
     implementation("com.mapbox.maps:android:11.3.1")
     implementation("com.mapbox.extension:maps-compose:11.3.1")
-    implementation("io.github.alexmaryin.metarkt:parser:1.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0-RC.2")
     implementation("io.coil-kt:coil-gif:2.6.0")
     dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.9.20")

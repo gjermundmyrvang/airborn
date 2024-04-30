@@ -7,6 +7,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Humidity
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Temperature
 import no.uio.ifi.in2000.team18.airborn.model.degrees
+import no.uio.ifi.in2000.team18.airborn.model.format
 import no.uio.ifi.in2000.team18.airborn.model.hpa
 import no.uio.ifi.in2000.team18.airborn.model.mps
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
@@ -132,5 +133,17 @@ class UnitTest {
         val result: Distance = start.distanceTo(end)
         // Assert
         Assert.assertEquals(7872000.0, result.meters, 500.0)
+    }
+
+    @Test
+    fun `format double with 3 decimals`() {
+        val pi = 3.14159265358979
+        assertEquals("3.142", pi.format(3))
+    }
+
+    @Test
+    fun `format double with negative decimals`() {
+        val n = -273.15
+        assertEquals("-270", n.format(-1))
     }
 }

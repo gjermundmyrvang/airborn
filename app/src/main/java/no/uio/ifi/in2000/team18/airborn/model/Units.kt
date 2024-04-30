@@ -1,10 +1,10 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
-import alexmaryin.metarkt.parser.formatToFloat
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.mapbox.geojson.Point
+import java.util.Locale
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow
@@ -248,10 +248,9 @@ val Number.nauticalMiles get() = this * 1852.m
 // Utilities:
 fun Double.format(decimals: Int) =
     if (decimals <= 0) "${this.round(decimals).roundToInt()}"
-    else "${this.round(decimals).formatToFloat(decimals)}"
+    else String.format(Locale.ENGLISH, "%.${decimals}f",this)
 
 fun Double.round(decimals: Int): Double {
     var multiplier = Math.pow(10.0, decimals.toDouble())
     return round(this * multiplier) / multiplier
 }
-
