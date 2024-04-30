@@ -5,6 +5,7 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GeosatelliteDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.OffshoreMapsDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.RadarDataSource
+import no.uio.ifi.in2000.team18.airborn.data.datasource.RouteDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SigchartDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.SunriseSunsetDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.TafmetarDataSource
@@ -21,10 +22,12 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Taf
 import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.roundToInt
 
 // Refactored to use a single instance of Json for serialization to avoid unnecessary instantiation.
 
+@Singleton
 class AirportRepository @Inject constructor(
     private val airportDataSource: AirportDataSource,
     private val tafmetarDataSource: TafmetarDataSource,
@@ -35,6 +38,7 @@ class AirportRepository @Inject constructor(
     private val offshoreMapsDataSource: OffshoreMapsDataSource,
     private val geosatelliteDataSource: GeosatelliteDataSource,
     private val radarDataSource: RadarDataSource,
+    private val routeDataSource: RouteDataSource,
 ) {
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
@@ -67,8 +71,7 @@ class AirportRepository @Inject constructor(
 
     // Turbulence logic
     suspend fun fetchTurbulence(icao: Icao) =
-        turbulenceDataSource.fetchTurbulenceMap(icao)
-            ?.groupBy { it.params.type }
+        turbulenceDataSource.fetchTurbulenceMap(icao)?.groupBy { it.params.type }
 
     // Webcam Logic
     suspend fun fetchWebcamImages(airport: Airport) = webcamDataSource.fetchImage(airport).webcams
@@ -83,10 +86,8 @@ class AirportRepository @Inject constructor(
             if (sun.properties.sunrise.time == null || sun.properties.sunset.time == null) {
                 Sun("N/A", "N/A")
             } else {
-                val sunrise = sun.properties.sunrise.time
-                    .toSystemZoneOffset().hourMinute()
-                val sunset = sun.properties.sunset.time
-                    .toSystemZoneOffset().hourMinute()
+                val sunrise = sun.properties.sunrise.time.toSystemZoneOffset().hourMinute()
+                val sunset = sun.properties.sunset.time.toSystemZoneOffset().hourMinute()
                 Sun(sunrise, sunset)
             }
         sunDataCache[airport.icao] = newSun
@@ -110,4 +111,14 @@ class AirportRepository @Inject constructor(
 
         return uri.replaceRange(startIndex, endIdex + 1, "")
     }
+
+    private var routeDataCache: List<String>? = null
+    suspend fun isRoute(route: String): Boolean =
+        route in (routeDataCache ?: routeDataSource.fetchAllAvailableRoutes().also {
+            routeDataCache = it
+        })
+
+    suspend fun fetchRoute(departureIcao: Icao, arrivalIcao: Icao) =
+        routeDataSource.fetchRoute("iga-${departureIcao.code}-${arrivalIcao.code}") // only iga is relevant for our case
+
 }

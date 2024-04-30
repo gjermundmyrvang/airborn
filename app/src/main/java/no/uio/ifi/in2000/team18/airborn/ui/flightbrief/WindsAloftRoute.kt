@@ -34,7 +34,6 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
         header = "Route isobaric",
         value = state,
         onExpand = initRouteIsobaric,
-        padding = 0.dp
     ) { routeIsobaric ->
         Column(
             Modifier.padding(vertical = 10.dp),

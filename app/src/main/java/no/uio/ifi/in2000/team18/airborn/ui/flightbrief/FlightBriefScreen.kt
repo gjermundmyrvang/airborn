@@ -327,6 +327,13 @@ fun OverallAirportBrieftab(
         item { RadarAnimations(state.radarAnimations) { viewModel.initRadarAnimations() } }
         item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
         item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMpas() } }
+        if (state.isIgaRoute) { // Only show this composable if selected departure and arrival is a route
+            item {
+                RouteForecast(state = state.routeForecast) {
+                    viewModel.initRoute()
+                }
+            }
+        }
     }
 }
 

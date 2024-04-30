@@ -63,7 +63,7 @@ import kotlin.random.Random
 @Composable
 fun WeatherSection(state: LoadingState<List<WeatherDay>>, initWeather: () -> Unit) =
     LazyCollapsible(
-        header = "Weather", value = state, padding = 0.dp, onExpand = initWeather
+        header = "Weather", value = state, onExpand = initWeather
     ) { weather ->
         var selectedDay by rememberSaveable { mutableIntStateOf(0) }
         var selectedHour by rememberSaveable { mutableIntStateOf(0) }

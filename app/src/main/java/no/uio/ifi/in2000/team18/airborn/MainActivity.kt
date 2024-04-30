@@ -41,11 +41,13 @@ class MainActivity @Inject constructor() : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
+
             val networkStatus by networkStatusFlow.collectAsState(initial = ConnectivityObserver.Status.Available)
             AirbornTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primaryContainer
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     NetworkStatus(status = networkStatus) {
                         Navigation()
@@ -56,7 +58,7 @@ class MainActivity @Inject constructor() : ComponentActivity() {
     }
 }
 
-@Composable
+    @Composable
 fun NetworkStatus(status: ConnectivityObserver.Status, content: @Composable () -> Unit) = Column {
     Box(
         modifier = Modifier

@@ -45,7 +45,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 @Composable
 fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffshoreMap: () -> Unit) =
     LazyCollapsible(
-        header = "Offshore maps", value = state, onExpand = initOffshoreMap, padding = 0.dp
+        header = "Offshore maps", value = state, onExpand = initOffshoreMap,
     ) { offshoreMap ->
         val options = remember {
             listOf(
