@@ -18,7 +18,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 @Composable
 fun RouteForecast(state: LoadingState<List<RouteForecast>>, initRoute: () -> Unit) =
     LazyCollapsible(
-        header = "Route forecast", value = state, onExpand = { initRoute() }, padding = 0.dp
+        header = "Route forecast", value = state, onExpand = { initRoute() }
     ) { routeForecasts ->
         val route = routeForecasts.first().params.route
         Text( // All elements in list will be same route
