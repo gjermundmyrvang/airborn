@@ -125,7 +125,7 @@ fun LoadingScreen() {
         LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp),
+                .padding(horizontal = 10.dp),
             color = MaterialTheme.colorScheme.background,
             trackColor = MaterialTheme.colorScheme.secondaryContainer,
         )
@@ -213,70 +213,53 @@ fun MultiToggleButton(
 
 @Composable
 fun <T> LazyCollapsible(
-    modifier: Modifier = Modifier,
-    padding: Dp = 16.dp,
     header: String,
     expanded: Boolean = false,
     value: LoadingState<T>,
     onExpand: () -> Unit,
     content: @Composable ColumnScope.(T) -> Unit
+) = Column(
+    modifier = Modifier.animateContentSize(
+        animationSpec = tween(
+            durationMillis = 300, easing = LinearOutSlowInEasing
+        )
+    )
 ) {
     var open by rememberSaveable {
         mutableStateOf(expanded)
     }
-    Column(
-        modifier = Modifier.animateContentSize(
-            animationSpec = tween(
-                durationMillis = 300, easing = LinearOutSlowInEasing
-            )
-        )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = header, fontSize = 22.sp)
-            IconButton(onClick = {
-                onExpand()
-                open = !open
-            }) {
-                Icon(
-                    imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    modifier = Modifier.size(30.dp),
-                    contentDescription = if (open) "Show less" else "Show more"
-                )
-            }
-        }
-        if (open) {
-            Column(
-                modifier = modifier.padding(padding),
-                content = {
-                    when (value) {
-                        is LoadingState.Success -> LazyCollapsibleContent(content = { content(value.value) })
-                        is LoadingState.Loading -> LoadingScreen()
-                        is LoadingState.Error -> Error(
-                            "failed to load ${header}: ${value.message}",
-                            modifier = Modifier.padding(16.dp, 8.dp)
-                        )
-                    }
-                },
+        Text(text = header, fontSize = 22.sp, modifier = Modifier.padding(start = 10.dp))
+        IconButton(onClick = {
+            onExpand()
+            open = !open
+        }) {
+            Icon(
+                imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                modifier = Modifier.size(30.dp),
+                contentDescription = if (open) "Show less" else "Show more"
             )
         }
-        HorizontalDivider(
-            modifier = Modifier
-                .padding(start = 5.dp, end = 5.dp)
-                .fillMaxWidth(),
-            color = MaterialTheme.colorScheme.tertiary
+    }
+    if (!open) return@Column
 
+    when (value) {
+        is LoadingState.Success -> Column {
+            content(value.value)
+        }
+
+        is LoadingState.Loading -> LoadingScreen()
+        is LoadingState.Error -> Error(
+            "failed to load ${header}: ${value.message}",
+            modifier = Modifier.padding(16.dp, 8.dp)
         )
     }
 }
-
-@Composable
-fun LazyCollapsibleContent(content: @Composable ColumnScope.() -> Unit) = Column(content = content)
 
 @Composable
 fun ImageComposable(uri: String, contentDescription: String, modifier: Modifier = Modifier) {

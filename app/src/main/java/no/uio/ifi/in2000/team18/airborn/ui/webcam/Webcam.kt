@@ -45,7 +45,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
 
 @Composable
 fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = LazyCollapsible(
-    header = "Webcams", value = state, onExpand = initWebcam, padding = 0.dp
+    header = "Webcams", value = state, onExpand = initWebcam,
 ) { webcams ->
     if (webcams.isEmpty()) {
         Column(
