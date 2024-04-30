@@ -93,7 +93,9 @@ fun HomeScreen(
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         sheetContent = {
 
-            AirportSelection(modifier = modifier.padding(16.dp),
+            AirportSelection(
+                modifier = modifier
+                    .padding(16.dp),
                 viewModel = viewModel,
                 onFocusChange = {
                     airportInputSelected = it
