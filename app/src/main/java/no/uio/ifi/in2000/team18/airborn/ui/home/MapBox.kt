@@ -47,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -82,7 +83,10 @@ import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.SunComposable
 @OptIn(MapboxExperimental::class, ExperimentalPermissionsApi::class)
 @Composable
 fun Map(
-    homeViewModel: HomeViewModel, modifier: Modifier = Modifier, airportSelected: () -> Unit = {}
+    homeViewModel: HomeViewModel,
+    modifier: Modifier = Modifier,
+    airportSelected: () -> Unit = {},
+    sheetHeight: Dp,
 ) = Column(
     modifier = modifier,
 ) {
@@ -159,24 +163,31 @@ fun Map(
             }
         }
         if (permissionState.status.isGranted) {
-            FloatingActionButton(modifier = Modifier.offset(350.dp, 450.dp),
-                onClick = {
-                    mapViewportState.transitionToFollowPuckState(
-                        FollowPuckViewportStateOptions.Builder()
-                            .zoom(7.000)
-                            .pitch(0.0)
-                            .build(),
-                        DefaultViewportTransitionOptions.Builder().build(),
+            Box(
+                modifier = Modifier
+                    .offset(0.dp, -sheetHeight)
+                    .align(Alignment.BottomEnd),
+            ) {
+                FloatingActionButton(
+                    modifier = Modifier.padding(10.dp),
+                    onClick = {
+                        mapViewportState.transitionToFollowPuckState(
+                            FollowPuckViewportStateOptions.Builder()
+                                .zoom(7.000)
+                                .pitch(0.0)
+                                .build(),
+                            DefaultViewportTransitionOptions.Builder().build(),
+                        )
+                    }) {
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        painter =
+                        painterResource(
+                            id = R.drawable.center
+                        ),
+                        contentDescription = "Recenter"
                     )
-                }) {
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    painter =
-                    painterResource(
-                        id = R.drawable.center
-                    ),
-                    contentDescription = "Recenter"
-                )
+                }
             }
         }
         Column(modifier = Modifier.padding(top = 6.dp)) {
