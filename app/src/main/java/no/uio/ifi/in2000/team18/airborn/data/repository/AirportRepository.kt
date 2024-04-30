@@ -45,11 +45,11 @@ class AirportRepository @Inject constructor(
     private val radarDataSource: RadarDataSource,
     private val routeDataSource: RouteDataSource,
 ) {
-    private val sunDataCache = mutableMapOf<Icao, Sun>()
-    private val tafMetarDataCache = mutableMapOf<Icao, MetarTaf>()
+    private var sunDataCache = mutableMapOf<Icao, Sun>()
+    private var tafMetarDataCache = mutableMapOf<Icao, MetarTaf>()
     private var sigchartDataCache: Map<Area, List<Sigchart>>? = null
-    private val turbulenceDataCache = mutableMapOf<Icao, Map<String, List<Turbulence>>?>()
-    private val webcamDataCache = mutableMapOf<Airport, List<Webcam>>()
+    private var turbulenceDataCache = mutableMapOf<Icao, Map<String, List<Turbulence>>?>()
+    private var webcamDataCache = mutableMapOf<Airport, List<Webcam>>()
     private var offshoreDataCache: Map<String, List<OffshoreMap>>? = null
     private var geoSatDataCache: String? = null
     private var radarDataCache: List<Radar>? = null
@@ -142,4 +142,15 @@ class AirportRepository @Inject constructor(
     suspend fun fetchRoute(departureIcao: Icao, arrivalIcao: Icao) =
         routeDataSource.fetchRoute("iga-${departureIcao.code}-${arrivalIcao.code}") // only iga is relevant for our case
 
+    fun clearCache() {
+        sunDataCache.clear()
+        tafMetarDataCache.clear()
+        sigchartDataCache = null
+        turbulenceDataCache.clear()
+        webcamDataCache.clear()
+        offshoreDataCache = null
+        geoSatDataCache = null
+        radarDataCache = null
+        routeDataCache = null
+    }
 }
