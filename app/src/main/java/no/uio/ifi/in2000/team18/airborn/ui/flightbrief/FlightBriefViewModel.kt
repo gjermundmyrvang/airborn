@@ -78,10 +78,17 @@ class FlightBriefViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                val departureIcao = _state.value.departureIcao.code
-                val arrivalIcao = _state.value.arrivalIcao?.code
-                arrivalIcao?.let {
-                    _state.update { it.copy(isIgaRoute = airportRepository.isRoute("iga-$departureIcao-$arrivalIcao")) }
+                val departureIcao = _state.value.departureIcao
+                val arrivalIcao = _state.value.arrivalIcao
+                if (arrivalIcao != null) {
+                    _state.update {
+                        it.copy(
+                            isIgaRoute = airportRepository.isRoute(
+                                departureIcao,
+                                arrivalIcao
+                            )
+                        )
+                    }
                 }
             } catch (_: Exception) {
             }
