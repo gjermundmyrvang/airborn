@@ -128,7 +128,8 @@ class FlightBriefViewModel @Inject constructor(
         viewModelScope.launch {
             val departure = _state.value.departureIcao.code
             val arrival = _state.value.arrivalIcao?.code
-            val route = "iga-$departure-$arrival"
+            val route =
+                "iga-$departure-$arrival" // Only 'iga' routes is relevant for the airports we use in this project
             val routeForecast = load { airportRepository.fetchRoute(route) }
             _state.update {
                 it.copy(routeForecast = routeForecast)
