@@ -1,5 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 import no.uio.ifi.in2000.team18.airborn.data.datasource.AirportDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GeosatelliteDataSource
@@ -27,6 +29,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Taf
 import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
@@ -45,15 +48,22 @@ class AirportRepository @Inject constructor(
     private val radarDataSource: RadarDataSource,
     private val routeDataSource: RouteDataSource,
 ) {
-    private var sunDataCache = mutableMapOf<Icao, Sun>()
-    private var tafMetarDataCache = mutableMapOf<Icao, MetarTaf>()
-    private var sigchartDataCache: Map<Area, List<Sigchart>>? = null
-    private var turbulenceDataCache = mutableMapOf<Icao, Map<String, List<Turbulence>>?>()
-    private var webcamDataCache = mutableMapOf<Airport, List<Webcam>>()
-    private var offshoreDataCache: Map<String, List<OffshoreMap>>? = null
+    private var sunDataCache = ConcurrentHashMap(mutableMapOf<Icao, Sun>())
+    private var tafMetarDataCache = ConcurrentHashMap(mutableMapOf<Icao, MetarTaf>())
+    private val sigchartDataMutex = Mutex()
+    private var sigchartDataCache: Map<Area, List<Sigchart>> = mapOf()
+    private var turbulenceDataCache = ConcurrentHashMap(
+        mutableMapOf<Icao, Map<String, List<Turbulence>>?>()
+    )
+    private var webcamDataCache = ConcurrentHashMap(mutableMapOf<Airport, List<Webcam>>())
+    private val offshoreMutex = Mutex()
+    private var offshoreDataCache: Map<String, List<OffshoreMap>> = mapOf()
+    private val geoSatMutex = Mutex()
     private var geoSatDataCache: String? = null
-    private var radarDataCache: List<Radar>? = null
-    private var routeDataCache: List<String>? = null
+    private val radarMutex = Mutex()
+    private var radarDataCache: List<Radar> = listOf()
+    private val routeMutex = Mutex()
+    private var routeDataCache: List<String> = listOf()
 
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
@@ -82,9 +92,13 @@ class AirportRepository @Inject constructor(
     }
 
     // Sigchart logic
-    suspend fun getSigcharts() =
-        sigchartDataCache ?: sigchartDataSource.fetchSigcharts().groupBy { it.params.area }
-            .also { sigchartDataCache = it }
+    suspend fun getSigcharts(): Map<Area, List<Sigchart>> {
+        if (sigchartDataCache.isEmpty()) {
+            val sigcharts = sigchartDataSource.fetchSigcharts().groupBy { it.params.area }
+            sigchartDataMutex.withLock { this.sigchartDataCache = sigcharts }
+        }
+        return sigchartDataMutex.withLock { this.sigchartDataCache }
+    }
 
     // Turbulence logic
     suspend fun fetchTurbulence(icao: Icao) =
@@ -113,19 +127,28 @@ class AirportRepository @Inject constructor(
         newSun.also { sunDataCache[airport.icao] = it }
     }
 
-    suspend fun getOffshoreMaps() =
-        offshoreDataCache ?: offshoreMapsDataSource.fetchOffshoreMaps().groupBy { it.endpoint }
-            .also { offshoreDataCache = it }
+    suspend fun getOffshoreMaps(): Map<String, List<OffshoreMap>> {
+        if (offshoreDataCache.isEmpty()) {
+            val offshoreMaps = offshoreMapsDataSource.fetchOffshoreMaps().groupBy { it.endpoint }
+            offshoreMutex.withLock { this.offshoreDataCache = offshoreMaps }
+        }
+        return offshoreMutex.withLock { this.offshoreDataCache }
+    }
 
     fun getGeosatelliteImage() = geoSatDataCache ?: geosatelliteDataSource.fetchGeosatelliteImage()
         .also { geoSatDataCache = it }
 
     // Uri's with animation parameter dont work when time is present in the uri string
     // Dont know why, ask MET
-    suspend fun fetchRadarAnimations() =
-        radarDataCache ?: radarDataSource.fetchRadarAnimations().map { radar ->
-            radar.copy(uri = removeTimeFromUrl(radar.uri))
-        }.also { radarDataCache = it }
+    suspend fun fetchRadarAnimations(): List<Radar> {
+        if (radarDataCache.isEmpty()) {
+            val radarImages = radarDataSource.fetchRadarAnimations().map { radar ->
+                radar.copy(uri = removeTimeFromUrl(radar.uri))
+            }
+            radarMutex.withLock { this.radarDataCache = radarImages }
+        }
+        return radarMutex.withLock { this.radarDataCache }
+    }
 
     private fun removeTimeFromUrl(uri: String): String {
         val startIndex = uri.indexOf("time=")
@@ -134,10 +157,13 @@ class AirportRepository @Inject constructor(
         return uri.replaceRange(startIndex, endIdex + 1, "")
     }
 
-    suspend fun isRoute(route: String): Boolean =
-        route in (routeDataCache ?: routeDataSource.fetchAllAvailableRoutes().also {
-            routeDataCache = it
-        })
+    suspend fun isRoute(route: String): Boolean {
+        if (routeDataCache.isEmpty()) {
+            val routes = routeDataSource.fetchAllAvailableRoutes()
+            routeMutex.withLock { this.routeDataCache = routes }
+        }
+        return routeMutex.withLock { route in this.routeDataCache }
+    }
 
     suspend fun fetchRoute(departureIcao: Icao, arrivalIcao: Icao) =
         routeDataSource.fetchRoute("iga-${departureIcao.code}-${arrivalIcao.code}") // only iga is relevant for our case
@@ -145,12 +171,12 @@ class AirportRepository @Inject constructor(
     fun clearCache() {
         sunDataCache.clear()
         tafMetarDataCache.clear()
-        sigchartDataCache = null
+        sigchartDataCache = mapOf()
         turbulenceDataCache.clear()
         webcamDataCache.clear()
-        offshoreDataCache = null
+        offshoreDataCache = mapOf()
         geoSatDataCache = null
-        radarDataCache = null
-        routeDataCache = null
+        radarDataCache = listOf()
+        routeDataCache = listOf()
     }
 }
