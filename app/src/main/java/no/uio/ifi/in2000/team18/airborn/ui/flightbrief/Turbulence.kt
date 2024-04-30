@@ -28,7 +28,10 @@ fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulen
     ) { turbulence ->
 
         if (turbulence == null) {
-            Text(text = "Airport does not have turbulence data")
+            Text(
+                text = "Airport does not have turbulence data",
+                modifier = Modifier.padding(horizontal = 10.dp)
+            )
             return@LazyCollapsible
         }
         var currentlySelectedType by rememberSaveable { mutableStateOf(turbulence.keys.first()) }
