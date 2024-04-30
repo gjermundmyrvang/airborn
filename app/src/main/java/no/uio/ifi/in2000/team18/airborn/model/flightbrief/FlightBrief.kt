@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
 import com.mapbox.geojson.Point
+import no.uio.ifi.in2000.team18.airborn.data.entity.BuiltinAirport
 import no.uio.ifi.in2000.team18.airborn.model.Position
 
 data class MetarTaf(
@@ -18,7 +19,16 @@ data class Airport(
     val icao: Icao,
     val name: String,
     val position: Position,
-)
+) {
+    companion object {
+        fun fromBuiltinAirport(airport: BuiltinAirport) =
+            Airport(
+                icao = Icao(airport.icao),
+                name = airport.name,
+                position = Position(airport.lat, airport.lon)
+            )
+    }
+}
 
 data class Position(
     val latitude: Double, val longitude: Double

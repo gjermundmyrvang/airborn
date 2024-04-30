@@ -17,6 +17,14 @@ class AirportDataSource @Inject constructor(
         }
     }
 
+    suspend fun getAirportsNearby(airport: Airport, max: Int) = withContext(Dispatchers.IO) {
+        builtinAirportDao.getAirportsNearby(
+            airport.position.latitude,
+            airport.position.longitude,
+            max
+        )
+    }
+
     suspend fun search(query: String): List<Airport> = withContext(Dispatchers.IO) {
         builtinAirportDao.search(query).map {
             Airport(
