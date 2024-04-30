@@ -345,7 +345,6 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
         { Sundata(sun = state.sun) },
         { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
         { IsobaricData(state.isobaric) { viewModel.initIsobaric() } },
-        { Turbulence(state.turbulence) { viewModel.initTurbulence() } },
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
     )
@@ -354,6 +353,9 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
     ) {
         items(sections) { section ->
             section()
+        }
+        if (state.hasTurbulence) {
+            item { Turbulence(state.turbulence) { viewModel.initTurbulence() } }
         }
     }
 }

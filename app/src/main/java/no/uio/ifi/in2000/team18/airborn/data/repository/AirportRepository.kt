@@ -52,13 +52,11 @@ class AirportRepository @Inject constructor(
     private var tafMetarDataCache = ConcurrentHashMap(mutableMapOf<Icao, MetarTaf>())
     private val sigchartDataMutex = Mutex()
     private var sigchartDataCache: Map<Area, List<Sigchart>> = mapOf()
-    private var turbulenceDataCache = ConcurrentHashMap(
-        mutableMapOf<Icao, Map<String, List<Turbulence>>?>()
-    )
+    private var turbulenceDataCache =
+        ConcurrentHashMap(mutableMapOf<Icao, Map<String, List<Turbulence>>>())
     private var webcamDataCache = ConcurrentHashMap(mutableMapOf<Airport, List<Webcam>>())
     private val offshoreMutex = Mutex()
     private var offshoreDataCache: Map<String, List<OffshoreMap>> = mapOf()
-    private val geoSatMutex = Mutex()
     private var geoSatDataCache: String? = null
     private val radarMutex = Mutex()
     private var radarDataCache: List<Radar> = listOf()
@@ -101,9 +99,32 @@ class AirportRepository @Inject constructor(
     }
 
     // Turbulence logic
+    private val availableTurbulence = listOf(
+        "ENAL",
+        "ENBL",
+        "ENBN",
+        "ENDU",
+        "ENEV",
+        "ENHF",
+        "ENHK",
+        "ENHV",
+        "ENLK",
+        "ENMH",
+        "ENMS",
+        "ENOV",
+        "ENRA",
+        "ENSB",
+        "ENSD",
+        "ENSH",
+        "ENST",
+        "ENTC",
+        "ENVA"
+    )
+
+    fun hasTurbulence(icao: Icao) = icao.code in availableTurbulence
     suspend fun fetchTurbulence(icao: Icao) =
         turbulenceDataCache[icao] ?: turbulenceDataSource.fetchTurbulenceMap(icao)
-            ?.groupBy { it.params.type }.also { turbulenceDataCache[icao] = it }
+            .groupBy { it.params.type }.also { turbulenceDataCache[icao] = it }
 
 
     // Webcam Logic
