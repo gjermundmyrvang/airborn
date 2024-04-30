@@ -6,8 +6,8 @@ import no.uio.ifi.in2000.team18.airborn.model.Sigmet
 import javax.inject.Inject
 
 class SigmetRepository @Inject constructor(private val dataSource: SigmetDatasource) {
-    suspend fun fetchSigmets(): List<Sigmet> {
-        val source = dataSource.fetchSigmets()
-        return parseSigmets(source)
+    private var sigmetDataCache: List<Sigmet>? = null
+    suspend fun fetchSigmets() = sigmetDataCache ?: parseSigmets(dataSource.fetchSigmets()).also {
+        sigmetDataCache = it
     }
 }
