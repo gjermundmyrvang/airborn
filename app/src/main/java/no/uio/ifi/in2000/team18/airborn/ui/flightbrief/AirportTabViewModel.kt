@@ -4,6 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.client.call.NoTransformationFoundException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -21,6 +24,7 @@ import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
@@ -29,6 +33,7 @@ sealed class AirportTabViewModel(
     val savedStateHandle: SavedStateHandle,
     val airportRepository: AirportRepository,
     val weatherRepository: WeatherRepository,
+    private val connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AirportUiState())
     val state = _state.asStateFlow()
@@ -42,6 +47,7 @@ sealed class AirportTabViewModel(
         val webcams: LoadingState<List<Webcam>> = Loading,
         val weather: LoadingState<List<WeatherDay>> = Loading,
         val sun: LoadingState<Sun?> = Loading,
+        val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
     )
 
     init {
@@ -52,6 +58,11 @@ sealed class AirportTabViewModel(
             airportRepository.getByIcao(icao)?.let {
                 val sun = load { airportRepository.fetchSunriseSunset(it) }
                 _state.update { it.copy(sun = sun) }
+            }
+        }
+        viewModelScope.launch {
+            connectivityObserver.observe().collect { status ->
+                _state.update { it.copy(networkStatus = status) }
             }
         }
     }
@@ -111,11 +122,13 @@ sealed class AirportTabViewModel(
     class DepartureViewModel @Inject constructor(
         savedStateHandle: SavedStateHandle,
         airportRepository: AirportRepository,
-        weatherRepository: WeatherRepository
+        weatherRepository: WeatherRepository,
+        connectivityObserver: ConnectivityObserver,
     ) : AirportTabViewModel(
         savedStateHandle = savedStateHandle,
         airportRepository = airportRepository,
-        weatherRepository = weatherRepository
+        weatherRepository = weatherRepository,
+        connectivityObserver = connectivityObserver,
     ) {
         override val icao: Icao
             // For some reason this has to be a property. Otherwise something doesn't work.
@@ -128,11 +141,13 @@ sealed class AirportTabViewModel(
     class ArrivalViewModel @Inject constructor(
         savedStateHandle: SavedStateHandle,
         airportRepository: AirportRepository,
-        weatherRepository: WeatherRepository
+        weatherRepository: WeatherRepository,
+        connectivityObserver: ConnectivityObserver,
     ) : AirportTabViewModel(
         savedStateHandle = savedStateHandle,
         airportRepository = airportRepository,
-        weatherRepository = weatherRepository
+        weatherRepository = weatherRepository,
+        connectivityObserver = connectivityObserver,
     ) {
         override val icao: Icao
             // For some reason this has to be a property. Otherwise something doesn't work.
@@ -141,10 +156,19 @@ sealed class AirportTabViewModel(
     }
 
     private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+        if (state.value.networkStatus != ConnectivityObserver.Status.Available) {
+            return LoadingState.Error(message = "Network Unavailable")
+        }
         return try {
             f().toSuccess()
         } catch (e: UnresolvedAddressException) {
             LoadingState.Error(message = "Unresolved Address")
+        } catch (e: ConnectTimeoutException) {
+            LoadingState.Error("Connection Timed out")
+        } catch (e: NoTransformationFoundException) {
+            LoadingState.Error("Something went wrong with the api")
+        } catch (e: JsonConvertException) {
+            LoadingState.Error("Something went wrong with the api")
         } catch (e: Exception) {
             LoadingState.Error(message = "Unknown Error: $e")
         }

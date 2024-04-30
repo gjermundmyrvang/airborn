@@ -64,6 +64,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
@@ -84,31 +85,16 @@ fun HomeScreen(
         )
     )
     val scope = rememberCoroutineScope()
-    var sheetPeekHeight by remember {
-        mutableStateOf(300.dp)
-    }
-    val density = LocalDensity.current
 
     BottomSheetScaffold(
-        modifier = Modifier.drawWithContent {
-            if (sheetPeekHeight != 300.dp) {
-                drawContent()
-            }
-        },
         scaffoldState = bottomSheetScaffoldState,
-        sheetPeekHeight = sheetPeekHeight,
+        sheetPeekHeight = 300.dp,
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         sheetContent = {
             AirportSelection(
                 modifier = modifier
-                    .padding(16.dp)
-                    .onPlaced {
-                        if (sheetPeekHeight == 0.dp) {
-                        sheetPeekHeight = with(density) {
-                            it.size.height.toDp()
-                        }
-                    } },
+                    .padding(16.dp),
                 viewModel = viewModel,
                 onFocusChange = {
                     airportInputSelected = it
@@ -270,7 +256,7 @@ private fun AirportSelection(
                 disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
             ),
-            enabled = state.departureAirport != null,
+            enabled = state.departureAirport != null && state.networkStatus == ConnectivityObserver.Status.Available,
             modifier = Modifier
                 .width(200.dp)
                 .align(Alignment.CenterHorizontally),

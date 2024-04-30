@@ -5,6 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.client.call.NoTransformationFoundException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -21,6 +24,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
@@ -29,6 +33,7 @@ class FlightBriefViewModel @Inject constructor(
     private val airportRepository: AirportRepository,
     private val weatherRepository: WeatherRepository,
     savedStateHandle: SavedStateHandle,
+    private val connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
 
     data class UiState(
@@ -41,10 +46,10 @@ class FlightBriefViewModel @Inject constructor(
         val geoSatelliteImage: LoadingState<String> = Loading,
         val route: LoadingState<RouteIsobaric> = Loading,
         val radarAnimations: LoadingState<List<Radar>> = Loading,
+        val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
     }
-
 
     private val _state = MutableStateFlow(
         UiState(
@@ -61,6 +66,11 @@ class FlightBriefViewModel @Inject constructor(
                 it.copy(
                     airports = airportRepository.all()
                 )
+            }
+        }
+        viewModelScope.launch {
+            connectivityObserver.observe().collect { status ->
+                _state.update { it.copy(networkStatus = status) }
             }
         }
     }
@@ -133,10 +143,19 @@ class FlightBriefViewModel @Inject constructor(
     }
 
     private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+        if (state.value.networkStatus != ConnectivityObserver.Status.Available) {
+            return LoadingState.Error(message = "Network Unavailable")
+        }
         return try {
             f().toSuccess()
         } catch (e: UnresolvedAddressException) {
             LoadingState.Error(message = "Unresolved Address")
+        } catch (e: ConnectTimeoutException) {
+            LoadingState.Error("Connection Timed out")
+        } catch (e: NoTransformationFoundException) {
+            LoadingState.Error("Something went wrong with the api")
+        } catch (e: JsonConvertException) {
+            LoadingState.Error("Something went wrong with the api")
         } catch (e: Exception) {
             LoadingState.Error(message = "Unknown Error: $e")
         }
