@@ -117,6 +117,19 @@ sealed class AirportTabViewModel(
         }
     }
 
+    fun clearAllCache() {
+        clearAirportCache()
+        clearWeatherCache()
+    }
+
+    fun clearAirportCache() {
+        airportRepository.clearCache()
+    }
+
+    fun clearWeatherCache() {
+        weatherRepository.clearWeatherCache()
+    }
+
 
     @HiltViewModel
     class DepartureViewModel @Inject constructor(
