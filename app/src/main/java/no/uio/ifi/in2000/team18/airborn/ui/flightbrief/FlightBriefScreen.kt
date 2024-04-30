@@ -95,7 +95,7 @@ fun FlightBriefScreen(
             }, navigationIcon = {
                 IconButton(
                     onClick = {
-                        navController.popBackStack()
+                        navController.popBackStack(route = "home", inclusive = false)
                     },
                 ) {
                     Icon(
