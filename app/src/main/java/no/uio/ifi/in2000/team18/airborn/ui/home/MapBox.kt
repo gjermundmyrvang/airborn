@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
+import android.Manifest
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,12 +23,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -45,6 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.ViewAnnotationAnchor
@@ -53,6 +60,11 @@ import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportS
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
+import com.mapbox.maps.plugin.PuckBearing
+import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
+import com.mapbox.maps.plugin.locationcomponent.generated.LocationComponentSettings
+import com.mapbox.maps.plugin.viewport.data.DefaultViewportTransitionOptions
+import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 import com.mapbox.maps.viewannotation.annotationAnchor
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
@@ -66,35 +78,91 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.SunComposable
 
-@OptIn(MapboxExperimental::class)
+
+@OptIn(MapboxExperimental::class, ExperimentalPermissionsApi::class)
 @Composable
 fun Map(
     homeViewModel: HomeViewModel, modifier: Modifier = Modifier, airportSelected: () -> Unit = {}
 ) = Column(
     modifier = modifier,
 ) {
+
     val state by homeViewModel.state.collectAsState()
     val airports = state.airports
     val sigmets = state.sigmets
     var selectedAirport by remember { mutableStateOf<Airport?>(null) }
     var isClicked by remember { mutableStateOf(false) }
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
+    val permissionState =
+        rememberPermissionState(permission = Manifest.permission.ACCESS_COARSE_LOCATION)
     val mapViewportState = rememberMapViewportState {
-        setCameraOptions {
-            zoom(3.420)
-            center(Point.fromLngLat(15.00, 69.69 - 8))
-            pitch(0.0)
-            bearing(0.0)
+        if (permissionState.status.isGranted) {
+            transitionToFollowPuckState(
+                FollowPuckViewportStateOptions.Builder()
+                    .zoom(7.000)
+                    .pitch(0.0)
+                    .build(),
+                DefaultViewportTransitionOptions.Builder().build(),
+            )
+        } else {
+            setCameraOptions {
+                zoom(3.420)
+                center(Point.fromLngLat(15.00, 69.69 - 8))
+                pitch(0.0)
+                bearing(0.0)
+            }
         }
     }
+
+    LaunchedEffect(permissionState.status.isGranted) {
+        if (permissionState.status.isGranted) {
+            mapViewportState.transitionToFollowPuckState(
+                FollowPuckViewportStateOptions.Builder()
+                    .zoom(7.000)
+                    .pitch(0.0)
+                    .build(),
+                DefaultViewportTransitionOptions.Builder().build(),
+            )
+        }
+    }
+
     Box {
         val distance = state.airportPair?.let {
             it.first.position.distanceTo(it.second.position)
         }
         MapboxMap(
-            mapViewportState = mapViewportState,
-
+            locationComponentSettings = LocationComponentSettings(
+                locationPuck = createDefault2DPuck(true)
             ) {
+                enabled = true
+                puckBearing = PuckBearing.HEADING
+                puckBearingEnabled = true
+            },
+            attribution = {
+                if (permissionState.status.isGranted) {
+                    FloatingActionButton(modifier = Modifier.offset(350.dp, 450.dp),
+                        onClick = {
+                        mapViewportState.transitionToFollowPuckState(
+                            FollowPuckViewportStateOptions.Builder()
+                                .zoom(7.000)
+                                .pitch(0.0)
+                                .build(),
+                            DefaultViewportTransitionOptions.Builder().build(),
+                        )
+                    }) {
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            painter =
+                            painterResource(
+                                id = R.drawable.center
+                            ),
+                            contentDescription = "Recenter"
+                        )
+                    }
+                }
+            },
+            mapViewportState = mapViewportState,
+        ) {
             airports.forEach { airport ->
                 Annotation(airport) {
                     selectedAirport = it
@@ -186,6 +254,7 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
         options = viewAnnotationOptions {
             geometry(airport.position.toPoints())
             allowOverlap(true)
+            allowOverlapWithPuck(true)
             annotationAnchor {
                 anchor(ViewAnnotationAnchor.CENTER)
             }

@@ -112,7 +112,6 @@ fun CustomDialogLocation(
                 //.........................Button : OK button
                 val cornerRadius = 16.dp
                 val gradientColors = listOf(Color(0xFFff669f), Color(0xFFff8961))
-                val roundedCornerShape = RoundedCornerShape(topStart = 30.dp,bottomEnd = 30.dp)
 
                 Button(
                     modifier = Modifier
@@ -131,7 +130,6 @@ fun CustomDialogLocation(
                             .fillMaxWidth()
                             .background(
                                 brush = Brush.horizontalGradient(colors = gradientColors),
-                                shape = roundedCornerShape
                             )
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center
