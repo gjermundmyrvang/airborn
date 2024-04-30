@@ -17,17 +17,12 @@ class AirportDataSource @Inject constructor(
         }
     }
 
-    suspend fun getAirportsNearby(airport: Airport): List<Airport>? = withContext(Dispatchers.IO) {
-        builtinAirportDao.getAirportsNearby(airport.position.latitude, airport.position.longitude)
-            ?.let { airports ->
-                airports.map {
-                    Airport(
-                        icao = Icao(it.icao),
-                        name = it.name,
-                        position = Position(it.lat, it.lon)
-                    )
-                }
-            }
+    suspend fun getAirportsNearby(airport: Airport, max: Int) = withContext(Dispatchers.IO) {
+        builtinAirportDao.getAirportsNearby(
+            airport.position.latitude,
+            airport.position.longitude,
+            max
+        )
     }
 
     suspend fun search(query: String): List<Airport> = withContext(Dispatchers.IO) {

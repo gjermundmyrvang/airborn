@@ -21,6 +21,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Taf
 import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 // Refactored to use a single instance of Json for serialization to avoid unnecessary instantiation.
 
@@ -37,7 +38,11 @@ class AirportRepository @Inject constructor(
 ) {
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
-    suspend fun getAirportNearby(airport: Airport) = airportDataSource.getAirportsNearby(airport)
+    suspend fun getAirportNearby(airport: Airport, max: Int = 5) =
+        airportDataSource.getAirportsNearby(airport, (max * 1.2).roundToInt())
+            .map { Airport.fromBuiltinAirport(it) }
+            .sortedBy { airport.position.distanceTo(it.position).meters }.take(max)
+
     suspend fun search(query: String) = airportDataSource.search(query)
     suspend fun all() = airportDataSource.all()
 
