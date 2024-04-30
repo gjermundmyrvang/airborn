@@ -13,6 +13,12 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.TurbulenceDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.WebcamDataSource
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.ParseResult
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
+import no.uio.ifi.in2000.team18.airborn.model.Area
+import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
+import no.uio.ifi.in2000.team18.airborn.model.Radar
+import no.uio.ifi.in2000.team18.airborn.model.Sigchart
+import no.uio.ifi.in2000.team18.airborn.model.Turbulence
+import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
@@ -26,7 +32,6 @@ import javax.inject.Singleton
 import kotlin.math.roundToInt
 
 // Refactored to use a single instance of Json for serialization to avoid unnecessary instantiation.
-
 @Singleton
 class AirportRepository @Inject constructor(
     private val airportDataSource: AirportDataSource,
@@ -40,20 +45,30 @@ class AirportRepository @Inject constructor(
     private val radarDataSource: RadarDataSource,
     private val routeDataSource: RouteDataSource,
 ) {
+    private val sunDataCache = mutableMapOf<Icao, Sun>()
+    private val tafMetarDataCache = mutableMapOf<Icao, MetarTaf>()
+    private var sigchartDataCache: Map<Area, List<Sigchart>>? = null
+    private val turbulenceDataCache = mutableMapOf<Icao, Map<String, List<Turbulence>>?>()
+    private val webcamDataCache = mutableMapOf<Airport, List<Webcam>>()
+    private var offshoreDataCache: Map<String, List<OffshoreMap>>? = null
+    private var geoSatDataCache: String? = null
+    private var radarDataCache: List<Radar>? = null
+    private var routeDataCache: List<String>? = null
+
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
+
     suspend fun getAirportNearby(airport: Airport, max: Int = 5) =
         airportDataSource.getAirportsNearby(airport, (max * 1.2).roundToInt())
             .map { Airport.fromBuiltinAirport(it) }
             .sortedBy { airport.position.distanceTo(it.position).meters }.take(max)
 
     suspend fun search(query: String) = airportDataSource.search(query)
+
     suspend fun all() = airportDataSource.all()
 
-    private val sunDataCache = mutableMapOf<Icao, Sun>()
-
     // TAF/METAR logic
-    suspend fun fetchTafMetar(icao: Icao): MetarTaf {
+    suspend fun fetchTafMetar(icao: Icao) = tafMetarDataCache[icao] ?: run {
         val tafLines = tafmetarDataSource.fetchTaf(icao).lines().filter(String::isNotBlank)
         val metarLines = tafmetarDataSource.fetchMetar(icao).lines().filter(String::isNotBlank)
         val metars = metarLines.asSequence().map {
@@ -63,22 +78,27 @@ class AirportRepository @Inject constructor(
             }
         }.toMutableList()
         val tafs = tafLines.asSequence().map { Taf(it) }.toMutableList()
-        return MetarTaf(metars, tafs)
+        MetarTaf(metars, tafs).also { tafMetarDataCache[icao] = it }
     }
 
     // Sigchart logic
-    suspend fun getSigcharts() = sigchartDataSource.fetchSigcharts().groupBy { it.params.area }
+    suspend fun getSigcharts() =
+        sigchartDataCache ?: sigchartDataSource.fetchSigcharts().groupBy { it.params.area }
+            .also { sigchartDataCache = it }
 
     // Turbulence logic
     suspend fun fetchTurbulence(icao: Icao) =
-        turbulenceDataSource.fetchTurbulenceMap(icao)?.groupBy { it.params.type }
+        turbulenceDataCache[icao] ?: turbulenceDataSource.fetchTurbulenceMap(icao)
+            ?.groupBy { it.params.type }.also { turbulenceDataCache[icao] = it }
+
 
     // Webcam Logic
-    suspend fun fetchWebcamImages(airport: Airport) = webcamDataSource.fetchImage(airport).webcams
+    suspend fun fetchWebcamImages(airport: Airport) = webcamDataCache[airport]
+        ?: webcamDataSource.fetchImage(airport).webcams.also { webcamDataCache[airport] = it }
+
 
     // Sunrise & Sunset logic
-    suspend fun fetchSunriseSunset(airport: Airport): Sun {
-        sunDataCache[airport.icao]?.also { return it }
+    suspend fun fetchSunriseSunset(airport: Airport) = sunDataCache[airport.icao] ?: run {
         val sun = sunriseSunsetDataSource.fetchSunriseSunset(
             airport.position.latitude, airport.position.longitude
         )
@@ -90,20 +110,22 @@ class AirportRepository @Inject constructor(
                 val sunset = sun.properties.sunset.time.toSystemZoneOffset().hourMinute()
                 Sun(sunrise, sunset)
             }
-        sunDataCache[airport.icao] = newSun
-        return newSun
+        newSun.also { sunDataCache[airport.icao] = it }
     }
 
     suspend fun getOffshoreMaps() =
-        offshoreMapsDataSource.fetchOffshoreMaps().groupBy { it.endpoint }
+        offshoreDataCache ?: offshoreMapsDataSource.fetchOffshoreMaps().groupBy { it.endpoint }
+            .also { offshoreDataCache = it }
 
-    fun getGeosatelliteImage() = geosatelliteDataSource.fetchGeosatelliteImage()
+    fun getGeosatelliteImage() = geoSatDataCache ?: geosatelliteDataSource.fetchGeosatelliteImage()
+        .also { geoSatDataCache = it }
 
-    // Uri's dont work when time is present in the uri string
+    // Uri's with animation parameter dont work when time is present in the uri string
     // Dont know why, ask MET
-    suspend fun fetchRadarAnimations() = radarDataSource.fetchRadarAnimations().map { radar ->
-        radar.copy(uri = removeTimeFromUrl(radar.uri))
-    }
+    suspend fun fetchRadarAnimations() =
+        radarDataCache ?: radarDataSource.fetchRadarAnimations().map { radar ->
+            radar.copy(uri = removeTimeFromUrl(radar.uri))
+        }.also { radarDataCache = it }
 
     private fun removeTimeFromUrl(uri: String): String {
         val startIndex = uri.indexOf("time=")
@@ -112,7 +134,6 @@ class AirportRepository @Inject constructor(
         return uri.replaceRange(startIndex, endIdex + 1, "")
     }
 
-    private var routeDataCache: List<String>? = null
     suspend fun isRoute(route: String): Boolean =
         route in (routeDataCache ?: routeDataSource.fetchAllAvailableRoutes().also {
             routeDataCache = it
