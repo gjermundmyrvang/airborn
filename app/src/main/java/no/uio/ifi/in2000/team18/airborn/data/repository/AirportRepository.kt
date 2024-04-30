@@ -22,9 +22,11 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Taf
 import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import javax.inject.Inject
+import javax.inject.Singleton
 
 // Refactored to use a single instance of Json for serialization to avoid unnecessary instantiation.
 
+@Singleton
 class AirportRepository @Inject constructor(
     private val airportDataSource: AirportDataSource,
     private val tafmetarDataSource: TafmetarDataSource,
@@ -107,7 +109,13 @@ class AirportRepository @Inject constructor(
         return uri.replaceRange(startIndex, endIdex + 1, "")
     }
 
-    suspend fun isRoute(route: String) = route in routeDataSource.fetchAllAvailableRoutes()
-    suspend fun fetchRoute(route: String) = routeDataSource.fetchRoute(route)
+    private var routeDataCache: List<String>? = null
+    suspend fun isRoute(route: String): Boolean =
+        route in (routeDataCache ?: routeDataSource.fetchAllAvailableRoutes().also {
+            routeDataCache = it
+        })
+
+    suspend fun fetchRoute(departureIcao: Icao, arrivalIcao: Icao) =
+        routeDataSource.fetchRoute("iga-${departureIcao.code}-${arrivalIcao.code}") // only iga is relevant for our case
 
 }
