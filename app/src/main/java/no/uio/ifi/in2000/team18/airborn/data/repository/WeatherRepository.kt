@@ -7,7 +7,6 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSour
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.GribFile
-import no.uio.ifi.in2000.team18.airborn.model.GribFiles
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
@@ -38,24 +37,26 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    suspend fun fetchGribFiles(): GribFiles {
-        val available = gribDataSource.availableGribFiles()
-        val availableTimes = available.map { Pair(it, it.params.time) }
-        Log.d("Route", "available GribFiles: $available")
-        Log.d("Route", "available times: $availableTimes")
-        return available
-    }
-    // TODO: make function that reads out and returns the times available in GribFiles
 
-    suspend fun currentGribFile(gribFiles: GribFiles): GribFile {
+    suspend fun initializeTimeseries(): Map<ZonedDateTime, GribFile> {
+        val available = gribDataSource.availableGribFiles()
+        val availableTimes =
+            available.map { it.params.time to it }.toMap().toSortedMap(compareBy { it })
+        return availableTimes
+    }
+
+
+    fun currentGribFile(timeSeries: Map<ZonedDateTime, GribFile>): GribFile {
         val now = ZonedDateTime.now(ZoneOffset.UTC)
-        return gribFiles.find {
-            it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
+        val returnTime = timeSeries.filterKeys {
+            it.isBefore(now) || it.isEqual(now) && it.plusHours(
                 3
             ).isAfter(
                 now
             )
-        } ?: gribFiles.last()
+        }. ?: timeSeries.last()
+
+        return returnTime.
     }
 
     suspend fun fetchIsobaricData(gribFile: GribFile, position: Position): IsobaricData {
@@ -99,7 +100,6 @@ class WeatherRepository @Inject constructor(
 
 
     suspend fun updateRouteIsobaric(route: Route, fraction: Double, time: ZonedDateTime) {
-        val gribFiles = fetchGribFiles()
 
         // TODO: change to use position at specific FRACTION, update IsobaricPosition-values
         val distance = route.departure.position.distanceTo(route.arrival.position)

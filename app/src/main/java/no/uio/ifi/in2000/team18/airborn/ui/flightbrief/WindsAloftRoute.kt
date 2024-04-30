@@ -34,7 +34,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 
 
 @Composable
-fun Route(state: LoadingState<Route>, initRouteIsobaric: () -> Unit) =
+fun WindsAloftRoute(state: LoadingState<Route>, initRouteIsobaric: () -> Unit) =
     LazyCollapsible(
         header = "Route isobaric",
         value = state,

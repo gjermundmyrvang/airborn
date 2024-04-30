@@ -7,6 +7,7 @@ import java.time.ZonedDateTime
 
 data class IsobaricPosition(
     val position: Position,
+    val fraction: Double,
     val timeSeries: Map<ZonedDateTime, List<IsobaricData>>? = null,
     val distance: Distance? = null,
     val bearing: Direction? = null,

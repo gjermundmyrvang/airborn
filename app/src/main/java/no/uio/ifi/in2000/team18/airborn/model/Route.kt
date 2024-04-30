@@ -9,23 +9,17 @@ import java.time.ZonedDateTime
 class Route(
     val departure: Airport,
     val arrival: Airport,
-    var positions: Map<Double, IsobaricPosition>? = null, // fraction of Route as Double
-    var timeSeries: Map<ZonedDateTime, List<GribFile>>? = null,
-    var availableGribFiles: List<GribFile>? = null,
+    var positions: Map<Double, Position>? = null,  // fraction of Route as Double
+    var timeSeries: Map<ZonedDateTime, GribFile>? = null,
     var position: IsobaricPosition? = null, // current Isobaric position in view
     var isobaric: IsobaricData? = null, // current Isobaric Data
 ) {
     fun initializePositions(posList: List<Position>) {
         val fractions = listOf(0.0, 0.25, 0.5, 0.75, 1.0)
         require(posList.size == fractions.size)
-        positions = fractions.zip(posList.map { IsobaricPosition(it) }).toMap()
+        positions = fractions.zip(posList.map { it }).toMap()
         Log.d("Route", "Positions made: $positions")
     }
-
-    //TODO: this will arrange timeSeries by using availableGribFiles
-    // and connect to ZonedDateTimes
-    fun initializeTimeSeries() {}
-
 }
 
 /**

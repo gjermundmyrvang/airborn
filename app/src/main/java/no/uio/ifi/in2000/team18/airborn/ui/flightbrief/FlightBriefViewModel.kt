@@ -105,6 +105,8 @@ class FlightBriefViewModel @Inject constructor(
                 val positions = findAlongRoute(departure.position, arrival.position, 1)
                 val routeInit = Route(departure, arrival)
                 routeInit.initializePositions(positions)
+                routeInit.timeSeries = weatherRepository.initializeTimeseries()
+                Log.d("Route", "init route has timeSeries ${routeInit.timeSeries}")
                 var availableGribTimes: List<ZonedDateTime>? = null
 
                 val route = load {
