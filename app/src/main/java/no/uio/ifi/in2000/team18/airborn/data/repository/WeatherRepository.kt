@@ -24,6 +24,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import ucar.nc2.dt.GridDatatype
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.pow
@@ -38,9 +39,10 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    private var isobaricDataCache = mutableMapOf<Position, IsobaricData>()
-    private var isobaricRouteDataCache = mutableMapOf<Pair<Airport, Airport>, RouteIsobaric>()
-    private var weatherDataCache = mutableMapOf<Airport, List<WeatherDay>>()
+    private var isobaricDataCache = ConcurrentHashMap(mutableMapOf<Position, IsobaricData>())
+    private var isobaricRouteDataCache =
+        ConcurrentHashMap(mutableMapOf<Pair<Airport, Airport>, RouteIsobaric>())
+    private var weatherDataCache = ConcurrentHashMap(mutableMapOf<Airport, List<WeatherDay>>())
     suspend fun getIsobaricData(position: Position): IsobaricData =
         isobaricDataCache[position] ?: run {
             val gribFiles = gribDataSource.availableGribFiles()
