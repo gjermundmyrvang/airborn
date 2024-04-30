@@ -129,11 +129,10 @@ class FlightBriefViewModel @Inject constructor(
 
     fun initRoute() {
         viewModelScope.launch {
-            val departure = _state.value.departureIcao.code
-            val arrival = _state.value.arrivalIcao?.code
-            val route =
-                "iga-$departure-$arrival" // Only 'iga' routes is relevant for the airports we use in this project
-            val routeForecast = load { airportRepository.fetchRoute(route) }
+            val departure = _state.value.departureIcao
+            val arrival =
+                _state.value.arrivalIcao!! // This function is only called when user has created brief with an arrival
+            val routeForecast = load { airportRepository.fetchRoute(departure, arrival) }
             _state.update {
                 it.copy(routeForecast = routeForecast)
             }
