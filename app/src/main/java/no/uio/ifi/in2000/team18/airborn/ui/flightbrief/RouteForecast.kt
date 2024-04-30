@@ -16,26 +16,25 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 
 @Composable
-fun RouteForecast(state: LoadingState<List<RouteForecast>>, initRoute: () -> Unit) =
-    LazyCollapsible(
-        header = "Route forecast", value = state, onExpand = { initRoute() }
-    ) { routeForecasts ->
-        val route = routeForecasts.first().params.route
-        Text( // All elements in list will be same route
-            text = route, Modifier.padding(start = 10.dp)
-        )
-        var selected by rememberSaveable { mutableIntStateOf(0) }
-        TimeRow(
-            modifier = Modifier.padding(start = 10.dp),
-            current = selected,
-            times = routeForecasts.map { it.params.time.time },
-            selectedColor = MaterialTheme.colorScheme.secondary,
-            notSelectedColor = MaterialTheme.colorScheme.tertiaryContainer,
-            onTimeClicked = { selected = it }
-        )
-        ImageComposable(
-            uri = routeForecasts[selected].uri,
-            contentDescription = "Route forecast",
-            modifier = Modifier.aspectRatio(700f / 622F)
-        )
-    }
+fun RouteForecast(
+    state: LoadingState<List<RouteForecast>>, initRoute: () -> Unit
+) = LazyCollapsible(header = "Route forecast",
+    value = state,
+    onExpand = { initRoute() }) { routeForecasts ->
+    val route = routeForecasts.first().params.route
+    Text( // All elements in list will be same route
+        text = route, Modifier.padding(start = 10.dp)
+    )
+    var selected by rememberSaveable { mutableIntStateOf(0) }
+    TimeRow(modifier = Modifier.padding(start = 10.dp),
+        current = selected,
+        times = routeForecasts.map { it.params.time.time },
+        selectedColor = MaterialTheme.colorScheme.secondary,
+        notSelectedColor = MaterialTheme.colorScheme.tertiaryContainer,
+        onTimeClicked = { selected = it })
+    ImageComposable(
+        uri = routeForecasts[selected].uri,
+        contentDescription = "Route forecast",
+        modifier = Modifier.aspectRatio(700f / 622F)
+    )
+}
