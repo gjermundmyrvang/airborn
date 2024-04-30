@@ -138,29 +138,6 @@ fun Map(
                 puckBearing = PuckBearing.HEADING
                 puckBearingEnabled = true
             },
-            attribution = {
-                if (permissionState.status.isGranted) {
-                    FloatingActionButton(modifier = Modifier.offset(350.dp, 450.dp),
-                        onClick = {
-                        mapViewportState.transitionToFollowPuckState(
-                            FollowPuckViewportStateOptions.Builder()
-                                .zoom(7.000)
-                                .pitch(0.0)
-                                .build(),
-                            DefaultViewportTransitionOptions.Builder().build(),
-                        )
-                    }) {
-                        Icon(
-                            modifier = Modifier.size(32.dp),
-                            painter =
-                            painterResource(
-                                id = R.drawable.center
-                            ),
-                            contentDescription = "Recenter"
-                        )
-                    }
-                }
-            },
             mapViewportState = mapViewportState,
         ) {
             airports.forEach { airport ->
@@ -177,6 +154,27 @@ fun Map(
             state.airportPair?.let {
                 Polyline(
                     positions = it
+                )
+            }
+        }
+        if (permissionState.status.isGranted) {
+            FloatingActionButton(modifier = Modifier.offset(350.dp, 450.dp),
+                onClick = {
+                    mapViewportState.transitionToFollowPuckState(
+                        FollowPuckViewportStateOptions.Builder()
+                            .zoom(7.000)
+                            .pitch(0.0)
+                            .build(),
+                        DefaultViewportTransitionOptions.Builder().build(),
+                    )
+                }) {
+                Icon(
+                    modifier = Modifier.size(32.dp),
+                    painter =
+                    painterResource(
+                        id = R.drawable.center
+                    ),
+                    contentDescription = "Recenter"
                 )
             }
         }
