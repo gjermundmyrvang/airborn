@@ -37,6 +37,7 @@ class AirportRepository @Inject constructor(
 ) {
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
+    suspend fun getAirportNearby(airport: Airport) = airportDataSource.getAirportsNearby(airport)
     suspend fun search(query: String) = airportDataSource.search(query)
     suspend fun all() = airportDataSource.all()
 

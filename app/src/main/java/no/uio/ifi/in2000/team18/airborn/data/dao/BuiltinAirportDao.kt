@@ -19,9 +19,13 @@ interface BuiltinAirportDao {
     fun getByIcao(icao: String): BuiltinAirport?
 
     @Query(
-        "SELECT * FROM builtin_airport " +
-                "WHERE (lat BETWEEN (:latitude - 1.0) AND (:latitude + 1.0))" +
-                "AND (lon BETWEEN (:longitude - 2.0) AND (:longitude + 2.0));"
+        """
+        SELECT * 
+        FROM builtin_airport 
+        ORDER BY (lat - 60)*(lat - 60) + (lon - 10) * (lon - 10) 
+        LIMIT 10;    
+        """
+
     )
     fun getAirportsNearby(latitude: Double, longitude: Double): List<BuiltinAirport>?
 }

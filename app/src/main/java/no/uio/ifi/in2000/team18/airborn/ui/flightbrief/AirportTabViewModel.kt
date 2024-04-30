@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -66,6 +67,13 @@ sealed class AirportTabViewModel(
 
     fun initMetarTaf() {
         viewModelScope.launch {
+            Log.d("Nearby", "${
+                airportRepository.getByIcao(icao)?.let {
+                    airportRepository.getAirportNearby(
+                        it
+                    )
+                }
+            }")
             val metarTaf = load { airportRepository.fetchTafMetar(icao) }
             _state.update { it.copy(metarTaf = metarTaf) }
         }
