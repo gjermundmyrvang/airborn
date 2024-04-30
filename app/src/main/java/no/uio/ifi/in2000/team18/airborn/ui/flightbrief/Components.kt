@@ -125,7 +125,7 @@ fun LoadingScreen() {
         LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp),
+                .padding(horizontal = 10.dp),
             color = MaterialTheme.colorScheme.background,
             trackColor = MaterialTheme.colorScheme.secondaryContainer,
         )
