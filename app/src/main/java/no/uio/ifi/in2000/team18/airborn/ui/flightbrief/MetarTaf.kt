@@ -1,17 +1,20 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
@@ -76,15 +80,13 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
             Text("No metar or taf for this airport")
             return@LazyCollapsible
         }
-
         Card(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
                     rotationY = rotate
                     cameraDistance = 8 * density
-                }
-                .clickable { rotated = !rotated },
+                },
             shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -97,7 +99,10 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
                         .padding(10.dp)
                         .fillMaxWidth()
                 ) {
-                    Row {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             text = "RAW DATA:",
                             fontSize = 25.sp,
@@ -106,7 +111,18 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
                                 .weight(1F)
                                 .fillMaxSize()
                         )
-                        Icon(imageVector = rememberFlip(), contentDescription = "Flip")
+                        Box(
+                            Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(14.dp)
+                                )
+                                .padding(horizontal = 16.dp, vertical = 3.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .clickable { rotated = !rotated }
+                        ) {
+                            Text("Decode")
+                        }
                     }
                     if (metar != null) {
                         Text(
@@ -135,13 +151,36 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
                 Box(modifier = Modifier.graphicsLayer {
                     rotationY = 180f
                 }) {
-                    Icon(
-                        imageVector = rememberFlip(),
-                        contentDescription = "Flip",
-                        Modifier
-                            .align(Alignment.TopEnd)
+                    Column(
+                        modifier = Modifier
                             .padding(10.dp)
-                    )
+                            .fillMaxWidth()
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "DECODED DATA:",
+                                fontSize = 25.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .weight(1F)
+                                    .fillMaxSize()
+                            )
+                            Box(
+                                Modifier
+                                    .background(
+                                        MaterialTheme.colorScheme.primaryContainer,
+                                        shape = RoundedCornerShape(14.dp)
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 3.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .clickable { rotated = !rotated }) {
+                                Text("Raw")
+                            }
+                        }
+                    }
                     when (metar) {
                         is Metar.DecodedMetar -> DecodedMetar(metar)
                         null -> Text("No METAR available")
@@ -167,15 +206,7 @@ fun DecodedMetar(metar: Metar.DecodedMetar) = Column(
         .padding(10.dp)
         .fillMaxWidth()
 ) {
-    Text(
-        text = "DECODED",
-        fontSize = 25.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier
-            .weight(1F)
-            .fillMaxSize()
-    )
-    Text(text = "METAR", fontWeight = FontWeight.Bold)
+    Spacer(modifier = Modifier.height(32.dp))
     Row {
         Text("Station Name: ", fontWeight = FontWeight.Bold)
         Text("${metar.station}")
@@ -210,7 +241,7 @@ fun DecodedMetar(metar: Metar.DecodedMetar) = Column(
             RotatableArrowIcon(
                 wind.direction.direction,
                 iconSize = 16.dp,
-                iconColor = MaterialTheme.colorScheme.secondaryContainer
+                iconColor = MaterialTheme.colorScheme.secondary
             )
         }
         Text("${wind.direction.formatAsDegrees(0)} ${wind.speed.formatAsKnots(1)}") // TODO: Arrow pointing in wind direction

@@ -33,6 +33,7 @@ class HomeViewModel @Inject constructor(
         val airports: List<Airport> = listOf(),
         val sigmets: List<Sigmet> = listOf(),
         val sun: LoadingState<Sun?> = LoadingState.Loading,
+        val showNoSigmetMessage: Boolean = false,
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
     ) {
         val airportPair
@@ -136,8 +137,15 @@ class HomeViewModel @Inject constructor(
                 listOf()
             }
             _state.update {
-                it.copy(sigmets = sigmets)
+                val isEmpty = sigmets.isEmpty()
+                it.copy(sigmets = sigmets, showNoSigmetMessage = isEmpty)
             }
+        }
+    }
+
+    fun dismissNoSigmetMessage() {
+        _state.update {
+            it.copy(showNoSigmetMessage = false)
         }
     }
 

@@ -113,6 +113,7 @@ fun Map(
             }
         }
     }
+    var showNoSigmetMessage = state.showNoSigmetMessage
 
     LaunchedEffect(permissionState.status.isGranted) {
         if (permissionState.status.isGranted) {
@@ -178,7 +179,13 @@ fun Map(
                 )
             }
         }
-        Column(modifier = Modifier.padding(top = 16.dp)) {
+        Column(modifier = Modifier.padding(top = 6.dp)) {
+            Spacer(modifier = Modifier.height(10.dp))
+            if (showNoSigmetMessage) {
+                NoSigmetInfoBox {
+                    homeViewModel.dismissNoSigmetMessage()
+                }
+            }
             if (distance != null) {
                 state.airportPair?.let { DistanceInfoBox(distance = distance, airportPair = it) }
             }
@@ -268,6 +275,42 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
                 painter = painterResource(id = R.drawable.local_airport_24),
                 contentDescription = "Marker",
                 modifier = Modifier.size(12.dp),
+            )
+        }
+    }
+}
+
+@Composable
+fun NoSigmetInfoBox(onClose: () -> Unit) {
+    Row(
+        Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .clip(RoundedCornerShape(5.dp))
+            .background(
+                Color(0xD5263842),
+                shape = RoundedCornerShape(5.dp)
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    )
+    {
+        Text(
+            "Currently no sigmets/airmets",
+            Modifier.padding(start = 5.dp),
+            MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
+        )
+        IconButton(onClick = { onClose() }) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Close icon",
+                tint = MaterialTheme.colorScheme.secondary
             )
         }
     }
