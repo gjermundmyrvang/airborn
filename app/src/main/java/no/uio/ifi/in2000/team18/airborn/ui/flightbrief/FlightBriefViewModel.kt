@@ -5,6 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.client.call.NoTransformationFoundException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -147,6 +150,12 @@ class FlightBriefViewModel @Inject constructor(
             f().toSuccess()
         } catch (e: UnresolvedAddressException) {
             LoadingState.Error(message = "Unresolved Address")
+        } catch (e: ConnectTimeoutException) {
+            LoadingState.Error("Connection Timed out")
+        } catch (e: NoTransformationFoundException) {
+            LoadingState.Error("Something went wrong with the api")
+        } catch (e: JsonConvertException) {
+            LoadingState.Error("Something went wrong with the api")
         } catch (e: Exception) {
             LoadingState.Error(message = "Unknown Error: $e")
         }
