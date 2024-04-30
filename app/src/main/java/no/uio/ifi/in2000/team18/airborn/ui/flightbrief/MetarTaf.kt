@@ -117,7 +117,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
                                     MaterialTheme.colorScheme.primaryContainer,
                                     shape = RoundedCornerShape(14.dp)
                                 )
-                                .padding(5.dp)
+                                .padding(horizontal = 16.dp, vertical = 3.dp)
                                 .clip(RoundedCornerShape(14.dp))
                                 .clickable { rotated = !rotated }
                         ) {
@@ -174,7 +174,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
                                         MaterialTheme.colorScheme.primaryContainer,
                                         shape = RoundedCornerShape(14.dp)
                                     )
-                                    .padding(5.dp)
+                                    .padding(horizontal = 16.dp, vertical = 3.dp)
                                     .clip(RoundedCornerShape(14.dp))
                                     .clickable { rotated = !rotated }) {
                                 Text("Raw")
