@@ -113,10 +113,11 @@ class AirportRepository @Inject constructor(
     }
 
     private var routeDataCache: List<String>? = null
-    suspend fun isRoute(route: String): Boolean =
-        route in (routeDataCache ?: routeDataSource.fetchAllAvailableRoutes().also {
-            routeDataCache = it
-        })
+    suspend fun isRoute(departureIcao: Icao, arrivalIcao: Icao): Boolean =
+        "iga-$departureIcao-$arrivalIcao" in (routeDataCache
+            ?: routeDataSource.fetchAllAvailableRoutes().also {
+                routeDataCache = it
+            })
 
     suspend fun fetchRoute(departureIcao: Icao, arrivalIcao: Icao) =
         routeDataSource.fetchRoute("iga-${departureIcao.code}-${arrivalIcao.code}") // only iga is relevant for our case
