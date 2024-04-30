@@ -46,10 +46,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -86,16 +86,24 @@ fun HomeScreen(
     )
     val scope = rememberCoroutineScope()
 
+    var sheetHeight by remember { mutableStateOf(0.dp) }
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 300.dp,
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         sheetContent = {
-
             AirportSelection(
                 modifier = modifier
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .onPlaced {
+                        val screenHeight = configuration.screenHeightDp
+                        val yPosition = it.positionInWindow().y / density.density
+                        sheetHeight = (screenHeight - yPosition + 96).dp
+                    },
                 viewModel = viewModel,
                 onFocusChange = {
                     airportInputSelected = it
@@ -107,11 +115,16 @@ fun HomeScreen(
                 })
         },
         content = {
-            Map(viewModel, modifier = Modifier.fillMaxSize(), airportSelected = {
-                scope.launch {
-                    bottomSheetScaffoldState.bottomSheetState.partialExpand()
-                }
-            })
+            Map(
+                viewModel,
+                modifier = Modifier.fillMaxSize(),
+                airportSelected = {
+                    scope.launch {
+                        bottomSheetScaffoldState.bottomSheetState.partialExpand()
+                    }
+                },
+                sheetHeight = sheetHeight,
+            )
             Button(modifier = Modifier.align(Alignment.BottomCenter),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
