@@ -66,7 +66,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
         Column(
             Modifier
                 .align(Alignment.Start)
-                .padding(16.dp)
+                .padding(horizontal = 10.dp)
         ) {
             Text(
                 text = webcams[selectedWebcam].title, fontWeight = FontWeight.Bold, fontSize = 14.sp
