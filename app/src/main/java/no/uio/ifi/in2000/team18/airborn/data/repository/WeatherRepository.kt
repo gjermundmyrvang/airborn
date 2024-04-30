@@ -46,7 +46,7 @@ class WeatherRepository @Inject constructor(
     }
 
 
-    fun currentGribFile(timeSeries: Map<ZonedDateTime, GribFile>): GribFile {
+    fun currentGribFile(timeSeries: Map<ZonedDateTime, GribFile>): GribFile? {
         val now = ZonedDateTime.now(ZoneOffset.UTC)
         val returnTime = timeSeries.filterKeys {
             it.isBefore(now) || it.isEqual(now) && it.plusHours(
@@ -54,9 +54,10 @@ class WeatherRepository @Inject constructor(
             ).isAfter(
                 now
             )
-        }. ?: timeSeries.last()
-
-        return returnTime.
+        }.keys
+        val returnValue = timeSeries[returnTime.first()]
+        Log.d("Route", "currentGribFile: $returnTime")
+        return returnValue
     }
 
     suspend fun fetchIsobaricData(gribFile: GribFile, position: Position): IsobaricData {
@@ -100,8 +101,16 @@ class WeatherRepository @Inject constructor(
 
 
     suspend fun updateRouteIsobaric(route: Route, fraction: Double, time: ZonedDateTime) {
+        // TODO: check for cached stuff
+        route.isobaric = route.positions?.get(fraction)?.let { pos ->
+            route.timeSeries?.let { it ->
+                currentGribFile(it)?.let { file ->
+                    fetchIsobaricData(file, pos)
+                }
+            }
+        }
+        // TODO: cache stuff.
 
-        // TODO: change to use position at specific FRACTION, update IsobaricPosition-values
         val distance = route.departure.position.distanceTo(route.arrival.position)
         val bearing = route.departure.position.bearingTo(route.arrival.position)
 
