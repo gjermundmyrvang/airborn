@@ -24,7 +24,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 @Composable
 fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulence: () -> Unit) =
     LazyCollapsible(
-        header = "Turbulence", value = state, onExpand = initTurbulence, padding = 0.dp
+        header = "Turbulence", value = state, onExpand = initTurbulence,
     ) { turbulence ->
 
         if (turbulence == null) {

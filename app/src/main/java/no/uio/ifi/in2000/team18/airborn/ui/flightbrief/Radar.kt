@@ -41,7 +41,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Composable
 fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) = LazyCollapsible(
-    header = "Radar", value = state, onExpand = { initRadar() }, padding = 0.dp
+    header = "Radar", value = state, onExpand = { initRadar() },
 ) { radarList ->
     val options = listOf(
         "central_norway" to "Central Norway",

@@ -11,7 +11,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Composable
 fun IsobaricData(state: LoadingState<IsobaricData?>, initisobaric: () -> Unit) = LazyCollapsible(
-    header = "Winds aloft", value = state, onExpand = initisobaric, padding = 0.dp
+    header = "Winds aloft", value = state, onExpand = initisobaric
 ) { isobaric ->
     // data from isobaric layers, includes height TODO: a table or chart would be nice
     Spacer(modifier = Modifier.height(16.dp))
