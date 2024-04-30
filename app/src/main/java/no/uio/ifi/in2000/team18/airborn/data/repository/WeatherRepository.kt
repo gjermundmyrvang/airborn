@@ -25,6 +25,7 @@ import ucar.nc2.dt.GridDatatype
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -32,69 +33,80 @@ const val TEMPERATURE_LAPSE_RATE: Double = 0.0065 // in (K/m)
 const val PRESSURE_CALCULATION_EXPONENT: Double = 1 / 5.25579
 
 
+@Singleton
 class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    suspend fun getIsobaricData(position: Position): IsobaricData {
-        val gribFiles = gribDataSource.availableGribFiles()
-        val now = ZonedDateTime.now(ZoneOffset.UTC)
-        val gribFile = gribFiles.find {
-            it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
-                3
-            ).isAfter(
-                now
-            )
-        } ?: gribFiles.last()
-        val windsAloft = gribDataSource.useGribFile(gribFile) { dataset ->
-            val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
-            val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
-            val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
-
-            Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
-
-            temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
-                (named.name.trim().toInt() / 100) to listOf(
-                    temperature.sampleAtPosition(position, i).toDouble(),
-                    windU.sampleAtPosition(position, i).toDouble(),
-                    windV.sampleAtPosition(position, i).toDouble(),
+    private val isobaricDataCache = mutableMapOf<Position, IsobaricData>()
+    private val isobaricRouteDataCache = mutableMapOf<Pair<Airport, Airport>, RouteIsobaric>()
+    private val weatherDataCache = mutableMapOf<Airport, List<WeatherDay>>()
+    suspend fun getIsobaricData(position: Position): IsobaricData =
+        isobaricDataCache[position] ?: run {
+            val gribFiles = gribDataSource.availableGribFiles()
+            val now = ZonedDateTime.now(ZoneOffset.UTC)
+            val gribFile = gribFiles.find {
+                it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
+                    3
+                ).isAfter(
+                    now
                 )
-            }.toMap()
+            } ?: gribFiles.last()
+            val windsAloft = gribDataSource.useGribFile(gribFile) { dataset ->
+                val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
+                val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
+                val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
+
+                Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
+
+                temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
+                    (named.name.trim().toInt() / 100) to listOf(
+                        temperature.sampleAtPosition(position, i).toDouble(),
+                        windU.sampleAtPosition(position, i).toDouble(),
+                        windV.sampleAtPosition(position, i).toDouble(),
+                    )
+                }.toMap()
+            }
+
+            val layers = windsAloft.map { (key, value) ->
+                val layer = IsobaricLayer(
+                    pressure = Pressure(key.toDouble()),
+                    temperature = Temperature(value[0] - 273.15),
+                    uWind = value[1],
+                    vWind = value[2]
+                )
+                layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
+                layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
+                layer.height = Distance(calculateHeight(layer))
+                layer
+            }.filter {
+                val h = it.height
+                val maxHeight = 15000
+                val result = if (h != null) (h.feet <= maxHeight) else false
+                result
+            }
+            IsobaricData(
+                position, gribFile.params.time.toSystemZoneOffset(), layers
+            ).also { isobaricDataCache[position] = it }
         }
 
-        val layers = windsAloft.map { (key, value) ->
-            val layer = IsobaricLayer(
-                pressure = Pressure(key.toDouble()),
-                temperature = Temperature(value[0] - 273.15),
-                uWind = value[1],
-                vWind = value[2]
-            )
-            layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
-            layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
-            layer.height = Distance(calculateHeight(layer))
-            layer
-        }.filter {
-            val h = it.height
-            val maxHeight = 15000
-            val result = if (h != null) (h.feet <= maxHeight) else false
-            result
+    suspend fun getRouteIsobaric(departure: Airport, arrival: Airport): RouteIsobaric =
+        isobaricRouteDataCache[Pair(departure, arrival)] ?: isobaricRouteDataCache[Pair(
+            arrival, departure
+        )] ?: run {
+            val distance = departure.position.distanceTo(arrival.position)
+            val bearing = departure.position.bearingTo(arrival.position)
+            RouteIsobaric(
+                departure = departure,
+                arrival = arrival,
+                isobaric = getIsobaricData(departure.position.halfwayTo(departure.position)),
+                distance = distance,
+                bearing = bearing
+            ).also {
+                isobaricRouteDataCache[Pair(departure, arrival)] = it
+                isobaricRouteDataCache[Pair(arrival, departure)] = it
+            }
         }
-        return IsobaricData(
-            position, gribFile.params.time.toSystemZoneOffset(), layers
-        )
-    }
-
-    suspend fun getRouteIsobaric(departure: Airport, arrival: Airport): RouteIsobaric {
-        val distance = departure.position.distanceTo(arrival.position)
-        val bearing = departure.position.bearingTo(arrival.position)
-        return RouteIsobaric(
-            departure = departure,
-            arrival = arrival,
-            isobaric = getIsobaricData(departure.position.halfwayTo(departure.position)),
-            distance = distance,
-            bearing = bearing
-        )
-    }
 
     private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
         (sqrt(uWind.pow(2) + vWind.pow(2))).mps
@@ -105,7 +117,7 @@ class WeatherRepository @Inject constructor(
      * @param refTemperature todo: what is this
      * @param pressureLevelZero the pressure at sea level
      */
-    fun calculateHeight(
+    private fun calculateHeight(
         layer: IsobaricLayer,
         refTemperature: Double = 288.15,
         pressureLevelZero: Double = 1013.25,
@@ -157,11 +169,10 @@ class WeatherRepository @Inject constructor(
         "fog" to "Fog",
     )
 
-    suspend fun getWeatherDays(airport: Airport): List<WeatherDay> {
-        val weatherData =
-            locationForecastDataSource.fetchForecast(airport.position).properties.timeseries
-        return mapToWeatherDay(weatherData)
-    }
+    suspend fun getWeatherDays(airport: Airport) = weatherDataCache[airport] ?: mapToWeatherDay(
+        locationForecastDataSource.fetchForecast(airport.position).properties.timeseries
+    ).also { weatherDataCache[airport] = it }
+
 
     private fun mapToWeatherDay(timeseries: List<TimeSeries>): List<WeatherDay> {
         val groupedByDate = timeseries.groupBy { DateTime(isoDateTime = it.time).date }
