@@ -46,8 +46,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -84,11 +86,13 @@ fun HomeScreen(
     )
     val scope = rememberCoroutineScope()
 
-    BottomSheetScaffold(scaffoldState = bottomSheetScaffoldState,
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 300.dp,
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         sheetContent = {
+
             AirportSelection(modifier = modifier.padding(16.dp),
                 viewModel = viewModel,
                 onFocusChange = {
