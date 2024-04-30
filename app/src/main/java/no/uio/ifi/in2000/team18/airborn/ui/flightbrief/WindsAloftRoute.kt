@@ -17,6 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -37,6 +41,7 @@ fun Route(state: LoadingState<Route>, initRouteIsobaric: () -> Unit) =
         onExpand = initRouteIsobaric,
         padding = 0.dp
     ) { route ->
+        var selectedTime by rememberSaveable { mutableIntStateOf(0) }
         Column(
             Modifier.padding(vertical = 10.dp),
         ) {

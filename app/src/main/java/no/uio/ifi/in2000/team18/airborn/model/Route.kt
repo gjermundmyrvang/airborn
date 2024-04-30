@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
+import android.util.Log
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricPosition
@@ -18,6 +19,7 @@ class Route(
         val fractions = listOf(0.0, 0.25, 0.5, 0.75, 1.0)
         require(posList.size == fractions.size)
         positions = fractions.zip(posList.map { IsobaricPosition(it) }).toMap()
+        Log.d("Route", "Positions made: $positions")
     }
 
     //TODO: this will arrange timeSeries by using availableGribFiles

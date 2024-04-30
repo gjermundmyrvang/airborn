@@ -39,7 +39,11 @@ class WeatherRepository @Inject constructor(
     private val gribDataSource: GribDataSource,
 ) {
     suspend fun fetchGribFiles(): GribFiles {
-        return gribDataSource.availableGribFiles()
+        val available = gribDataSource.availableGribFiles()
+        val availableTimes = available.map { Pair(it, it.params.time) }
+        Log.d("Route", "available GribFiles: $available")
+        Log.d("Route", "available times: $availableTimes")
+        return available
     }
     // TODO: make function that reads out and returns the times available in GribFiles
 

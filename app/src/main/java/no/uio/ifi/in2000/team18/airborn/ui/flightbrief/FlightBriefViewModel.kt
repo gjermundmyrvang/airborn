@@ -105,8 +105,11 @@ class FlightBriefViewModel @Inject constructor(
                 val positions = findAlongRoute(departure.position, arrival.position, 1)
                 val routeInit = Route(departure, arrival)
                 routeInit.initializePositions(positions)
+                var availableGribTimes: List<ZonedDateTime>? = null
 
                 val route = load {
+                    //todo: continue here, probably fetchGribFiles first of all? Also in updateRouteIsobaric??
+                    // availableGribTimes =
                     weatherRepository.updateRouteIsobaric(
                         routeInit, 0.5, ZonedDateTime.now()
                     )
