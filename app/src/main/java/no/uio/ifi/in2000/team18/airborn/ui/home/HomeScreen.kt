@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
+import android.Manifest
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,8 +46,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -56,15 +59,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -81,13 +86,16 @@ fun HomeScreen(
     )
     val scope = rememberCoroutineScope()
 
-    BottomSheetScaffold(scaffoldState = bottomSheetScaffoldState,
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 300.dp,
         sheetShadowElevation = 5.dp,
         sheetContainerColor = MaterialTheme.colorScheme.primaryContainer,
         sheetContent = {
+
             AirportSelection(
-                modifier = modifier.padding(16.dp),
+                modifier = modifier
+                    .padding(16.dp),
                 viewModel = viewModel,
                 onFocusChange = {
                     airportInputSelected = it
@@ -121,8 +129,8 @@ fun HomeScreen(
                 Text("Select Airport")
             }
         }
-
     )
+    RequestPermission(permission = Manifest.permission.ACCESS_FINE_LOCATION)
 }
 
 
@@ -249,7 +257,7 @@ private fun AirportSelection(
                 disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
             ),
-            enabled = state.departureAirport != null,
+            enabled = state.departureAirport != null && state.networkStatus == ConnectivityObserver.Status.Available,
             modifier = Modifier
                 .width(200.dp)
                 .align(Alignment.CenterHorizontally),

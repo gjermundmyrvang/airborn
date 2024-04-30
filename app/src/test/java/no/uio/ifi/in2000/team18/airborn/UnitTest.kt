@@ -108,7 +108,7 @@ class UnitTest {
         // Act
         val result = start.bearingTo(end)
         // Assert
-        Assert.assertEquals(334.0, result, 0.5)
+        Assert.assertEquals(Direction(334.0).degrees, result.degrees, 0.5)
     }
 
     @Test

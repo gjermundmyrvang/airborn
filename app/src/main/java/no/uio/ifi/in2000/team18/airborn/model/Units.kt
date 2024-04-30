@@ -198,7 +198,7 @@ data class Position(
      * @param destination Position of destination
      * @return Direction of initial bearing to destination
      */
-    fun bearingTo(destination: Position): Double {
+    fun bearingTo(destination: Position): Direction {
         val startLon = Math.toRadians(this.longitude)
         val startLat = Math.toRadians(this.latitude)
         val endLon = Math.toRadians(destination.longitude)
@@ -208,7 +208,7 @@ data class Position(
         val y = sin(deltaLon) * cos(endLat)
         val x = (cos(startLat) * sin(endLat)).minus(sin(startLat) * cos(endLat) * cos(deltaLon))
         val theta = atan2(y, x)
-        return Math.toDegrees((theta)).mod(360.0) // bearing in degrees
+        return Math.toDegrees((theta)).mod(360.0).degrees // bearing in degrees
     }
 }
 

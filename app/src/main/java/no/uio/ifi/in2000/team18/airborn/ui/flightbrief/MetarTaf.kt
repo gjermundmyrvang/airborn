@@ -62,8 +62,10 @@ import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import java.time.ZoneId
 
 @Composable
-fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
-    LazyCollapsible(header = "Metar/Taf", value = state, onExpand = initMetar) { metarTaf ->
+fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollapsible(
+    header = "Metar/Taf", value = state, onExpand = initMetar
+) { metarTaf ->
+    Column(modifier = Modifier.padding(16.dp)) {
         val clipboardManager = LocalClipboardManager.current
         val metar = metarTaf?.latestMetar
         val taf = metarTaf?.latestTaf
@@ -193,6 +195,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) =
             }
         }
     }
+}
 
 @OptIn(FormatStringsInDatetimeFormats::class)
 fun LocalDateTime.format(format: String) = format(LocalDateTime.Format { byUnicodePattern(format) })

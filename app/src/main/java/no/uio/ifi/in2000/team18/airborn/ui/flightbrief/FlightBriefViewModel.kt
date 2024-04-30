@@ -5,6 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.client.call.NoTransformationFoundException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,6 +17,7 @@ import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Radar
+import no.uio.ifi.in2000.team18.airborn.model.RouteForecast
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -21,6 +25,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
+import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
@@ -29,6 +34,7 @@ class FlightBriefViewModel @Inject constructor(
     private val airportRepository: AirportRepository,
     private val weatherRepository: WeatherRepository,
     savedStateHandle: SavedStateHandle,
+    private val connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
 
     data class UiState(
@@ -41,10 +47,12 @@ class FlightBriefViewModel @Inject constructor(
         val geoSatelliteImage: LoadingState<String> = Loading,
         val route: LoadingState<RouteIsobaric> = Loading,
         val radarAnimations: LoadingState<List<Radar>> = Loading,
+        val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
+        val routeForecast: LoadingState<List<RouteForecast>> = Loading,
+        val isIgaRoute: Boolean = false,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
     }
-
 
     private val _state = MutableStateFlow(
         UiState(
@@ -61,6 +69,18 @@ class FlightBriefViewModel @Inject constructor(
                 it.copy(
                     airports = airportRepository.all()
                 )
+            }
+        }
+        viewModelScope.launch {
+            connectivityObserver.observe().collect { status ->
+                _state.update { it.copy(networkStatus = status) }
+            }
+        }
+        viewModelScope.launch {
+            val departureIcao = _state.value.departureIcao.code
+            val arrivalIcao = _state.value.arrivalIcao?.code
+            arrivalIcao?.let {
+                _state.update { it.copy(isIgaRoute = airportRepository.isRoute("iga-$departureIcao-$arrivalIcao")) }
             }
         }
     }
@@ -107,6 +127,18 @@ class FlightBriefViewModel @Inject constructor(
         }
     }
 
+    fun initRoute() {
+        viewModelScope.launch {
+            val departure = _state.value.departureIcao
+            val arrival =
+                _state.value.arrivalIcao!! // This function is only called when user has created brief with an arrival
+            val routeForecast = load { airportRepository.fetchRoute(departure, arrival) }
+            _state.update {
+                it.copy(routeForecast = routeForecast)
+            }
+        }
+    }
+
     fun filterArrivalAirports(input: String) {
         Log.i("ARRIVAL from filter", input)
         _state.update { it.copy(arrivalAirportInput = input) }
@@ -133,10 +165,19 @@ class FlightBriefViewModel @Inject constructor(
     }
 
     private suspend fun <T> load(f: suspend () -> T): LoadingState<T> {
+        if (state.value.networkStatus != ConnectivityObserver.Status.Available) {
+            return LoadingState.Error(message = "Network Unavailable")
+        }
         return try {
             f().toSuccess()
         } catch (e: UnresolvedAddressException) {
             LoadingState.Error(message = "Unresolved Address")
+        } catch (e: ConnectTimeoutException) {
+            LoadingState.Error("Connection Timed out")
+        } catch (e: NoTransformationFoundException) {
+            LoadingState.Error("Something went wrong with the api")
+        } catch (e: JsonConvertException) {
+            LoadingState.Error("Something went wrong with the api")
         } catch (e: Exception) {
             LoadingState.Error(message = "Unknown Error: $e")
         }

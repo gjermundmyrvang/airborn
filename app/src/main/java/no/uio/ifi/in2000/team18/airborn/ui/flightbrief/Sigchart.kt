@@ -21,7 +21,6 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
         header = "Sigcharts",
         value = state,
         onExpand = initSigchart,
-        padding = 0.dp
     ) { sigcharts ->
         var selectedArea by rememberSaveable { mutableStateOf(Area.norway) }
         var selectedSigchart by rememberSaveable { mutableIntStateOf(0) }

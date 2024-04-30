@@ -125,7 +125,7 @@ fun LoadingScreen() {
         LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp),
+                .padding(horizontal = 10.dp),
             color = MaterialTheme.colorScheme.background,
             trackColor = MaterialTheme.colorScheme.secondaryContainer,
         )
@@ -137,32 +137,30 @@ fun Modifier.shadow(
     offsetX: Dp = 0.dp,
     offsetY: Dp = 0.dp,
     blurRadius: Dp = 0.dp,
-) = then(
-    drawBehind {
-        drawIntoCanvas { canvas ->
-            val paint = Paint()
-            val frameworkPaint = paint.asFrameworkPaint()
-            if (blurRadius != 0.dp) {
-                frameworkPaint.maskFilter =
-                    (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
-            }
-            frameworkPaint.color = color.toArgb()
-
-            val leftPixel = offsetX.toPx()
-            val topPixel = offsetY.toPx()
-            val rightPixel = size.width + topPixel
-            val bottomPixel = size.height + leftPixel
-
-            canvas.drawRect(
-                left = leftPixel,
-                top = topPixel,
-                right = rightPixel,
-                bottom = bottomPixel,
-                paint = paint,
-            )
+) = then(drawBehind {
+    drawIntoCanvas { canvas ->
+        val paint = Paint()
+        val frameworkPaint = paint.asFrameworkPaint()
+        if (blurRadius != 0.dp) {
+            frameworkPaint.maskFilter =
+                (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
         }
+        frameworkPaint.color = color.toArgb()
+
+        val leftPixel = offsetX.toPx()
+        val topPixel = offsetY.toPx()
+        val rightPixel = size.width + topPixel
+        val bottomPixel = size.height + leftPixel
+
+        canvas.drawRect(
+            left = leftPixel,
+            top = topPixel,
+            right = rightPixel,
+            bottom = bottomPixel,
+            paint = paint,
+        )
     }
-)
+})
 
 @Composable
 fun MultiToggleButton(
@@ -202,8 +200,7 @@ fun MultiToggleButton(
                     Box(
                         Modifier
                             .background(
-                                backgroundTint,
-                                RoundedCornerShape(3.dp)
+                                backgroundTint, RoundedCornerShape(3.dp)
                             )
                             .fillMaxWidth()
                             .height(3.dp)
@@ -216,70 +213,53 @@ fun MultiToggleButton(
 
 @Composable
 fun <T> LazyCollapsible(
-    modifier: Modifier = Modifier,
-    padding: Dp = 16.dp,
     header: String,
     expanded: Boolean = false,
     value: LoadingState<T>,
     onExpand: () -> Unit,
     content: @Composable ColumnScope.(T) -> Unit
+) = Column(
+    modifier = Modifier.animateContentSize(
+        animationSpec = tween(
+            durationMillis = 300, easing = LinearOutSlowInEasing
+        )
+    )
 ) {
     var open by rememberSaveable {
         mutableStateOf(expanded)
     }
-    Column(
-        modifier = Modifier.animateContentSize(
-            animationSpec = tween(
-                durationMillis = 300, easing = LinearOutSlowInEasing
-            )
-        )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = header, fontSize = 22.sp)
-            IconButton(onClick = {
-                onExpand()
-                open = !open
-            }) {
-                Icon(
-                    imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    modifier = Modifier.size(30.dp),
-                    contentDescription = if (open) "Show less" else "Show more"
-                )
-            }
-        }
-        if (open) {
-            Column(
-                modifier = modifier.padding(padding),
-                content = {
-                    when (value) {
-                        is LoadingState.Success -> LazyCollapsibleContent(content = { content(value.value) })
-                        is LoadingState.Loading -> LoadingScreen()
-                        is LoadingState.Error -> Error(
-                            "failed to load ${header}: ${value.message}",
-                            modifier = Modifier.padding(16.dp, 8.dp)
-                        )
-                    }
-                },
+        Text(text = header, fontSize = 22.sp, modifier = Modifier.padding(start = 10.dp))
+        IconButton(onClick = {
+            onExpand()
+            open = !open
+        }) {
+            Icon(
+                imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                modifier = Modifier.size(30.dp),
+                contentDescription = if (open) "Show less" else "Show more"
             )
         }
-        HorizontalDivider(
-            modifier = Modifier
-                .padding(start = 5.dp, end = 5.dp)
-                .fillMaxWidth(),
-            color = MaterialTheme.colorScheme.tertiary
+    }
+    if (!open) return@Column
 
+    when (value) {
+        is LoadingState.Success -> Column {
+            content(value.value)
+        }
+
+        is LoadingState.Loading -> LoadingScreen()
+        is LoadingState.Error -> Error(
+            "failed to load ${header}: ${value.message}",
+            modifier = Modifier.padding(16.dp, 8.dp)
         )
     }
 }
-
-@Composable
-fun LazyCollapsibleContent(content: @Composable ColumnScope.() -> Unit) = Column(content = content)
 
 @Composable
 fun ImageComposable(uri: String, contentDescription: String, modifier: Modifier = Modifier) {
@@ -420,27 +400,22 @@ fun TableContent(isobaricData: IsobaricData) {
         }
     }
     Text(
-        text = "Valid: ${isobaricData.time.monthDayHourMinute()} -> ${
-            isobaricData.time.plusHours(3)
-                .monthDayHourMinute()
-        }(LT)",
-        fontSize = 15.sp,
-        modifier = Modifier.padding(8.dp)
+        text = "Valid: ${isobaricData.time.monthDayHourMinute()} - ${
+            isobaricData.time.plusHours(3).monthDayHourMinute()
+        }(LT)", fontSize = 15.sp, modifier = Modifier.padding(8.dp)
     )
 }
 
 @Composable
 fun GifComposable(uri: String, contentDescription: String, modifier: Modifier = Modifier) {
     val zoomState = rememberZoomState()
-    val imageLoader = ImageLoader.Builder(LocalContext.current)
-        .components {
-            if (SDK_INT >= 28) {
-                add(ImageDecoderDecoder.Factory())
-            } else {
-                add(GifDecoder.Factory())
-            }
+    val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+        if (SDK_INT >= 28) {
+            add(ImageDecoderDecoder.Factory())
+        } else {
+            add(GifDecoder.Factory())
         }
-        .build()
+    }.build()
     SubcomposeAsyncImage(modifier = Modifier
         .fillMaxWidth()
         .graphicsLayer { clip = true }
@@ -477,20 +452,16 @@ fun TimeRow(
 ) {
     Text(text = "Local time:", fontSize = 15.sp, modifier = modifier)
     LazyRow(
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(bottom = 10.dp)
+        horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(bottom = 10.dp)
     ) {
         itemsIndexed(times) { i, time ->
             val isSelected = current == i
             val backgroundTint = if (isSelected) selectedColor else notSelectedColor
-            Column(
-                modifier = modifier
-                    .clickable { onTimeClicked(i) }
-                    .width(intrinsicSize = IntrinsicSize.Min)
-            ) {
+            Column(modifier = modifier
+                .clickable { onTimeClicked(i) }
+                .width(intrinsicSize = IntrinsicSize.Min)) {
                 Text(
-                    text = time,
-                    fontWeight = FontWeight.Medium
+                    text = time, fontWeight = FontWeight.Medium
                 )
                 Box(
                     Modifier
