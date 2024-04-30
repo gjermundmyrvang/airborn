@@ -38,9 +38,9 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    private val isobaricDataCache = mutableMapOf<Position, IsobaricData>()
-    private val isobaricRouteDataCache = mutableMapOf<Pair<Airport, Airport>, RouteIsobaric>()
-    private val weatherDataCache = mutableMapOf<Airport, List<WeatherDay>>()
+    private var isobaricDataCache = mutableMapOf<Position, IsobaricData>()
+    private var isobaricRouteDataCache = mutableMapOf<Pair<Airport, Airport>, RouteIsobaric>()
+    private var weatherDataCache = mutableMapOf<Airport, List<WeatherDay>>()
     suspend fun getIsobaricData(position: Position): IsobaricData =
         isobaricDataCache[position] ?: run {
             val gribFiles = gribDataSource.availableGribFiles()
@@ -303,6 +303,12 @@ class WeatherRepository @Inject constructor(
                 return R.drawable.image_not_availeable
             }
         }
+    }
+
+    fun clearWeatherCache() {
+        isobaricDataCache.clear()
+        isobaricRouteDataCache.clear()
+        weatherDataCache.clear()
     }
 }
 
