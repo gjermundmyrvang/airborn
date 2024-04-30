@@ -22,10 +22,9 @@ interface BuiltinAirportDao {
         """
         SELECT * 
         FROM builtin_airport 
-        ORDER BY (lat - 60)*(lat - 60) + (lon - 10) * (lon - 10) 
+        ORDER BY POWER(lat - :latitude, 2) + POWER((lon - :longitude)*0.5, 2)
         LIMIT 10;    
         """
-
     )
     fun getAirportsNearby(latitude: Double, longitude: Double): List<BuiltinAirport>?
 }

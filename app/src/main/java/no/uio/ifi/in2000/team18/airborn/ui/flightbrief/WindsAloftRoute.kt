@@ -131,9 +131,6 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                     }
                 }
             }
-            Row {
-                Text("TESTING Nearby airports: ${getAirportsNearby routeIsobaric.departure.icao}")
-            }
             TableContent(isobaricData = routeIsobaric.isobaric)
         }
     }
