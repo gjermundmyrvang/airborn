@@ -132,4 +132,49 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
             }
             TableContent(isobaricData = routeIsobaric.isobaric)
         }
+@Composable
+fun DistanceToIsobaricSlider(
+    totalDistance: Distance, onFractionSelected: (Distance) -> Unit
+) = Column(
+    Modifier
+        .fillMaxWidth()
+        .padding(10.dp)
+        .background(Color(0x801D1D1D), RoundedCornerShape(8.dp))
+        .clip(RoundedCornerShape(8.dp)), horizontalAlignment = Alignment.CenterHorizontally
+) {
+    val distanceNm = totalDistance.nauticalMiles.toFloat()
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text("Departure")
+        Text("Arrival")
     }
+    Slider(
+        modifier = Modifier.padding(horizontal = 5.dp),
+        value = sliderPosition,
+        onValueChange = { sliderPosition = it },
+        colors = SliderDefaults.colors(
+            thumbColor = MaterialTheme.colorScheme.background,
+            activeTrackColor = MaterialTheme.colorScheme.secondary,
+            inactiveTrackColor = MaterialTheme.colorScheme.tertiaryContainer,
+        ),
+        valueRange = 0f..distanceNm
+    )
+    Text(text = "Distance traveled: ${sliderPosition.roundToInt()} nm / ${distanceNm.roundToInt()} nm")
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(bottomEnd = 8.dp, bottomStart = 8.dp),
+        onClick = {
+            onFractionSelected(sliderPosition.nauticalMiles)
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.primaryContainer,
+        )
+    ) {
+        Text("Update isobaric data")
+    }
+}
