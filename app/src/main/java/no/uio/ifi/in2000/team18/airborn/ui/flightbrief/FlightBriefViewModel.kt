@@ -26,6 +26,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
+import java.net.SocketException
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
@@ -77,10 +78,20 @@ class FlightBriefViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            val departureIcao = _state.value.departureIcao.code
-            val arrivalIcao = _state.value.arrivalIcao?.code
-            arrivalIcao?.let {
-                _state.update { it.copy(isIgaRoute = airportRepository.isRoute("iga-$departureIcao-$arrivalIcao")) }
+            try {
+                val departureIcao = _state.value.departureIcao
+                val arrivalIcao = _state.value.arrivalIcao
+                if (arrivalIcao != null) {
+                    _state.update {
+                        it.copy(
+                            isIgaRoute = airportRepository.isRoute(
+                                departureIcao,
+                                arrivalIcao
+                            )
+                        )
+                    }
+                }
+            } catch (_: Exception) {
             }
         }
     }
@@ -174,6 +185,8 @@ class FlightBriefViewModel @Inject constructor(
             LoadingState.Error(message = "Unresolved Address")
         } catch (e: ConnectTimeoutException) {
             LoadingState.Error("Connection Timed out")
+        } catch (e: SocketException) {
+            LoadingState.Error("Failed to connect to api")
         } catch (e: NoTransformationFoundException) {
             LoadingState.Error("Something went wrong with the api")
         } catch (e: JsonConvertException) {
