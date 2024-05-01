@@ -98,7 +98,10 @@ fun Map(
     var isClicked by remember { mutableStateOf(false) }
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
     val permissionState =
-        rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
+        rememberPermissionState(
+            permission =
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
     val mapViewportState = rememberMapViewportState {
         if (permissionState.status.isGranted) {
             transitionToFollowPuckState(

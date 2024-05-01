@@ -22,7 +22,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 @Composable
 fun RequestPermission(
     permission: String,
-    rationaleMessage: String = "Grant this permission in order to see your live location",
+    rationaleMessage: String = "Grant this permission in order to see your precise live location",
 ) {
     val permissionState = rememberPermissionState(permission)
 

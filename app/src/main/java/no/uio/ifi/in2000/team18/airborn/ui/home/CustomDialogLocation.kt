@@ -66,17 +66,10 @@ fun CustomDialogLocation(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-
-                //.........................Image: preview
                 Image(
                     painter = painterResource(id = R.drawable.red_marker),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    /*
-                    colorFilter  = ColorFilter.tint(
-                        color = MaterialTheme.colorScheme.primary
-                    ),*/
                     modifier = Modifier
                         .padding(top = 5.dp)
                         .height(120.dp)
@@ -94,8 +87,6 @@ fun CustomDialogLocation(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
-                //Spacer(modifier = Modifier.height(8.dp))
-                //.........................Text : description
                 Text(
                     "This app uses your live location",
                     textAlign = TextAlign.Center,
@@ -106,10 +97,8 @@ fun CustomDialogLocation(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
-                //.........................Spacer
                 Spacer(modifier = Modifier.height(24.dp))
 
-                //.........................Button : OK button
                 val cornerRadius = 16.dp
                 val gradientColors = listOf(Color(0xFFff669f), Color(0xFFff8961))
 
@@ -142,18 +131,13 @@ fun CustomDialogLocation(
                     }
                 }
 
-
-                //.........................Spacer
                 Spacer(modifier = Modifier.height(12.dp))
-
 
                 TextButton(onClick = {
                     enableLocation.value = false
                 }) { Text("Cancel", style = MaterialTheme.typography.labelLarge) }
 
-
                 Spacer(modifier = Modifier.height(24.dp))
-
             }
         }
     }
