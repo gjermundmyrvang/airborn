@@ -92,23 +92,21 @@ class WeatherRepository @Inject constructor(
             ).also { isobaricDataCache[position] = it }
         }
 
-    suspend fun getRouteIsobaric(departure: Airport, arrival: Airport): RouteIsobaric =
-        isobaricRouteDataCache[Pair(departure, arrival)] ?: isobaricRouteDataCache[Pair(
-            arrival, departure
-        )] ?: run {
-            val distance = departure.position.distanceTo(arrival.position)
-            val bearing = departure.position.bearingTo(arrival.position)
-            RouteIsobaric(
-                departure = departure,
-                arrival = arrival,
-                isobaric = getIsobaricData(departure.position.halfwayTo(departure.position)),
-                distance = distance,
-                bearing = bearing
-            ).also {
-                isobaricRouteDataCache[Pair(departure, arrival)] = it
-                isobaricRouteDataCache[Pair(arrival, departure)] = it
-            }
-        }
+    suspend fun getRouteIsobaric(
+        departure: Airport, arrival: Airport, pos: Position
+    ): RouteIsobaric {
+        val distance = departure.position.distanceTo(arrival.position)
+        val bearing = departure.position.bearingTo(arrival.position)
+        return RouteIsobaric(
+            departure = departure,
+            arrival = arrival,
+            isobaric = getIsobaricData(pos),
+            distance = distance,
+            bearing = bearing,
+            currentPos = pos,
+        )
+    }
+
 
     private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
         (sqrt(uWind.pow(2) + vWind.pow(2))).mps

@@ -9,4 +9,5 @@ data class RouteIsobaric(
     val isobaric: IsobaricData,
     val distance: Distance,
     val bearing: Direction,
+    val currentPos: Position,
 )
