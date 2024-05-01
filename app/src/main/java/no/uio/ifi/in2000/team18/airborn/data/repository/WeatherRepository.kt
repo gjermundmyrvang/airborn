@@ -40,6 +40,16 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
+    // todo: rather put current values in State of FlightBriefViewModel or in Route-object?
+    var currentFraction: Double? = null
+    var currentPosition: Position? = null
+    var currentDistance: Distance? = null
+    var currentBearing: Direction? = null
+    private var bearingsAndDistances: MutableMap<Double, Triple<Position, Distance, Direction>?> =
+        mutableMapOf(0.0 to null, 0.25 to null, 0.5 to null, 0.75 to null, 1.0 to null)
+
+    private var isobaricDataMap: MutableMap<Double, IsobaricData?> =
+        mutableMapOf(0.0 to null, 0.25 to null, 0.5 to null, 0.75 to null, 1.0 to null)
 
     suspend fun initializeTimeseries(): Map<ZonedDateTime, GribFile> {
         val available = gribDataSource.availableGribFiles()
@@ -121,6 +131,24 @@ class WeatherRepository @Inject constructor(
                 }
             }
         }
+
+        currentFraction = fraction
+
+        if (bearingsAndDistances[fraction] == null && route.positions != null) {
+            val pos = route.positions!![fraction]
+            val dest = route.arrival.position
+            val dist = pos!!.distanceTo(dest)
+            val bear = pos.bearingTo(dest)
+            bearingsAndDistances[fraction] = Triple(pos, dist, bear)
+        }
+        currentPosition = bearingsAndDistances[fraction]!!.first
+        currentDistance = bearingsAndDistances[fraction]!!.second
+        currentBearing = bearingsAndDistances[fraction]!!.third
+        Log.d(
+            "routeCache", "curPos: $currentPosition, curDist: $currentDistance," +
+                    "curBear: $currentBearing"
+        )
+
         // TODO: cache stuff.
 
         val distance = route.departure.position.distanceTo(route.arrival.position)
