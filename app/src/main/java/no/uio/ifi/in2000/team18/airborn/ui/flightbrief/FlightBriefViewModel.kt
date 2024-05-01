@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
+import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Radar
 import no.uio.ifi.in2000.team18.airborn.model.RouteForecast
@@ -126,15 +127,30 @@ class FlightBriefViewModel @Inject constructor(
 
     fun initRouteIsobaric() {
         viewModelScope.launch {
-            if (!_state.value.hasArrival) {
-                _state.update { it.copy(route = LoadingState.Error("Choose arrival airport")) }
-            } else {
-                val departure = airportRepository.getByIcao(state.value.departureIcao)!!
-                val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
+            val departure = airportRepository.getByIcao(state.value.departureIcao)!!
+            val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
 
-                val data = load { weatherRepository.getRouteIsobaric(departure, arrival) }
-                _state.update { it.copy(route = data) }
+            val data = load {
+                weatherRepository.getRouteIsobaric(
+                    departure,
+                    arrival,
+                    departure.position
+                )
             }
+            _state.update { it.copy(route = data) }
+        }
+    }
+
+    fun changeRouteIsobaric(traveled: Distance) {
+        viewModelScope.launch {
+            val departure = airportRepository.getByIcao(state.value.departureIcao)!!
+            val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
+            val newPos = departure.position.getPointAtDistance(
+                d = traveled, bearing = departure.position.bearingTo(arrival.position).degrees
+            )
+            val newIsobaric =
+                load { weatherRepository.getRouteIsobaric(departure, arrival, newPos) }
+            _state.update { it.copy(route = newIsobaric) }
         }
     }
 
