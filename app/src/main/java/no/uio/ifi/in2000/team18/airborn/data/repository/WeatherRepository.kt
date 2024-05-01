@@ -46,7 +46,7 @@ class WeatherRepository @Inject constructor(
     }
 
 
-    fun currentGribFile(timeSeries: Map<ZonedDateTime, GribFile>): GribFile? {
+    private fun currentGribFile(timeSeries: Map<ZonedDateTime, GribFile>): GribFile? {
         val now = ZonedDateTime.now(ZoneOffset.UTC)
         val returnTime = timeSeries.filterKeys {
             it.isBefore(now) || it.isEqual(now) && it.plusHours(
@@ -60,7 +60,11 @@ class WeatherRepository @Inject constructor(
         return returnValue
     }
 
-    suspend fun fetchIsobaricData(gribFile: GribFile, position: Position): IsobaricData {
+    private suspend fun fetchIsobaricData(
+        gribFile: GribFile,
+        position: Position,
+        time: ZonedDateTime,
+    ): IsobaricData {
         val windsAloft = gribDataSource.useGribFile(gribFile) { dataset ->
             val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
             val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
@@ -77,6 +81,8 @@ class WeatherRepository @Inject constructor(
             }.toMap()
         }
 
+        val airPressureASL = getAirPressureAtSeaLevel(position, time)
+        Log.d("weather", "airPressureASL: $airPressureASL, .hpa value: ${airPressureASL.hpa}")
         val layers = windsAloft.map { (key, value) ->
             val layer = IsobaricLayer(
                 pressure = Pressure(key.toDouble()),
@@ -86,7 +92,7 @@ class WeatherRepository @Inject constructor(
             )
             layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
             layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
-            layer.height = Distance(calculateHeight(layer))
+            layer.height = Distance(calculateHeight(layer, pressureLevelZero = airPressureASL.hpa))
             layer
         }.filter {
             val h = it.height
@@ -95,17 +101,18 @@ class WeatherRepository @Inject constructor(
             result
         }
         return IsobaricData(
-            position, gribFile.params.time.toSystemZoneOffset(), layers
+            position,
+            gribFile.params.time.toSystemZoneOffset(), // TODO: where should we convert to system time?
+            layers,
         )
     }
-
 
     suspend fun updateRouteIsobaric(route: Route, fraction: Double, time: ZonedDateTime) {
         // TODO: check for cached stuff
         route.isobaric = route.positions?.get(fraction)?.let { pos ->
             route.timeSeries?.let { it ->
                 currentGribFile(it)?.let { file ->
-                    fetchIsobaricData(file, pos)
+                    fetchIsobaricData(file, pos, time)
                 }
             }
         }
@@ -122,18 +129,36 @@ class WeatherRepository @Inject constructor(
         (sqrt(uWind.pow(2) + vWind.pow(2))).mps
 
     /**
-     * Calculate height of isobaric layer
+     * Calculate height of isobaric layer, using the formula with non-null lapse rate
+     * https://en.wikipedia.org/wiki/Barometric_formula
+     * https://physics.stackexchange.com/questions/333475/how-to-calculate-altitude-from-current-temperature-and-pressure
      *
-     * @param refTemperature todo: what is this
-     * @param pressureLevelZero the pressure at sea level
+     *
+     * @param refTemperature default value according to table on wikipedia (see above)
+     * @param pressureLevelZero the actual pressure at sea level
      */
-    fun calculateHeight(
+    private fun calculateHeight(
         layer: IsobaricLayer,
         refTemperature: Double = 288.15,
         pressureLevelZero: Double = 1013.25,
-    ) = refTemperature * (1 - (layer.pressure.toDouble() / pressureLevelZero).pow(
+        useLapseRate: Boolean = true, // todo: later on we will probably use default false
+    ) = if (useLapseRate) refTemperature * (1 - (layer.pressure.toDouble() / pressureLevelZero).pow(
         PRESSURE_CALCULATION_EXPONENT
-    )) / TEMPERATURE_LAPSE_RATE
+    )) / TEMPERATURE_LAPSE_RATE else TODO() // todo: make version without lapse rate
+
+    private suspend fun getAirPressureAtSeaLevel(
+        position: Position,
+        time: ZonedDateTime
+    ): Pressure {
+        val airPressureAtSeaLevelNow =
+            locationForecastDataSource.fetchForecast(position, "compact")
+                .properties.timeseries.first().data.instant.details.airPressureAtSeaLevel
+        Log.d(
+            "weather",
+            "airPressureASL: $airPressureAtSeaLevelNow"
+        )
+        return airPressureAtSeaLevelNow
+    }
 
     private val english = mapOf(
         "clearsky" to "Clear sky",
