@@ -178,12 +178,12 @@ class AirportRepository @Inject constructor(
         return uri.replaceRange(startIndex, endIdex + 1, "")
     }
 
-    suspend fun isRoute(route: String): Boolean {
+    suspend fun isRoute(departureIcao: Icao, arrivalIcao: Icao): Boolean {
         if (routeDataCache.isEmpty()) {
             val routes = routeDataSource.fetchAllAvailableRoutes()
             routeMutex.withLock { this.routeDataCache = routes }
         }
-        return routeMutex.withLock { route in this.routeDataCache }
+        return routeMutex.withLock { "iga-$departureIcao-$arrivalIcao" in this.routeDataCache }
     }
 
     suspend fun fetchRoute(departureIcao: Icao, arrivalIcao: Icao) =
