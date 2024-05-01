@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -104,7 +105,21 @@ fun FlightBriefScreen(
                         tint = MaterialTheme.colorScheme.secondary
                     )
                 }
-            }, colors = TopAppBarColors(
+            },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            navController.navigate("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}")
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "refresh",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                },
+                colors = TopAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.primary,
                 navigationIconContentColor = MaterialTheme.colorScheme.primary,

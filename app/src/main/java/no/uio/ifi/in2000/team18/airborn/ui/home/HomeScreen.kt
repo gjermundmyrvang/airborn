@@ -139,7 +139,8 @@ fun HomeScreen(
                         }
                     }
                 }) {
-                Text("Select Airport")
+                Text("Select Airport",
+                    color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     )
