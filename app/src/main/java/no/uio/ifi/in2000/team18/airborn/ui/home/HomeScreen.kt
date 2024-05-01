@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
-import android.Manifest
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,7 +58,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.R
@@ -69,7 +67,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -144,7 +142,6 @@ fun HomeScreen(
             }
         }
     )
-    RequestPermission(permission = Manifest.permission.ACCESS_FINE_LOCATION)
 }
 
 
