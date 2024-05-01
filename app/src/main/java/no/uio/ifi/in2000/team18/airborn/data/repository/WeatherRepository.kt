@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
 import android.util.Log
+import kotlinx.datetime.LocalDateTime
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
@@ -32,7 +33,7 @@ import kotlin.math.sqrt
 
 const val TEMPERATURE_LAPSE_RATE: Double = 0.0065 // in (K/m)
 const val HEIGHT_CALCULATION_EXPONENT: Double = 1 / 5.25579
-const val HEIGHT_CALCULATION_FACTOR: Double = 29.2717
+const val HEIGHT_CALCULATION_FACTOR: Double = 29.2717 // R/(g*M) = 8.314.. / (9.806.. * 0.02896..)
 
 
 class WeatherRepository @Inject constructor(
@@ -86,7 +87,6 @@ class WeatherRepository @Inject constructor(
         }
 
         val airPressureASL = getAirPressureAtSeaLevel(position, time)
-        Log.d("weather", "airPressureASL: $airPressureASL, .hpa value: ${airPressureASL.hpa}")
         val layers = windsAloft.map { (key, value) ->
             val layer = IsobaricLayer(
                 pressure = Pressure(key.toDouble()),
@@ -127,7 +127,7 @@ class WeatherRepository @Inject constructor(
         val bearing = route.departure.position.bearingTo(route.arrival.position)
 
         // TODO: something like updating
-        //  route.positions.fraction.value.timeSeries.time with fetching IsobaricData
+        //  route.positions.fraction.value.timeSeries.time with fetching IsobaricData?
     }
 
     private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
@@ -160,13 +160,21 @@ class WeatherRepository @Inject constructor(
         return Distance(result)
     }
 
+    // TODO: make use of time parameter. Goal: get localForecast valid for the same time as param.
     private suspend fun getAirPressureAtSeaLevel(
         position: Position,
         time: ZonedDateTime
     ): Pressure {
+        val availableTimeSeries =
+            locationForecastDataSource.fetchForecast(position, "compact").properties.timeseries
+        val availableTimes = availableTimeSeries.map {
+            LocalDateTime.parse(it.time.trim().substring(0, 19))
+        }
+        Log.d("weather", "time (ZonedDateTime) sent as param to getAirPressureAtSeaLeve: $time")
+        Log.d("weather", "available timeseries compact locForecast: $availableTimeSeries")
+        Log.d("weather", "available times: $availableTimes")
         val airPressureAtSeaLevelNow =
-            locationForecastDataSource.fetchForecast(position, "compact")
-                .properties.timeseries.first().data.instant.details.airPressureAtSeaLevel
+            availableTimeSeries.first().data.instant.details.airPressureAtSeaLevel
         Log.d(
             "weather",
             "airPressureASL: $airPressureAtSeaLevelNow"
