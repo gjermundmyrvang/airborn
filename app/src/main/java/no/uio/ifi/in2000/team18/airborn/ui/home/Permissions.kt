@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team18.airborn.ui.home
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,18 +26,13 @@ fun RequestPermission(
 ) {
     val permissionState = rememberPermissionState(permission)
 
-    HandleRequest(
-        permissionState = permissionState,
-        deniedContent = { shouldShowRationale ->
-            PermissionDeniedContent(
-                rationaleMessage = rationaleMessage,
-                shouldShowRationale = shouldShowRationale
-            ) { permissionState.launchPermissionRequest() }
-        },
-        content = {
-            // Don't need to display anything here
-        }
-    )
+    HandleRequest(permissionState = permissionState, deniedContent = { shouldShowRationale ->
+        PermissionDeniedContent(
+            rationaleMessage = rationaleMessage, shouldShowRationale = shouldShowRationale
+        ) { permissionState.launchPermissionRequest() }
+    }, content = {
+        // Don't need to display anything here
+    })
 }
 
 @ExperimentalPermissionsApi
@@ -50,6 +46,7 @@ fun HandleRequest(
         is PermissionStatus.Granted -> {
             content()
         }
+
         is PermissionStatus.Denied -> {
             deniedContent(permissionState.status.shouldShowRationale)
         }
@@ -62,8 +59,7 @@ fun Content(showButton: Boolean = true, onClick: () -> Unit) {
         val enableLocation = remember { mutableStateOf(true) }
         if (enableLocation.value) {
             CustomDialogLocation(
-                enableLocation,
-                onClick
+                enableLocation, onClick
             )
         }
     }
@@ -80,35 +76,35 @@ fun PermissionDeniedContent(
     if (shouldShowRationale) {
         var dialogVisible by remember { mutableStateOf(true) }
         if (dialogVisible) {
-            AlertDialog(
-                onDismissRequest = {},
-                title = {
-                    Text(
-                        text = "Permission Request",
-                        style = TextStyle(
-                            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                            fontWeight = FontWeight.Bold
-                        )
+            AlertDialog(onDismissRequest = { }, title = {
+                Text(
+                    text = "Permission Request", style = TextStyle(
+                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                        fontWeight = FontWeight.Bold
                     )
-                },
-                text = {
-                    Text(rationaleMessage)
-                },
-                confirmButton = {
-                    Button(onClick = onRequestPermission) {
-                        Text("Give Permission")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { dialogVisible = false }
-                    ) {
-                        Text(text = "Dismiss")
-                    }
+                )
+            }, text = {
+                Text(rationaleMessage)
+            }, confirmButton = {
+                Button(
+                    onClick = onRequestPermission,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    ),
+                ) {
+                    Text("Give Permission")
                 }
-            )
+            }, dismissButton = {
+                Button(
+                    onClick = { dialogVisible = false }, colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    )
+                ) {
+                    Text(text = "Dismiss")
+                }
+            })
         }
-    }
-    else {
+    } else {
         Content(onClick = onRequestPermission)
     }
 }
