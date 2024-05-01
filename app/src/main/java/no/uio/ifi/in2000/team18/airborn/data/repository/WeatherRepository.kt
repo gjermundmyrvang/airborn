@@ -6,6 +6,7 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
+import no.uio.ifi.in2000.team18.airborn.model.GribFile
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
@@ -39,22 +40,21 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    private var isobaricDataCache = ConcurrentHashMap(mutableMapOf<Position, IsobaricData>())
-    private var isobaricRouteDataCache =
-        ConcurrentHashMap(mutableMapOf<Pair<Airport, Airport>, RouteIsobaric>())
+    private var isobaricDataCache =
+        ConcurrentHashMap(mutableMapOf<GribFile, Map<Int, List<Double>>>())
     private var weatherDataCache = ConcurrentHashMap(mutableMapOf<Airport, List<WeatherDay>>())
-    suspend fun getIsobaricData(position: Position): IsobaricData =
-        isobaricDataCache[position] ?: run {
-            val gribFiles = gribDataSource.availableGribFiles()
-            val now = ZonedDateTime.now(ZoneOffset.UTC)
-            val gribFile = gribFiles.find {
-                it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
-                    3
-                ).isAfter(
-                    now
-                )
-            } ?: gribFiles.last()
-            val windsAloft = gribDataSource.useGribFile(gribFile) { dataset ->
+    suspend fun getIsobaricData(position: Position): IsobaricData {
+        val gribFiles = gribDataSource.availableGribFiles()
+        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        val gribFile = gribFiles.find {
+            it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
+                3
+            ).isAfter(
+                now
+            )
+        } ?: gribFiles.last()
+        val windsAloft =
+            isobaricDataCache[gribFile] ?: gribDataSource.useGribFile(gribFile) { dataset ->
                 val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
                 val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
                 val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
@@ -70,27 +70,28 @@ class WeatherRepository @Inject constructor(
                 }.toMap()
             }
 
-            val layers = windsAloft.map { (key, value) ->
-                val layer = IsobaricLayer(
-                    pressure = Pressure(key.toDouble()),
-                    temperature = Temperature(value[0] - 273.15),
-                    uWind = value[1],
-                    vWind = value[2]
-                )
-                layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
-                layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
-                layer.height = Distance(calculateHeight(layer))
-                layer
-            }.filter {
-                val h = it.height
-                val maxHeight = 15000
-                val result = if (h != null) (h.feet <= maxHeight) else false
-                result
-            }
-            IsobaricData(
-                position, gribFile.params.time.toSystemZoneOffset(), layers
-            ).also { isobaricDataCache[position] = it }
+        val layers = windsAloft.map { (key, value) ->
+            val layer = IsobaricLayer(
+                pressure = Pressure(key.toDouble()),
+                temperature = Temperature(value[0] - 273.15),
+                uWind = value[1],
+                vWind = value[2]
+            )
+            layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
+            layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
+            layer.height = Distance(calculateHeight(layer))
+            layer
+        }.filter {
+            val h = it.height
+            val maxHeight = 15000
+            val result = if (h != null) (h.feet <= maxHeight) else false
+            result
         }
+        return IsobaricData(
+            position, gribFile.params.time.toSystemZoneOffset(), layers
+        )
+    }
+
 
     suspend fun getRouteIsobaric(
         departure: Airport, arrival: Airport, pos: Position
@@ -307,7 +308,6 @@ class WeatherRepository @Inject constructor(
 
     fun clearWeatherCache() {
         isobaricDataCache.clear()
-        isobaricRouteDataCache.clear()
         weatherDataCache.clear()
     }
 }
