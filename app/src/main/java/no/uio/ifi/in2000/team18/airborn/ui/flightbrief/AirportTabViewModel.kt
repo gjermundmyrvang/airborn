@@ -44,11 +44,12 @@ sealed class AirportTabViewModel(
         val airport: LoadingState<Airport> = Loading,
         val metarTaf: LoadingState<MetarTaf> = Loading,
         val isobaric: LoadingState<IsobaricData> = Loading,
-        val turbulence: LoadingState<Map<String, List<Turbulence>>?> = Loading,
+        val turbulence: LoadingState<Map<String, List<Turbulence>>> = Loading,
         val webcams: LoadingState<List<Webcam>> = Loading,
         val weather: LoadingState<List<WeatherDay>> = Loading,
         val sun: LoadingState<Sun?> = Loading,
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
+        val hasTurbulence: Boolean = false,
     )
 
     init {
@@ -66,6 +67,7 @@ sealed class AirportTabViewModel(
                 _state.update { it.copy(networkStatus = status) }
             }
         }
+        _state.update { it.copy(hasTurbulence = airportRepository.hasTurbulence(icao)) }
     }
 
     fun initMetarTaf() {
@@ -86,6 +88,7 @@ sealed class AirportTabViewModel(
             _state.update { it.copy(isobaric = isobaric) }
         }
     }
+
 
     fun initTurbulence() {
         viewModelScope.launch {
@@ -116,6 +119,19 @@ sealed class AirportTabViewModel(
             val weather = load { weatherRepository.getWeatherDays(airport) }
             _state.update { it.copy(weather = weather) }
         }
+    }
+
+    fun clearAllCache() {
+        clearAirportCache()
+        clearWeatherCache()
+    }
+
+    fun clearAirportCache() {
+        airportRepository.clearCache()
+    }
+
+    fun clearWeatherCache() {
+        weatherRepository.clearWeatherCache()
     }
 
 
