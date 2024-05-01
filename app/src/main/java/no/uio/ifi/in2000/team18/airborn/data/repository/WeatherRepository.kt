@@ -6,7 +6,6 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
-import no.uio.ifi.in2000.team18.airborn.model.GribFile
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
@@ -41,7 +40,7 @@ class WeatherRepository @Inject constructor(
     private val gribDataSource: GribDataSource,
 ) {
     private var isobaricDataCache =
-        ConcurrentHashMap(mutableMapOf<GribFile, Map<Int, List<Double>>>())
+        ConcurrentHashMap(mutableMapOf<Position, Map<Int, List<Double>>>())
     private var weatherDataCache = ConcurrentHashMap(mutableMapOf<Airport, List<WeatherDay>>())
     suspend fun getIsobaricData(position: Position): IsobaricData {
         val gribFiles = gribDataSource.availableGribFiles()
@@ -54,7 +53,7 @@ class WeatherRepository @Inject constructor(
             )
         } ?: gribFiles.last()
         val windsAloft =
-            isobaricDataCache[gribFile] ?: gribDataSource.useGribFile(gribFile) { dataset ->
+            isobaricDataCache[position] ?: gribDataSource.useGribFile(gribFile) { dataset ->
                 val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
                 val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
                 val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
@@ -67,7 +66,7 @@ class WeatherRepository @Inject constructor(
                         windU.sampleAtPosition(position, i).toDouble(),
                         windV.sampleAtPosition(position, i).toDouble(),
                     )
-                }.toMap()
+                }.toMap().also { isobaricDataCache[position] = it }
             }
 
         val layers = windsAloft.map { (key, value) ->
