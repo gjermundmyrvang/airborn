@@ -137,6 +137,7 @@ fun Map(
             it.first.position.distanceTo(it.second.position)
         }
         MapboxMap(
+            mapViewportState = mapViewportState,
             locationComponentSettings = LocationComponentSettings(
                 locationPuck = createDefault2DPuck(true)
             ) {
