@@ -26,11 +26,13 @@ import ucar.nc2.dt.GridDatatype
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import javax.inject.Inject
+import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 const val TEMPERATURE_LAPSE_RATE: Double = 0.0065 // in (K/m)
-const val PRESSURE_CALCULATION_EXPONENT: Double = 1 / 5.25579
+const val HEIGHT_CALCULATION_EXPONENT: Double = 1 / 5.25579
+const val HEIGHT_CALCULATION_FACTOR: Double = 29.2717
 
 
 class WeatherRepository @Inject constructor(
@@ -73,12 +75,14 @@ class WeatherRepository @Inject constructor(
             Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
 
             temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
-                (named.name.trim().toInt() / 100) to listOf(
+                val sampledPressure =
+                    (named.name.trim().toInt() / 100)
+                sampledPressure to listOf(
                     temperature.sampleAtPosition(position, i).toDouble(),
                     windU.sampleAtPosition(position, i).toDouble(),
                     windV.sampleAtPosition(position, i).toDouble(),
                 )
-            }.toMap()
+            }.toMap().filterKeys { it > 500.0 }// only use high pressureLayers = low altitude
         }
 
         val airPressureASL = getAirPressureAtSeaLevel(position, time)
@@ -92,7 +96,8 @@ class WeatherRepository @Inject constructor(
             )
             layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
             layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
-            layer.height = Distance(calculateHeight(layer, pressureLevelZero = airPressureASL.hpa))
+            layer.height =
+                calculateHeight(key.toDouble(), layer.temperature.kelvin, airPressureASL.hpa)
             layer
         }.filter {
             val h = it.height
@@ -138,13 +143,22 @@ class WeatherRepository @Inject constructor(
      * @param pressureLevelZero the actual pressure at sea level
      */
     private fun calculateHeight(
-        layer: IsobaricLayer,
+        pressure: Double,
         refTemperature: Double = 288.15,
         pressureLevelZero: Double = 1013.25,
-        useLapseRate: Boolean = true, // todo: later on we will probably use default false
-    ) = if (useLapseRate) refTemperature * (1 - (layer.pressure.toDouble() / pressureLevelZero).pow(
-        PRESSURE_CALCULATION_EXPONENT
-    )) / TEMPERATURE_LAPSE_RATE else TODO() // todo: make version without lapse rate
+        useLapseRate: Boolean = false,
+    ): Distance {
+        val result = if (useLapseRate) { // might be useful if live data not available
+            refTemperature * (1 - (pressure / pressureLevelZero).pow(
+                HEIGHT_CALCULATION_EXPONENT
+            )) / TEMPERATURE_LAPSE_RATE
+        } else -refTemperature * ln(pressure / pressureLevelZero) * HEIGHT_CALCULATION_FACTOR
+        Log.d(
+            "height",
+            "calculate height with pressure $pressure, refTemp $refTemperature, result $result meters"
+        )
+        return Distance(result)
+    }
 
     private suspend fun getAirPressureAtSeaLevel(
         position: Position,
