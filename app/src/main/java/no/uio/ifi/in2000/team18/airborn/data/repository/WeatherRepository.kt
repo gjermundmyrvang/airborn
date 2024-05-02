@@ -1,11 +1,13 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
 import android.util.Log
+import kotlinx.datetime.LocalDateTime
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
+import no.uio.ifi.in2000.team18.airborn.model.GribFile
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
@@ -16,6 +18,7 @@ import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RouteProgress
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
@@ -27,11 +30,13 @@ import java.time.ZonedDateTime
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 const val TEMPERATURE_LAPSE_RATE: Double = 0.0065 // in (K/m)
-const val PRESSURE_CALCULATION_EXPONENT: Double = 1 / 5.25579
+const val HEIGHT_CALCULATION_EXPONENT: Double = 1 / 5.25579
+const val HEIGHT_CALCULATION_FACTOR: Double = 29.2717 // R/(g*M) = 8.314.. / (9.806.. * 0.02896..)
 
 
 @Singleton
@@ -39,58 +44,115 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
+
     private var isobaricDataCache =
-        ConcurrentHashMap(mutableMapOf<Position, Map<Int, List<Double>>>())
+        ConcurrentHashMap(mutableMapOf<Position, IsobaricData>())
     private var weatherDataCache = ConcurrentHashMap(mutableMapOf<Airport, List<WeatherDay>>())
-    suspend fun getIsobaricData(position: Position): IsobaricData {
-        val gribFiles = gribDataSource.availableGribFiles()
+
+    // todo: rather put current values in State of FlightBriefViewModel or in Route-object?
+    // todo: work on this...
+    var currentFraction: RouteProgress? = null
+    var currentPosition: Position? = null
+    var currentDistance: Distance? = null
+    var currentBearing: Direction? = null
+    private var bearingsAndDistances: MutableMap<RouteProgress, Triple<Position, Distance, Direction>?> =
+        mutableMapOf(
+            RouteProgress.p0 to null,
+            RouteProgress.p25 to null,
+            RouteProgress.p50 to null,
+            RouteProgress.p75 to null,
+            RouteProgress.p100 to null,
+        )
+
+    // Todo: probably delete this
+    private var isobaricDataMap: MutableMap<Double, IsobaricData?> =
+        mutableMapOf(0.0 to null, 0.25 to null, 0.5 to null, 0.75 to null, 1.0 to null)
+
+    suspend fun initializeTimeseries(): Map<ZonedDateTime, GribFile> {
+        val available = gribDataSource.availableGribFiles()
+        val availableTimes =
+            available.map { it.params.time to it }.toMap().toSortedMap(compareBy { it })
+        return availableTimes
+    }
+
+    // todo: try to delete this fun, it is implemented in getIsobaricData
+    private fun currentGribFile(timeSeries: Map<ZonedDateTime, GribFile>): GribFile? {
         val now = ZonedDateTime.now(ZoneOffset.UTC)
-        val gribFile = gribFiles.find {
-            it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
+        val returnTime = timeSeries.filterKeys {
+            it.isBefore(now) || it.isEqual(now) && it.plusHours(
                 3
             ).isAfter(
                 now
             )
-        } ?: gribFiles.last()
-        val windsAloft =
-            isobaricDataCache[position] ?: gribDataSource.useGribFile(gribFile) { dataset ->
-                val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
-                val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
-                val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
-
-                Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
-
-                temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
-                    (named.name.trim().toInt() / 100) to listOf(
-                        temperature.sampleAtPosition(position, i).toDouble(),
-                        windU.sampleAtPosition(position, i).toDouble(),
-                        windV.sampleAtPosition(position, i).toDouble(),
-                    )
-                }.toMap().also { isobaricDataCache[position] = it }
-            }
-
-        val layers = windsAloft.map { (key, value) ->
-            val layer = IsobaricLayer(
-                pressure = Pressure(key.toDouble()),
-                temperature = Temperature(value[0] - 273.15),
-                uWind = value[1],
-                vWind = value[2]
-            )
-            layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
-            layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
-            layer.height = Distance(calculateHeight(layer))
-            layer
-        }.filter {
-            val h = it.height
-            val maxHeight = 15000
-            val result = if (h != null) (h.feet <= maxHeight) else false
-            result
-        }
-        return IsobaricData(
-            position, gribFile.params.time.toSystemZoneOffset(), layers
-        )
+        }.keys
+        val returnValue = timeSeries[returnTime.first()]
+        Log.d("Route", "currentGribFile: $returnTime")
+        return returnValue
     }
 
+    suspend fun getIsobaricData(position: Position): IsobaricData {
+        val cachedIsobaric = isobaricDataCache[position]
+        if (cachedIsobaric != null) {
+            return cachedIsobaric
+        } else {
+            val gribFiles = gribDataSource.availableGribFiles()
+            val now = ZonedDateTime.now(ZoneOffset.UTC)
+            val gribFile = gribFiles.find {
+                it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
+                    3
+                ).isAfter(
+                    now
+                )
+            } ?: gribFiles.last()
+            val windsAloft =
+                gribDataSource.useGribFile(gribFile) { dataset ->
+                    val windU =
+                        dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
+                    val windV =
+                        dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
+                    val temperature =
+                        dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
+
+                    Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
+
+                    temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
+                        (named.name.trim().toInt() / 100) to listOf(
+                            temperature.sampleAtPosition(position, i).toDouble(),
+                            windU.sampleAtPosition(position, i).toDouble(),
+                            windV.sampleAtPosition(position, i).toDouble(),
+                        )
+                    }.toMap()
+                        .filterKeys { it > 500.0 }// only use high pressureLayers = low altitude
+                }
+
+            val airPressureASL = getAirPressureAtSeaLevel(position)
+            val layers = windsAloft.map { (key, value) ->
+                val layer = IsobaricLayer(
+                    pressure = Pressure(key.toDouble()),
+                    temperature = Temperature(value[0] - 273.15),
+                    uWind = value[1],
+                    vWind = value[2]
+                )
+                layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
+                layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
+                layer.height =
+                    calculateHeight(key.toDouble(), layer.temperature.kelvin, airPressureASL.hpa)
+                layer
+            }.filter {
+                val h = it.height
+                val maxHeight = 15000
+                val result = if (h != null) (h.feet <= maxHeight) else false
+                result
+            }
+            val result = IsobaricData(
+                position,
+                gribFile.params.time.toSystemZoneOffset(), // TODO: where and how should we convert to system time?
+                layers,
+            )
+            isobaricDataCache[position] = result
+            return result
+        }
+    }
 
     suspend fun getRouteIsobaric(
         departure: Airport, arrival: Airport, pos: Position
@@ -108,22 +170,94 @@ class WeatherRepository @Inject constructor(
     }
 
 
+// TODO Check if this is necessary at all
+//    suspend fun updateRouteIsobaric(route: Route, progress: RouteProgress, time: ZonedDateTime) {
+//        // TODO: check for cached stuff
+//        route.isobaric = route.positions?.get(progress)?.let { pos ->
+//            route.timeSeries?.let { it ->
+//                currentGribFile(it)?.let { file ->
+//                    fetchIsobaricData(file, pos, time)
+//                }
+//            }
+//        }
+//
+//        currentFraction = progress
+//
+//        if (bearingsAndDistances[progress] == null && route.positions != null) {
+//            val pos = route.positions!![progress]
+//            val dest = route.arrival.position
+//            val dist = pos!!.distanceTo(dest)
+//            val bear = pos.bearingTo(dest)
+//            bearingsAndDistances[progress] = Triple(pos, dist, bear)
+//        }
+//        currentPosition = bearingsAndDistances[progress]!!.first
+//        currentDistance = bearingsAndDistances[progress]!!.second
+//        currentBearing = bearingsAndDistances[progress]!!.third
+//        Log.d(
+//            "routeCache", "curPos: $currentPosition, curDist: $currentDistance," +
+//                    "curBear: $currentBearing"
+//        )
+//
+//        // TODO: cache stuff.
+//
+//        val distance = route.departure.position.distanceTo(route.arrival.position)
+//        val bearing = route.departure.position.bearingTo(route.arrival.position)
+//
+//        // TODO: something like updating
+//        //  route.positions.fraction.value.timeSeries.time with fetching IsobaricData?
+//    }
+
     private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
         (sqrt(uWind.pow(2) + vWind.pow(2))).mps
 
     /**
-     * Calculate height of isobaric layer
+     * Calculate height of isobaric layer, using the formula with non-null lapse rate
+     * https://en.wikipedia.org/wiki/Barometric_formula
+     * https://physics.stackexchange.com/questions/333475/how-to-calculate-altitude-from-current-temperature-and-pressure
      *
-     * @param refTemperature todo: what is this
-     * @param pressureLevelZero the pressure at sea level
+     *
+     * @param refTemperature default value according to table on wikipedia (see above)
+     * @param pressureLevelZero the actual pressure at sea level
      */
     private fun calculateHeight(
-        layer: IsobaricLayer,
+        pressure: Double,
         refTemperature: Double = 288.15,
         pressureLevelZero: Double = 1013.25,
-    ) = refTemperature * (1 - (layer.pressure.toDouble() / pressureLevelZero).pow(
-        PRESSURE_CALCULATION_EXPONENT
-    )) / TEMPERATURE_LAPSE_RATE
+        useLapseRate: Boolean = false,
+    ): Distance {
+        val result = if (useLapseRate) { // might be useful if live data not available
+            refTemperature * (1 - (pressure / pressureLevelZero).pow(
+                HEIGHT_CALCULATION_EXPONENT
+            )) / TEMPERATURE_LAPSE_RATE
+        } else -refTemperature * ln(pressure / pressureLevelZero) * HEIGHT_CALCULATION_FACTOR
+        Log.d(
+            "height",
+            "calculate height with pressure $pressure, refTemp $refTemperature, result $result meters"
+        )
+        return Distance(result)
+    }
+
+    // TODO: make use of time parameter. Goal: get localForecast valid for the same time as param.
+    private suspend fun getAirPressureAtSeaLevel(
+        position: Position,
+        //time: ZonedDateTime
+    ): Pressure {
+        val availableTimeSeries =
+            locationForecastDataSource.fetchForecast(position, "compact").properties.timeseries
+        val availableTimes = availableTimeSeries.map {
+            LocalDateTime.parse(it.time.trim().substring(0, 19))
+        }
+        //Log.d("weather", "time (ZonedDateTime) sent as param to getAirPressureAtSeaLeve: $time")
+        Log.d("weather", "available timeseries compact locForecast: $availableTimeSeries")
+        Log.d("weather", "available times: $availableTimes")
+        val airPressureAtSeaLevelNow =
+            availableTimeSeries.first().data.instant.details.airPressureAtSeaLevel
+        Log.d(
+            "weather",
+            "airPressureASL: $airPressureAtSeaLevelNow"
+        )
+        return airPressureAtSeaLevelNow
+    }
 
     private val english = mapOf(
         "clearsky" to "Clear sky",

@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,41 +14,42 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
+import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.nauticalMiles
+import no.uio.ifi.in2000.team18.airborn.model.round
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import kotlin.math.roundToInt
 
 @Composable
-fun Route(
+fun WindsAloftRoute(
     state: LoadingState<RouteIsobaric>,
     initRouteIsobaric: () -> Unit,
     onUpdateIsobaric: (Distance) -> Unit
 ) = LazyCollapsible(
-    header = "Route isobaric",
+    header = "Winds Aloft",
     value = state,
     onExpand = initRouteIsobaric,
 ) { routeIsobaric ->
@@ -95,75 +94,23 @@ fun Route(
                 )
             }
         }
-        Row(
-            horizontalArrangement = Arrangement.End,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(intrinsicSize = IntrinsicSize.Min)
-        ) {
-            OutlinedCard(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .fillMaxHeight(),
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp, vertical = 8.dp)
-                        .fillMaxHeight(),
-                ) {
-                    Text(
-                        text = "Distance: ${routeIsobaric.distance.formatAsNm()}",
-                        style = TextStyle(fontWeight = FontWeight.Bold)
-                    )
-                }
-            }
-            OutlinedCard(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .fillMaxHeight(),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp, vertical = 8.dp)
-                        .fillMaxHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Bearing from ${routeIsobaric.departure.name.substringBefore(" ")}: ${routeIsobaric.bearing}",
-                        style = TextStyle(fontWeight = FontWeight.Bold)
-                    )
-                    RotatableArrowIcon(
-                        direction = Direction(routeIsobaric.bearing.degrees - 180.0),
-                        iconColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                }
-            }
-        }
-        TableContent(isobaricData = routeIsobaric.isobaric)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            "See isobaric data along the route:",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 10.dp)
-        )
-        DistanceToIsobaricSlider(totalDistance = routeIsobaric.distance,
+        DistanceToIsobaricSlider(
+            totalDistance = routeIsobaric.distance,
+            bearing = routeIsobaric.bearing,
+            airports = Pair(routeIsobaric.departure, routeIsobaric.arrival),
+            currentPos = routeIsobaric.currentPos,
             onFractionSelected = { onUpdateIsobaric(it) })
+        TableContent(isobaricData = routeIsobaric.isobaric)
     }
 }
 
 @Composable
 fun DistanceToIsobaricSlider(
-    totalDistance: Distance, onFractionSelected: (Distance) -> Unit
+    totalDistance: Distance,
+    bearing: Direction,
+    airports: Pair<Airport, Airport>,
+    currentPos: Position,
+    onFractionSelected: (Distance) -> Unit
 ) = Column(
     Modifier
         .fillMaxWidth()
@@ -172,19 +119,38 @@ fun DistanceToIsobaricSlider(
         .clip(RoundedCornerShape(8.dp)), horizontalAlignment = Alignment.CenterHorizontally
 ) {
     val distanceNm = totalDistance.nauticalMiles.toFloat()
-    var sliderPosition by remember { mutableFloatStateOf(0f) }
+    var sliderPosition by rememberSaveable { mutableFloatStateOf(0f) }
+    var buttonEnabled by rememberSaveable { mutableStateOf(false) }
     Row(
         Modifier
             .fillMaxWidth()
             .padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("Departure")
-        Text("Arrival")
+        Column(horizontalAlignment = Alignment.Start) {
+            Text("Data from position:")
+            Text("Latitude: ${currentPos.latitude.round(2)}")
+            Text("Longitude: ${currentPos.longitude.round(2)}")
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            RotatableArrowIcon(direction = bearing, flip = false)
+            Row {
+                Text("Bearing: ")
+                Text(bearing.formatAsDegrees())
+            }
+        }
+    }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(airports.first.icao.code, color = MaterialTheme.colorScheme.secondary)
+        Text(airports.second.icao.code, color = MaterialTheme.colorScheme.secondary)
     }
     Slider(
         modifier = Modifier.padding(horizontal = 5.dp),
         value = sliderPosition,
-        onValueChange = { sliderPosition = it },
+        onValueChange = { sliderPosition = it; buttonEnabled = true },
         colors = SliderDefaults.colors(
             thumbColor = MaterialTheme.colorScheme.background,
             activeTrackColor = MaterialTheme.colorScheme.secondary,
@@ -197,12 +163,15 @@ fun DistanceToIsobaricSlider(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(bottomEnd = 8.dp, bottomStart = 8.dp),
         onClick = {
-            onFractionSelected(sliderPosition.nauticalMiles)
+            onFractionSelected(sliderPosition.nauticalMiles); buttonEnabled = false
         },
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.primaryContainer,
-        )
+            disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
+        ),
+        enabled = buttonEnabled
     ) {
         Text("Update isobaric data")
     }

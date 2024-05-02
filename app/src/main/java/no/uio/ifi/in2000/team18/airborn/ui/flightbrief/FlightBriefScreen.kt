@@ -120,12 +120,12 @@ fun FlightBriefScreen(
                     }
                 },
                 colors = TopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-                navigationIconContentColor = MaterialTheme.colorScheme.primary,
-                scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
-                actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
-            )
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                    scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
+                    actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
+                )
             )
         }, containerColor = MaterialTheme.colorScheme.primaryContainer
     ) { padding ->
@@ -340,7 +340,8 @@ fun OverallAirportBrieftab(
         item { Sigchart(state.sigcharts) { viewModel.initSigchart() } }
         if (state.hasArrival) {
             item {
-                Route(state.route, initRouteIsobaric = { viewModel.initRouteIsobaric() },
+                WindsAloftRoute(state.routeIsobaric,
+                    initRouteIsobaric = { viewModel.initRouteIsobaric() },
                     onUpdateIsobaric = { viewModel.changeRouteIsobaric(it) })
             }
         }
@@ -364,7 +365,7 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
         { AirportBriefHeader(state.airport) },
         { Sundata(sun = state.sun) },
         { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
-        { IsobaricData(state.isobaric) { viewModel.initIsobaric() } },
+        // { IsobaricData(state.isobaric) { viewModel.initIsobaric() } }, // TODO: delete totally?
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
     )

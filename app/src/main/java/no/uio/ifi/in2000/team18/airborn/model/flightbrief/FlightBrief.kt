@@ -47,3 +47,25 @@ data class Taf(val text: String) {
 data class Sun(
     val sunrise: String, val sunset: String
 )
+
+
+/**
+ * Indicates a point of progress of a route.
+ * Starting at p0 (0 %). Ending at p100 (100 %).
+ */
+enum class RouteProgress {
+    p0,
+    p25,
+    p50,
+    p75,
+    p100,
+}
+
+fun getRouteProgress(): List<RouteProgress> =
+    listOf(
+        RouteProgress.p0,
+        RouteProgress.p25,
+        RouteProgress.p50,
+        RouteProgress.p75,
+        RouteProgress.p100,
+    )

@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
+
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Radar
 import no.uio.ifi.in2000.team18.airborn.model.RouteForecast
+import no.uio.ifi.in2000.team18.airborn.model.RouteInfo
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -29,6 +31,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import java.net.SocketException
 import java.nio.channels.UnresolvedAddressException
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,11 +50,12 @@ class FlightBriefViewModel @Inject constructor(
         val departureIcao: Icao,
         val offshoreMaps: LoadingState<Map<String, List<OffshoreMap>>> = Loading,
         val geoSatelliteImage: LoadingState<String> = Loading,
-        val route: LoadingState<RouteIsobaric> = Loading,
+        val routeIsobaric: LoadingState<RouteIsobaric> = Loading,
         val radarAnimations: LoadingState<List<Radar>> = Loading,
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
         val routeForecast: LoadingState<List<RouteForecast>> = Loading,
         val isIgaRoute: Boolean = false,
+        val routeInfo: LoadingState<RouteInfo> = Loading,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
     }
@@ -125,19 +129,25 @@ class FlightBriefViewModel @Inject constructor(
         }
     }
 
+    // todo: simplify departure and arrival (may we use state.airports?)
     fun initRouteIsobaric() {
         viewModelScope.launch {
             val departure = airportRepository.getByIcao(state.value.departureIcao)!!
             val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
 
+            val info = load {
+                RouteInfo(departure, arrival)
+            }
+            _state.update { it.copy(routeInfo = info) }
+
             val data = load {
                 weatherRepository.getRouteIsobaric(
                     departure,
                     arrival,
-                    departure.position
+                    departure.position// TODO: want something like routeInfo.positions[RouteProgress.p50]!!
                 )
             }
-            _state.update { it.copy(route = data) }
+            _state.update { it.copy(routeIsobaric = data) }
         }
     }
 
@@ -150,7 +160,18 @@ class FlightBriefViewModel @Inject constructor(
             )
             val newIsobaric =
                 load { weatherRepository.getRouteIsobaric(departure, arrival, newPos) }
-            _state.update { it.copy(route = newIsobaric) }
+            _state.update { it.copy(routeIsobaric = newIsobaric) }
+        }
+    }
+
+    fun initRouteInfo() {
+        viewModelScope.launch {
+            val departure = airportRepository.getByIcao(state.value.departureIcao)!!
+            val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
+            val routeInit = RouteInfo(departure, arrival)
+            routeInit.timeSeries = weatherRepository.initializeTimeseries()
+            Log.d("Route", "init route has timeSeries ${routeInit.timeSeries}")
+            var availableGribTimes: List<ZonedDateTime>? = null
         }
     }
 

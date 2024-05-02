@@ -77,17 +77,18 @@ sealed class AirportTabViewModel(
         }
     }
 
-    fun initIsobaric() {
+    //TODO: probably to be deleted (moved to FlightBriefViewModel, Overall section)
+    /*fun initIsobaric() {
         viewModelScope.launch {
             val airport = airportRepository.getByIcao(icao)
             if (airport == null) {
                 _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
                 return@launch
             }
-            val isobaric = load { weatherRepository.getIsobaricData(airport.position) }
+            val isobaric = load { weatherRepository.fetchGribFiles(airport.position) }
             _state.update { it.copy(isobaric = isobaric) }
         }
-    }
+    }*/
 
 
     fun initTurbulence() {
@@ -102,6 +103,7 @@ sealed class AirportTabViewModel(
             val airport = airportRepository.getByIcao(icao)
             if (airport == null) {
                 _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
+                // TODO: Why is isobaric a value above?? This is webcam section...
                 return@launch
             }
             val webcams = load { airportRepository.fetchWebcamImages(airport) }
@@ -114,6 +116,7 @@ sealed class AirportTabViewModel(
             val airport = airportRepository.getByIcao(icao)
             if (airport == null) {
                 _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
+                // TODO: Why is isobaric a value above?? This is weather section...
                 return@launch
             }
             val weather = load { weatherRepository.getWeatherDays(airport) }

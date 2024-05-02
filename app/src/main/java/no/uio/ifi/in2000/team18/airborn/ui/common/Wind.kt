@@ -23,8 +23,10 @@ fun RotatableArrowIcon(
     direction: Direction,
     modifier: Modifier = Modifier,
     iconSize: Dp = 25.dp,
-    iconColor: Color = MaterialTheme.colorScheme.primary
+    iconColor: Color = MaterialTheme.colorScheme.primary,
+    flip: Boolean = true,
 ) {
+    val metDirection = if (flip) 180 else 0 // meteorological direction opposite of flight direction
     val arrowIcon: Painter = painterResource(id = R.drawable.arrow_up)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
@@ -34,7 +36,7 @@ fun RotatableArrowIcon(
             contentDescription = "Arrow icon",
             modifier = modifier
                 .size(iconSize)
-                .rotate((direction.degrees - 180).toFloat()),
+                .rotate((direction.degrees - metDirection).toFloat()),
             colorFilter = ColorFilter.tint(iconColor)
         )
     }
