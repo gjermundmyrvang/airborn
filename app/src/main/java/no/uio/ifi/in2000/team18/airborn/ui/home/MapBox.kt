@@ -594,7 +594,7 @@ fun AlertLocationPermissionDialog(onDismiss: (Boolean) -> Unit) {
         confirmButton = {
             Button(
                 onClick = {
-                    OpenSettings(context)
+                    openSettings(context)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -611,12 +611,13 @@ fun AlertLocationPermissionDialog(onDismiss: (Boolean) -> Unit) {
     )
 }
 
-fun OpenSettings(context: Context) {
+fun openSettings(context: Context) {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
     val uri = Uri.fromParts("package", context.packageName, null)
     intent.data = uri
     context.startActivity(intent)
 }
+
 @Preview(showSystemUi = true)
 @Composable
 fun TestInfoBox() {
