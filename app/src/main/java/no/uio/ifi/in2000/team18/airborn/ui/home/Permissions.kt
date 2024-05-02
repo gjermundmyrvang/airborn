@@ -1,6 +1,8 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
 import android.Manifest
+import android.app.AlertDialog
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -30,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,6 +52,7 @@ fun LocationPermissionRequest(
     val finePermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coarsePermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
     var askForPermission by remember { mutableStateOf(true) }
+    val context = LocalContext.current
     if (!askForPermission) return
 
     when {
@@ -62,12 +66,34 @@ fun LocationPermissionRequest(
 
         !finePermissionState.status.isGranted -> {
             LaunchedEffect(false) {
-                finePermissionState.launchPermissionRequest()
+                showFirstTimeDialog(context) {
+                    finePermissionState.launchPermissionRequest()
+                }
             }
         }
     }
 }
 
+fun showFirstTimeDialog(context: Context, onDismiss: () -> Unit) {
+    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    if (sharedPreferences.getBoolean("first_time_opened", true)) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Welcome")
+            .setMessage("Welcome to Airborn!\nTo get the full experience of the app, please give us access to your location")
+            .setPositiveButton("ok") { dialog, _ ->
+                dialog.dismiss(); onDismiss()
+            }
+            .show()
+        saveFirstTimeOpenedFlag(context)
+    }
+}
+
+fun saveFirstTimeOpenedFlag(context: Context) {
+    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    editor.putBoolean("first_time_opened", false)
+    editor.apply()
+}
 
 @Preview(showSystemUi = true)
 @Composable
