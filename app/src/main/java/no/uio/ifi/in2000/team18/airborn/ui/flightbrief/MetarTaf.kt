@@ -455,8 +455,54 @@ fun rememberFlip(): ImageVector {
                 horizontalLineToRelative(5f)
                 verticalLineToRelative(2.625f)
                 close()
+fun ShowNearbyAirports(
+    state: LoadingState<List<Airport>>,
+    onAirportSelected: (Airport) -> Unit,
+    initialAirport: Airport?
+) = NearbyAirportHandler(value = state) { airports ->
+    LazyRow(content = {
+        items(airports) { airport ->
+            Column(
+                Modifier
+                    .background(
+                        MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(5.dp)
+                    )
+                    .clip(RoundedCornerShape(5.dp))
+                    .padding(10.dp)
+                    .width(IntrinsicSize.Max)
+                    .height(IntrinsicSize.Max)
+                    .clickable { onAirportSelected(airport) }) {
+                Text(
+                    airport.icao.code,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold,
+                    fontStyle = FontStyle.Italic
+                )
+                Text(
+                    airport.name.substringBefore(","), fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Distance: ${
+                        initialAirport?.position?.distanceTo(airport.position)?.formatAsNm()
+                    }"
+                )
             }
         }.build()
+            Spacer(modifier = Modifier.width(5.dp))
+        }
+    })
+}
+
+@Composable
+fun <T> NearbyAirportHandler(value: LoadingState<T>, content: @Composable RowScope.(T) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth()
+    ) {
+        when (value) {
+            is LoadingState.Success -> content(value.value)
+            is LoadingState.Loading -> LoadingScreen()
+            is LoadingState.Error -> Error(message = "Failed to get nearby airports. ${value.message}")
+        }
     }
 }
 
