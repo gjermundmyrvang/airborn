@@ -120,12 +120,12 @@ fun FlightBriefScreen(
                     }
                 },
                 colors = TopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-                navigationIconContentColor = MaterialTheme.colorScheme.primary,
-                scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
-                actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
-            )
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                    scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
+                    actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
+                )
             )
         }, containerColor = MaterialTheme.colorScheme.primaryContainer
     ) { padding ->
@@ -405,9 +405,7 @@ fun Sundata(sun: LoadingState<Sun?>) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         SunComposable(
-            modifier = Modifier.padding(end = 10.dp),
-            sun = sun,
-            header = ""
+            modifier = Modifier.padding(end = 10.dp), sun = sun, header = ""
         )
     }
 }
@@ -421,8 +419,7 @@ fun AirportInfo(airport: Airport) = Column(
 ) {
     val hasSeperator = airport.name.contains(",")
     Row(
-        Modifier
-            .fillMaxWidth(),
+        Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.Bottom
     ) {
