@@ -1,6 +1,10 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,6 +26,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -30,7 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -43,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -97,16 +103,14 @@ fun Map(
     val sigmets = state.sigmets
     var selectedAirport by remember { mutableStateOf<Airport?>(null) }
     var isClicked by remember { mutableStateOf(false) }
+    var showAlertMessage by remember { mutableStateOf(false) }
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
     val permissionState =
         rememberPermissionState(permission = Manifest.permission.ACCESS_COARSE_LOCATION)
     val mapViewportState = rememberMapViewportState {
         if (permissionState.status.isGranted) {
             transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .zoom(7.000)
-                    .pitch(0.0)
-                    .build(),
+                FollowPuckViewportStateOptions.Builder().zoom(4.000).pitch(0.0).build(),
                 DefaultViewportTransitionOptions.Builder().build(),
             )
         } else {
@@ -118,20 +122,7 @@ fun Map(
             }
         }
     }
-    var showNoSigmetMessage = state.showNoSigmetMessage
-
-    LaunchedEffect(permissionState.status.isGranted) {
-        if (permissionState.status.isGranted) {
-            mapViewportState.transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .zoom(7.000)
-                    .pitch(0.0)
-                    .build(),
-                DefaultViewportTransitionOptions.Builder().build(),
-            )
-        }
-    }
-
+    val showNoSigmetMessage = state.showNoSigmetMessage
     Box {
         val distance = state.airportPair?.let {
             it.first.position.distanceTo(it.second.position)
@@ -164,32 +155,32 @@ fun Map(
                 )
             }
         }
-        if (permissionState.status.isGranted) {
-            Box(
-                modifier = Modifier
-                    .offset(0.dp, -sheetHeight)
-                    .align(Alignment.BottomEnd),
-            ) {
-                FloatingActionButton(
-                    modifier = Modifier.padding(10.dp),
-                    onClick = {
-                        mapViewportState.transitionToFollowPuckState(
-                            FollowPuckViewportStateOptions.Builder()
-                                .zoom(7.000)
-                                .pitch(0.0)
-                                .build(),
-                            DefaultViewportTransitionOptions.Builder().build(),
-                        )
-                    }) {
-                    Icon(
-                        modifier = Modifier.size(32.dp),
-                        painter =
-                        painterResource(
-                            id = R.drawable.center
-                        ),
-                        contentDescription = "Recenter"
+        if (showAlertMessage) AlertLocationPermissionDialog { showAlertMessage = it }
+        Box(
+            modifier = Modifier
+                .offset(0.dp, -sheetHeight)
+                .align(Alignment.BottomEnd),
+        ) {
+            FloatingActionButton(
+                modifier = Modifier.padding(10.dp),
+                onClick = {
+                    if (!permissionState.status.isGranted) showAlertMessage = true
+                    mapViewportState.transitionToFollowPuckState(
+                        FollowPuckViewportStateOptions.Builder()
+                            .zoom(7.000)
+                            .pitch(0.0)
+                            .build(),
+                        DefaultViewportTransitionOptions.Builder().build(),
                     )
-                }
+                }) {
+                Icon(
+                    modifier = Modifier.size(32.dp),
+                    painter =
+                    painterResource(
+                        id = R.drawable.center
+                    ),
+                    contentDescription = "Recenter"
+                )
             }
         }
         Column(modifier = Modifier.padding(top = 6.dp)) {
@@ -587,6 +578,47 @@ fun InfoBox(
     }
 }
 
+@Composable
+fun AlertLocationPermissionDialog(onDismiss: (Boolean) -> Unit) {
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = { onDismiss(false) },
+        title = {
+            Text("Access to location required")
+        },
+        text = {
+            Text(
+                "This function needs access to your location" +
+                        "\nPlease grant location access in settings.\n" +
+                        "NB! You may have to restart the app"
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    openSettings(context)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+                    .clip(RoundedCornerShape(10.dp))
+            ) {
+                Text("Go to settings")
+            }
+        }
+    )
+}
+
+fun openSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+    val uri = Uri.fromParts("package", context.packageName, null)
+    intent.data = uri
+    context.startActivity(intent)
+}
 
 @Preview(showSystemUi = true)
 @Composable
