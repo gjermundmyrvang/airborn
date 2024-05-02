@@ -78,6 +78,13 @@ sealed class AirportTabViewModel(
         }
     }
 
+    fun initNewMetar(icao: Icao) {
+        viewModelScope.launch {
+            val metarTaf = load { airportRepository.fetchTafMetar(icao) }
+            _state.update { it.copy(metarTaf = metarTaf) }
+        }
+    }
+
     fun initNearby() {
         viewModelScope.launch {
             val airport = airportRepository.getByIcao(icao)
