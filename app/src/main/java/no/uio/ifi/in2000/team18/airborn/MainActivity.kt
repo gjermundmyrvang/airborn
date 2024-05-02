@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.team18.airborn
 
-import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,7 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import no.uio.ifi.in2000.team18.airborn.ui.Navigation
 import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import no.uio.ifi.in2000.team18.airborn.ui.connectivity.NetworkConnectivityObserver
-import no.uio.ifi.in2000.team18.airborn.ui.home.RequestPermission
+import no.uio.ifi.in2000.team18.airborn.ui.home.LocationPermissionRequest
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import javax.inject.Inject
 
@@ -54,7 +53,7 @@ class MainActivity @Inject constructor() : ComponentActivity() {
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     NetworkStatus(status = networkStatus) {
-                        RequestPermission(permission = Manifest.permission.ACCESS_FINE_LOCATION)
+                        LocationPermissionRequest()
                         Navigation()
                     }
                 }
@@ -63,7 +62,7 @@ class MainActivity @Inject constructor() : ComponentActivity() {
     }
 }
 
-    @Composable
+@Composable
 fun NetworkStatus(status: ConnectivityObserver.Status, content: @Composable () -> Unit) = Column {
     Box(
         modifier = Modifier

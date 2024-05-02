@@ -98,17 +98,11 @@ fun Map(
     var isClicked by remember { mutableStateOf(false) }
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
     val permissionState =
-        rememberPermissionState(
-            permission =
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
+        rememberPermissionState(permission = Manifest.permission.ACCESS_COARSE_LOCATION)
     val mapViewportState = rememberMapViewportState {
         if (permissionState.status.isGranted) {
             transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .zoom(7.000)
-                    .pitch(0.0)
-                    .build(),
+                FollowPuckViewportStateOptions.Builder().zoom(7.000).pitch(0.0).build(),
                 DefaultViewportTransitionOptions.Builder().build(),
             )
         } else {
@@ -125,10 +119,7 @@ fun Map(
     LaunchedEffect(permissionState.status.isGranted) {
         if (permissionState.status.isGranted) {
             mapViewportState.transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .zoom(7.000)
-                    .pitch(0.0)
-                    .build(),
+                FollowPuckViewportStateOptions.Builder().zoom(7.000).pitch(0.0).build(),
                 DefaultViewportTransitionOptions.Builder().build(),
             )
         }
