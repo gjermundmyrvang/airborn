@@ -358,103 +358,7 @@ fun MetarClouds(clouds: Clouds) {
     }
 }
 
-// Create new icon
 @Composable
-fun rememberFlip(): ImageVector {
-    return remember {
-        ImageVector.Builder(
-            name = "flip",
-            defaultWidth = 40.0.dp,
-            defaultHeight = 40.0.dp,
-            viewportWidth = 40.0f,
-            viewportHeight = 40.0f
-        ).apply {
-            path(
-                fill = SolidColor(Color.Black),
-                fillAlpha = 1f,
-                stroke = null,
-                strokeAlpha = 1f,
-                strokeLineWidth = 1.0f,
-                strokeLineCap = StrokeCap.Butt,
-                strokeLineJoin = StrokeJoin.Miter,
-                strokeLineMiter = 1f,
-                pathFillType = PathFillType.NonZero
-            ) {
-                moveTo(7.875f, 34.75f)
-                quadToRelative(-1.042f, 0f, -1.833f, -0.792f)
-                quadToRelative(-0.792f, -0.791f, -0.792f, -1.833f)
-                verticalLineTo(7.875f)
-                quadToRelative(0f, -1.042f, 0.792f, -1.833f)
-                quadToRelative(0.791f, -0.792f, 1.833f, -0.792f)
-                horizontalLineToRelative(6.917f)
-                quadToRelative(0.541f, 0f, 0.937f, 0.396f)
-                reflectiveQuadToRelative(0.396f, 0.937f)
-                quadToRelative(0f, 0.542f, -0.396f, 0.917f)
-                reflectiveQuadToRelative(-0.937f, 0.375f)
-                horizontalLineTo(7.875f)
-                verticalLineToRelative(24.25f)
-                horizontalLineToRelative(6.917f)
-                quadToRelative(0.541f, 0f, 0.937f, 0.375f)
-                reflectiveQuadToRelative(0.396f, 0.917f)
-                quadToRelative(0f, 0.583f, -0.396f, 0.958f)
-                reflectiveQuadToRelative(-0.937f, 0.375f)
-                close()
-                moveToRelative(12.208f, 3.417f)
-                quadToRelative(-0.583f, 0f, -0.958f, -0.375f)
-                reflectiveQuadToRelative(-0.375f, -0.959f)
-                verticalLineTo(3.208f)
-                quadToRelative(0f, -0.541f, 0.396f, -0.937f)
-                reflectiveQuadToRelative(0.937f, -0.396f)
-                quadToRelative(0.542f, 0f, 0.917f, 0.396f)
-                reflectiveQuadToRelative(0.375f, 0.937f)
-                verticalLineToRelative(33.625f)
-                quadToRelative(0f, 0.584f, -0.375f, 0.959f)
-                reflectiveQuadToRelative(-0.917f, 0.375f)
-                close()
-                moveTo(32.125f, 7.875f)
-                horizontalLineToRelative(-0.417f)
-                verticalLineTo(5.25f)
-                horizontalLineToRelative(0.417f)
-                quadToRelative(1.042f, 0f, 1.833f, 0.792f)
-                quadToRelative(0.792f, 0.791f, 0.792f, 1.833f)
-                verticalLineToRelative(0.417f)
-                horizontalLineToRelative(-2.625f)
-                close()
-                moveToRelative(0f, 14.25f)
-                verticalLineToRelative(-4.25f)
-                horizontalLineToRelative(2.625f)
-                verticalLineToRelative(4.25f)
-                close()
-                moveToRelative(0f, 12.625f)
-                horizontalLineToRelative(-0.417f)
-                verticalLineToRelative(-2.625f)
-                horizontalLineToRelative(0.417f)
-                verticalLineToRelative(-0.458f)
-                horizontalLineToRelative(2.625f)
-                verticalLineToRelative(0.458f)
-                quadToRelative(0f, 1.042f, -0.792f, 1.833f)
-                quadToRelative(-0.791f, 0.792f, -1.833f, 0.792f)
-                close()
-                moveToRelative(0f, -19.5f)
-                verticalLineToRelative(-4.292f)
-                horizontalLineToRelative(2.625f)
-                verticalLineToRelative(4.292f)
-                close()
-                moveToRelative(0f, 13.792f)
-                verticalLineTo(24.75f)
-                horizontalLineToRelative(2.625f)
-                verticalLineToRelative(4.292f)
-                close()
-                moveToRelative(-8.083f, 5.708f)
-                verticalLineToRelative(-2.625f)
-                horizontalLineToRelative(5f)
-                verticalLineToRelative(2.625f)
-                close()
-                moveToRelative(0f, -26.875f)
-                verticalLineTo(5.25f)
-                horizontalLineToRelative(5f)
-                verticalLineToRelative(2.625f)
-                close()
 fun ShowNearbyAirports(
     state: LoadingState<List<Airport>>,
     onAirportSelected: (Airport) -> Unit,
@@ -487,7 +391,6 @@ fun ShowNearbyAirports(
                     }"
                 )
             }
-        }.build()
             Spacer(modifier = Modifier.width(5.dp))
         }
     })
