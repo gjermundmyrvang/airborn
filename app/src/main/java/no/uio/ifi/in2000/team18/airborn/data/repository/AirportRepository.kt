@@ -66,10 +66,21 @@ class AirportRepository @Inject constructor(
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
 
+    private val aiportsWithMetar = listOf(
+        "ENAL", "ENAN", "ENAS", "ENAT", "ENBL", "ENBN", "ENBO", "ENBR", "ENBS", "ENBV",
+        "ENCN", "ENDU", "ENEV", "ENFL", "ENGM", "ENHD", "ENHF", "ENHK", "ENHV", "ENKB",
+        "ENKR", "ENLK", "ENMH", "ENML", "ENNA", "ENNM", "ENNO", "ENOL", "ENOV", "ENRA",
+        "ENRM", "ENRO", "ENRS", "ENSB", "ENSD", "ENSG", "ENSH", "ENSK", "ENSO", "ENSR",
+        "ENSS", "ENST", "ENTC", "ENTO", "ENVA", "ENVD", "ENZV"
+    )
+
     suspend fun getAirportNearby(airport: Airport, max: Int = 5) =
         airportDataSource.getAirportsNearby(airport, (max * 1.2).roundToInt())
             .map { Airport.fromBuiltinAirport(it) }
             .sortedBy { airport.position.distanceTo(it.position).meters }.take(max)
+
+    suspend fun getNearbyAirportsWithMetar(airport: Airport) =
+        getAirportNearby(airport).filter { it.icao.code in aiportsWithMetar }
 
     suspend fun search(query: String) = airportDataSource.search(query)
 
