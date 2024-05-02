@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -41,13 +42,16 @@ import no.uio.ifi.in2000.team18.airborn.model.nauticalMiles
 import no.uio.ifi.in2000.team18.airborn.model.round
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
+import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
+import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
+import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
 @Composable
 fun WindsAloftRoute(
     state: LoadingState<RouteIsobaric>,
     initRouteIsobaric: () -> Unit,
-    onUpdateIsobaric: (Distance) -> Unit
+    onUpdateIsobaric: (Distance, ZonedDateTime) -> Unit
 ) = LazyCollapsible(
     header = "Winds Aloft",
     value = state,
@@ -94,12 +98,18 @@ fun WindsAloftRoute(
                 )
             }
         }
+        val timeStrings =
+            routeIsobaric.isobaric.timeSeries.map { it.toSystemZoneOffset().hourMinute() }
         DistanceToIsobaricSlider(
             totalDistance = routeIsobaric.distance,
             bearing = routeIsobaric.bearing,
             airports = Pair(routeIsobaric.departure, routeIsobaric.arrival),
             currentPos = routeIsobaric.currentPos,
-            onFractionSelected = { onUpdateIsobaric(it) })
+            onFractionSelected = { distance, time ->
+                onUpdateIsobaric(distance, routeIsobaric.isobaric.timeSeries[time])
+            },
+            timeStrings = timeStrings
+        )
         TableContent(isobaricData = routeIsobaric.isobaric)
     }
 }
@@ -110,17 +120,24 @@ fun DistanceToIsobaricSlider(
     bearing: Direction,
     airports: Pair<Airport, Airport>,
     currentPos: Position,
-    onFractionSelected: (Distance) -> Unit
+    onFractionSelected: (Distance, Int) -> Unit,
+    timeStrings: List<String>
 ) = Column(
     Modifier
         .fillMaxWidth()
         .padding(10.dp)
         .background(Color(0x801D1D1D), RoundedCornerShape(8.dp))
-        .clip(RoundedCornerShape(8.dp)), horizontalAlignment = Alignment.CenterHorizontally
+        .clip(RoundedCornerShape(8.dp)),
 ) {
     val distanceNm = totalDistance.nauticalMiles.toFloat()
     var sliderPosition by rememberSaveable { mutableFloatStateOf(0f) }
-    var buttonEnabled by rememberSaveable { mutableStateOf(false) }
+    var buttonEnabled by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var time by rememberSaveable {
+        mutableIntStateOf(0)
+    }
+
     Row(
         Modifier
             .fillMaxWidth()
@@ -163,7 +180,7 @@ fun DistanceToIsobaricSlider(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(bottomEnd = 8.dp, bottomStart = 8.dp),
         onClick = {
-            onFractionSelected(sliderPosition.nauticalMiles); buttonEnabled = false
+            onFractionSelected(sliderPosition.nauticalMiles, time); buttonEnabled = false
         },
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.background,
@@ -175,4 +192,12 @@ fun DistanceToIsobaricSlider(
     ) {
         Text("Update isobaric data")
     }
+    TimeRow(
+        current = time,
+        times = timeStrings,
+        selectedColor = MaterialTheme.colorScheme.secondary,
+        notSelectedColor = MaterialTheme.colorScheme.tertiaryContainer,
+        onTimeClicked = { time = it; buttonEnabled = true },
+        modifier = Modifier.align(Alignment.Start)
+    )
 }
