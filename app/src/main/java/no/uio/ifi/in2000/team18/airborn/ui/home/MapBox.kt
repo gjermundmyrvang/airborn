@@ -122,16 +122,6 @@ fun Map(
         }
     }
     var showNoSigmetMessage = state.showNoSigmetMessage
-
-    LaunchedEffect(permissionState.status.isGranted) {
-        if (permissionState.status.isGranted) {
-            mapViewportState.transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder().zoom(7.000).pitch(0.0).build(),
-                DefaultViewportTransitionOptions.Builder().build(),
-            )
-        }
-    }
-
     Box {
         val distance = state.airportPair?.let {
             it.first.position.distanceTo(it.second.position)
