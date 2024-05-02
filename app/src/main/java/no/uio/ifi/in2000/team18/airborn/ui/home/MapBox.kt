@@ -110,7 +110,7 @@ fun Map(
     val mapViewportState = rememberMapViewportState {
         if (permissionState.status.isGranted) {
             transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder().zoom(7.000).pitch(0.0).build(),
+                FollowPuckViewportStateOptions.Builder().zoom(4.000).pitch(0.0).build(),
                 DefaultViewportTransitionOptions.Builder().build(),
             )
         } else {
