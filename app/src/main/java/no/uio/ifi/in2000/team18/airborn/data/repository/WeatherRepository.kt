@@ -1,12 +1,15 @@
 package no.uio.ifi.in2000.team18.airborn.data.repository
 
 import android.util.Log
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
+import no.uio.ifi.in2000.team18.airborn.model.GribFile
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
@@ -23,7 +26,6 @@ import no.uio.ifi.in2000.team18.airborn.model.mps
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import ucar.nc2.dt.GridDatatype
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -42,77 +44,86 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-    private var isobaricDataCache = ConcurrentHashMap(mutableMapOf<Position, IsobaricData>())
     private var weatherDataCache = ConcurrentHashMap(mutableMapOf<Airport, List<WeatherDay>>())
 
-    suspend fun getIsobaricData(position: Position): IsobaricData {
-        val cachedIsobaric = isobaricDataCache[position]
-        if (cachedIsobaric != null) {
-            return cachedIsobaric
-        } else {
+    private var isobaricDataCache =
+        ConcurrentHashMap(mutableMapOf<Pair<Position, ZonedDateTime?>, Map<Int, List<Double>>>())
+    private var allGribFiles = ConcurrentHashMap(mapOf<ZonedDateTime, GribFile>())
+    private var timeSeriesMutex = Mutex()
+    private var timeSeriesDataCache: List<ZonedDateTime> = listOf()
+
+    private suspend fun getIsobaricData(
+        position: Position, time: ZonedDateTime? = null
+    ): IsobaricData {
+        val gribFile: GribFile
+        if (timeSeriesDataCache.isEmpty() || time == null) { //Runs on init
             val gribFiles = gribDataSource.availableGribFiles()
-            val now = ZonedDateTime.now(ZoneOffset.UTC)
-            val gribFile = gribFiles.find {
-                it.params.time.isBefore(now) || it.params.time.isEqual(now) && it.params.time.plusHours(
-                    3
-                ).isAfter(
-                    now
-                )
-            } ?: gribFiles.last()
-            val windsAloft = gribDataSource.useGribFile(gribFile) { dataset ->
-                val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
-                val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
-                val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
+            allGribFiles = ConcurrentHashMap(gribFiles.associateBy { it.params.time })
+            timeSeriesMutex.withLock { this.timeSeriesDataCache = allGribFiles.keys.sorted() }
 
-                Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
-
-                temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
-                    (named.name.trim().toInt() / 100) to listOf(
-                        temperature.sampleAtPosition(position, i).toDouble(),
-                        windU.sampleAtPosition(position, i).toDouble(),
-                        windV.sampleAtPosition(position, i).toDouble(),
-                    )
-                }.toMap().filterKeys { it > 500.0 }// only use high pressureLayers = low altitude
+            val firstTime = timeSeriesMutex.withLock {
+                this.timeSeriesDataCache.first()
             }
-
-            val airPressureASL = getAirPressureAtSeaLevel(position)
-            val layers = windsAloft.map { (key, value) ->
-                val layer = IsobaricLayer(
-                    pressure = Pressure(key.toDouble()),
-                    temperature = Temperature(value[0] - 273.15),
-                    uWind = value[1],
-                    vWind = value[2]
-                )
-                layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
-                layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
-                layer.height =
-                    calculateHeight(key.toDouble(), layer.temperature.kelvin, airPressureASL.hpa)
-                layer
-            }.filter {
-                val h = it.height
-                val maxHeight = 15000
-                val result = if (h != null) (h.feet <= maxHeight) else false
-                result
-            }
-            val result = IsobaricData(
-                position,
-                gribFile.params.time.toSystemZoneOffset(), // TODO: where and how should we convert to system time?
-                layers,
-            )
-            isobaricDataCache[position] = result
-            return result
+            gribFile = allGribFiles[firstTime] ?: gribFiles.last()
+        } else {
+            //gribFile will never be null
+            gribFile = allGribFiles[time]!!
         }
+
+        val windsAloft = isobaricDataCache[Pair(position, time)] ?: gribDataSource.useGribFile(
+            gribFile
+        ) { dataset ->
+            val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
+            val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
+            val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
+
+            Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
+
+            temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
+                (named.name.trim().toInt() / 100) to listOf(
+                    temperature.sampleAtPosition(position, i).toDouble(),
+                    windU.sampleAtPosition(position, i).toDouble(),
+                    windV.sampleAtPosition(position, i).toDouble(),
+                )
+            }.toMap().filterKeys { it > 500.0 }// only use high pressureLayers = low altitude.also
+                .also { isobaricDataCache[Pair(position, time)] = it }
+        }
+
+        val airPressureASL = getAirPressureAtSeaLevel(position)
+        val layers = windsAloft.map { (key, value) ->
+            val layer = IsobaricLayer(
+                pressure = Pressure(key.toDouble()),
+                temperature = Temperature(value[0] - 273.15),
+                uWind = value[1],
+                vWind = value[2]
+            )
+            layer.windFromDirection = Direction.fromWindUV(layer.uWind, layer.vWind)
+            layer.windSpeed = calculateWindSpeed(layer.uWind, layer.vWind)
+            layer.height =
+                calculateHeight(key.toDouble(), layer.temperature.kelvin, airPressureASL.hpa)
+            layer
+        }.filter {
+            val h = it.height
+            val maxHeight = 15000
+            val result = if (h != null) (h.feet <= maxHeight) else false
+            result
+        }
+        return IsobaricData(position,
+            gribFile.params.time.toSystemZoneOffset(),
+            layers,
+            timeSeriesMutex.withLock { this.timeSeriesDataCache })
+
     }
 
     suspend fun getRouteIsobaric(
-        departure: Airport, arrival: Airport, pos: Position
+        departure: Airport, arrival: Airport, pos: Position, time: ZonedDateTime? = null
     ): RouteIsobaric {
         val distance = departure.position.distanceTo(arrival.position)
         val bearing = departure.position.bearingTo(arrival.position)
         return RouteIsobaric(
             departure = departure,
             arrival = arrival,
-            isobaric = getIsobaricData(pos),
+            isobaric = getIsobaricData(pos, time),
             distance = distance,
             bearing = bearing,
             currentPos = pos,
