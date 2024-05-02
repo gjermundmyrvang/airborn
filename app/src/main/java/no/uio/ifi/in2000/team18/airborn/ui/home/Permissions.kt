@@ -54,13 +54,11 @@ fun HandleRequest(
 }
 
 @Composable
-fun Content(showButton: Boolean = true, onClick: () -> Unit) {
+fun PermissionRequestContent(showButton: Boolean = true, onClick: () -> Unit) {
     if (showButton) {
-        val enableLocation = remember { mutableStateOf(true) }
-        if (enableLocation.value) {
-            CustomDialogLocation(
-                enableLocation, onClick
-            )
+        var enableLocation by remember { mutableStateOf(true) }
+        if (enableLocation) {
+            LocationPermissionDialog(onClick, onDismissRequest = { enableLocation = false })
         }
     }
 }
@@ -105,6 +103,6 @@ fun PermissionDeniedContent(
             })
         }
     } else {
-        Content(onClick = onRequestPermission)
+        PermissionRequestContent(onClick = onRequestPermission)
     }
 }
