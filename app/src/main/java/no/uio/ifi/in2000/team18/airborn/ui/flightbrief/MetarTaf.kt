@@ -6,12 +6,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,16 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,9 +47,11 @@ import kotlinx.datetime.toKotlinTimeZone
 import kotlinx.datetime.toLocalDateTime
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Clouds
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarWindDirection
@@ -62,10 +63,16 @@ import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import java.time.ZoneId
 
 @Composable
-fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollapsible(
+fun MetarTaf(
+    state: LoadingState<MetarTaf?>,
+    airports: LoadingState<List<Airport>>,
+    initMetar: () -> Unit,
+    onShowNearby: () -> Unit,
+    onNewAirport: (Icao) -> Unit
+) = LazyCollapsible(
     header = "Metar/Taf", value = state, onExpand = initMetar
 ) { metarTaf ->
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(10.dp)) {
         val clipboardManager = LocalClipboardManager.current
         val metar = metarTaf?.latestMetar
         val taf = metarTaf?.latestTaf
@@ -73,13 +80,24 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
             mutableStateOf(false)
         }
         val rotate by animateFloatAsState(
-            targetValue = if (rotated) 180f else 0f
+            targetValue = if (rotated) 180f else 0f, label = ""
         )
-
+        var newAirportName by remember { mutableStateOf("") }
         if (metar == null && taf == null) {
-            Text("No metar or taf for this airport")
+            onShowNearby()
+            Text("Nearby airports with metar/taf:")
+            Spacer(modifier = Modifier.height(8.dp))
+            ShowNearbyAirports(
+                state = airports,
+                initialAirport = metarTaf?.airport,
+                onAirportSelected = { onNewAirport(it.icao); newAirportName = it.name })
             return@LazyCollapsible
         }
+        if (newAirportName.isNotBlank()) Text(
+            "Showing metar for: $newAirportName",
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -119,8 +137,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
                                 )
                                 .padding(horizontal = 16.dp, vertical = 3.dp)
                                 .clip(RoundedCornerShape(14.dp))
-                                .clickable { rotated = !rotated }
-                        ) {
+                                .clickable { rotated = !rotated }) {
                             Text("Decode")
                         }
                     }
