@@ -40,7 +40,6 @@ import androidx.compose.ui.window.Dialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import no.uio.ifi.in2000.team18.airborn.R
 
 @ExperimentalPermissionsApi
@@ -53,20 +52,12 @@ fun LocationPermissionRequest(
     if (!askForPermission) return
 
     when {
-        coarsePermissionState.status.isGranted && finePermissionState.status.shouldShowRationale -> {
-            LocationPermissionDialog(message = "This app works better with precise location",
-                onDismissRequest = { askForPermission = false },
-                onClick = {
-                    finePermissionState.launchPermissionRequest()
-                })
+        coarsePermissionState.status.isGranted -> {
+            askForPermission = false
         }
 
-        finePermissionState.status.shouldShowRationale -> {
-            LocationPermissionDialog(message = "This app need acces to your location to show where you are",
-                onDismissRequest = { askForPermission = false },
-                onClick = {
-                    finePermissionState.launchPermissionRequest()
-                })
+        finePermissionState.status.isGranted -> {
+            askForPermission = false
         }
 
         !finePermissionState.status.isGranted -> {
