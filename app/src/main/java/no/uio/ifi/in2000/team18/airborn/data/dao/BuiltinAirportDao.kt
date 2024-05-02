@@ -35,4 +35,10 @@ interface BuiltinAirportDao {
         """
     )
     fun getAirportsNearby(latitude: Double, longitude: Double, max: Int): List<BuiltinAirport>
+
+    @Query("UPDATE builtin_airport SET is_favourite = 1 WHERE icao = :icao")
+    fun addFavourite(icao: String)
+
+    @Query("UPDATE builtin_airport SET is_favourite = 0 WHERE icao = :icao")
+    fun removeFavourite(icao: String)
 }
