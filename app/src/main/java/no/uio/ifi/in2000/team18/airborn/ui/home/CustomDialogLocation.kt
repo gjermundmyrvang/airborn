@@ -19,9 +19,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -38,107 +39,108 @@ import no.uio.ifi.in2000.team18.airborn.R
 
 @Preview(showSystemUi = true)
 @Composable
-fun PreviewPermissionDialog(){
-    val enableLocation = remember { mutableStateOf(false) }
-    CustomDialogLocation(enableLocation = enableLocation)
+fun PreviewLocationPermissionDialog() {
+    var enableLocation by remember { mutableStateOf(false) }
+    LocationPermissionDialog(
+        onDismissRequest = {
+            enableLocation = false
+        },
+    )
 }
+
 @Composable
-fun CustomDialogLocation(
-    enableLocation: MutableState<Boolean>,
-    onClick: () -> Unit = {}
+fun LocationPermissionDialog(
+    onClick: () -> Unit = {},
+    onDismissRequest: () -> Unit = {},
+) = Dialog(
+    onDismissRequest = onDismissRequest
 ) {
-    Dialog(
-        onDismissRequest = { enableLocation.value = false}
+    Box(
+        modifier = Modifier
+            .padding(top = 20.dp, bottom = 20.dp)
+            .width(300.dp)
+            .height(370.dp)
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(25.dp, 5.dp, 25.dp, 5.dp)
+            )
+            .verticalScroll(rememberScrollState()),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Box(
-            modifier = Modifier
-                .padding(top = 20.dp, bottom = 20.dp)
-                .width(300.dp)
-                .height(370.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(25.dp, 5.dp, 25.dp, 5.dp)
-                )
-                .verticalScroll(rememberScrollState()),
-            contentAlignment = Alignment.TopCenter
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Image(
+                painter = painterResource(id = R.drawable.red_marker),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .padding(top = 5.dp)
+                    .height(120.dp)
+                    .fillMaxWidth(),
+
+                )
+            Text(
+                text = "Enable location",
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    //  .padding(top = 5.dp)
+                    .fillMaxWidth(),
+                letterSpacing = 2.sp,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                "This app uses your live location",
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+                    .fillMaxWidth(),
+                letterSpacing = 1.sp,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            val cornerRadius = 16.dp
+            val gradientColors = listOf(Color(0xFFff669f), Color(0xFFff8961))
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 32.dp, end = 32.dp),
+                onClick = onClick,
+                contentPadding = PaddingValues(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent
+                ),
+                shape = RoundedCornerShape(cornerRadius)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.red_marker),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .padding(top = 5.dp)
-                        .height(120.dp)
-                        .fillMaxWidth(),
 
-                    )
-                Text(
-                    text = "Enable location",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        //  .padding(top = 5.dp)
-                        .fillMaxWidth(),
-                    letterSpacing = 2.sp,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    "This app uses your live location",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(top = 10.dp, start = 25.dp, end = 25.dp)
-                        .fillMaxWidth(),
-                    letterSpacing = 1.sp,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-
-                val cornerRadius = 16.dp
-                val gradientColors = listOf(Color(0xFFff669f), Color(0xFFff8961))
-
-                Button(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 32.dp, end = 32.dp),
-                    onClick=onClick,
-                    contentPadding = PaddingValues(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent
-                    ),
-                    shape = RoundedCornerShape(cornerRadius)
-                ) {
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                brush = Brush.horizontalGradient(colors = gradientColors),
-                            )
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text ="Enable",
-                            fontSize = 20.sp,
-                            color = Color.White
+                        .background(
+                            brush = Brush.horizontalGradient(colors = gradientColors),
                         )
-                    }
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Enable",
+                        fontSize = 20.sp,
+                        color = Color.White
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                TextButton(onClick = {
-                    enableLocation.value = false
-                }) { Text("Cancel", style = MaterialTheme.typography.labelLarge) }
-
-                Spacer(modifier = Modifier.height(24.dp))
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            TextButton(onClick = onDismissRequest) { Text("Cancel", style = MaterialTheme.typography.labelLarge) }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
