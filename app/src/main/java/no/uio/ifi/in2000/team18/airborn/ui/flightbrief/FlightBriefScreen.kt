@@ -342,12 +342,16 @@ fun OverallAirportBrieftab(
             item {
                 WindsAloftRoute(state.routeIsobaric,
                     initRouteIsobaric = { viewModel.initRouteIsobaric() },
-                    onUpdateIsobaric = { viewModel.changeRouteIsobaric(it) })
+                    onUpdateIsobaric = { distance, time ->
+                        viewModel.changeRouteIsobaric(
+                            distance, time
+                        )
+                    })
             }
         }
         item { RadarAnimations(state.radarAnimations) { viewModel.initRadarAnimations() } }
         item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
-        item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMpas() } }
+        item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMaps() } }
         if (state.isIgaRoute) { // Only show this composable if selected departure and arrival is a route
             item {
                 RouteForecast(state = state.routeForecast) {
@@ -363,9 +367,8 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
     val state by viewModel.state.collectAsState()
     val sections: List<@Composable () -> Unit> = listOf(
         { AirportBriefHeader(state.airport) },
-        { Sundata(sun = state.sun) },
+        { Sundata(state.sun) },
         { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
-        // { IsobaricData(state.isobaric) { viewModel.initIsobaric() } }, // TODO: delete totally?
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
     )
@@ -404,9 +407,7 @@ fun Sundata(sun: LoadingState<Sun?>) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         SunComposable(
-            modifier = Modifier.padding(end = 10.dp),
-            sun = sun,
-            header = ""
+            modifier = Modifier.padding(end = 10.dp), sun = sun, header = ""
         )
     }
 }
@@ -420,8 +421,7 @@ fun AirportInfo(airport: Airport) = Column(
 ) {
     val hasSeperator = airport.name.contains(",")
     Row(
-        Modifier
-            .fillMaxWidth(),
+        Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.Bottom
     ) {
