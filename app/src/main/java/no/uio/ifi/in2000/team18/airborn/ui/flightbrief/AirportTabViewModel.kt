@@ -88,6 +88,7 @@ sealed class AirportTabViewModel(
             val airport = airportRepository.getByIcao(icao)
             if (airport == null) {
                 _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
+                // TODO: Why is isobaric a value above?? This is webcam section...
                 return@launch
             }
             val webcams = load { airportRepository.fetchWebcamImages(airport) }
@@ -100,6 +101,7 @@ sealed class AirportTabViewModel(
             val airport = airportRepository.getByIcao(icao)
             if (airport == null) {
                 _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
+                // TODO: Why is isobaric a value above?? This is weather section...
                 return@launch
             }
             val weather = load { weatherRepository.getWeatherDays(airport) }

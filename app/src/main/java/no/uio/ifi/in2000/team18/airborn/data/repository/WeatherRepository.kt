@@ -18,6 +18,7 @@ import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RouteProgress
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
@@ -41,12 +42,18 @@ class WeatherRepository @Inject constructor(
     private val gribDataSource: GribDataSource,
 ) {
     // todo: rather put current values in State of FlightBriefViewModel or in Route-object?
-    var currentFraction: Double? = null
+    var currentFraction: RouteProgress? = null
     var currentPosition: Position? = null
     var currentDistance: Distance? = null
     var currentBearing: Direction? = null
-    private var bearingsAndDistances: MutableMap<Double, Triple<Position, Distance, Direction>?> =
-        mutableMapOf(0.0 to null, 0.25 to null, 0.5 to null, 0.75 to null, 1.0 to null)
+    private var bearingsAndDistances: MutableMap<RouteProgress, Triple<Position, Distance, Direction>?> =
+        mutableMapOf(
+            RouteProgress.p0 to null,
+            RouteProgress.p25 to null,
+            RouteProgress.p50 to null,
+            RouteProgress.p75 to null,
+            RouteProgress.p100 to null,
+        )
 
     private var isobaricDataMap: MutableMap<Double, IsobaricData?> =
         mutableMapOf(0.0 to null, 0.25 to null, 0.5 to null, 0.75 to null, 1.0 to null)
@@ -117,14 +124,14 @@ class WeatherRepository @Inject constructor(
         }
         return IsobaricData(
             position,
-            gribFile.params.time.toSystemZoneOffset(), // TODO: where should we convert to system time?
+            gribFile.params.time.toSystemZoneOffset(), // TODO: where and how should we convert to system time?
             layers,
         )
     }
 
-    suspend fun updateRouteIsobaric(route: Route, fraction: Double, time: ZonedDateTime) {
+    suspend fun updateRouteIsobaric(route: Route, progress: RouteProgress, time: ZonedDateTime) {
         // TODO: check for cached stuff
-        route.isobaric = route.positions?.get(fraction)?.let { pos ->
+        route.isobaric = route.positions?.get(progress)?.let { pos ->
             route.timeSeries?.let { it ->
                 currentGribFile(it)?.let { file ->
                     fetchIsobaricData(file, pos, time)
@@ -132,18 +139,18 @@ class WeatherRepository @Inject constructor(
             }
         }
 
-        currentFraction = fraction
+        currentFraction = progress
 
-        if (bearingsAndDistances[fraction] == null && route.positions != null) {
-            val pos = route.positions!![fraction]
+        if (bearingsAndDistances[progress] == null && route.positions != null) {
+            val pos = route.positions!![progress]
             val dest = route.arrival.position
             val dist = pos!!.distanceTo(dest)
             val bear = pos.bearingTo(dest)
-            bearingsAndDistances[fraction] = Triple(pos, dist, bear)
+            bearingsAndDistances[progress] = Triple(pos, dist, bear)
         }
-        currentPosition = bearingsAndDistances[fraction]!!.first
-        currentDistance = bearingsAndDistances[fraction]!!.second
-        currentBearing = bearingsAndDistances[fraction]!!.third
+        currentPosition = bearingsAndDistances[progress]!!.first
+        currentDistance = bearingsAndDistances[progress]!!.second
+        currentBearing = bearingsAndDistances[progress]!!.third
         Log.d(
             "routeCache", "curPos: $currentPosition, curDist: $currentDistance," +
                     "curBear: $currentBearing"
