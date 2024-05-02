@@ -121,7 +121,7 @@ fun Map(
             }
         }
     }
-    var showNoSigmetMessage = state.showNoSigmetMessage
+    val showNoSigmetMessage = state.showNoSigmetMessage
     Box {
         val distance = state.airportPair?.let {
             it.first.position.distanceTo(it.second.position)
