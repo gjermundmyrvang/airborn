@@ -27,7 +27,7 @@ interface BuiltinAirportDao {
                 (lat - :latitude) * (lat - :latitude) + (lon - :longitude)*(lon - :longitude)/4 as distance_squared
             FROM builtin_airport
         )
-        SELECT icao, name, lat, lon
+        SELECT icao, name, lat, lon, is_favourite
         FROM airport_dist 
         ORDER BY distance_squared
         LIMIT :max
