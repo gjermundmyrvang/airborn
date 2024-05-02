@@ -7,6 +7,7 @@ import no.uio.ifi.in2000.team18.airborn.model.Position
 data class MetarTaf(
     val metars: List<Metar>,
     val tafs: List<Taf>,
+    val airport: Airport?,
 ) {
     val latestTaf
         get(): Taf? = if (tafs.isNotEmpty()) tafs.last() else null

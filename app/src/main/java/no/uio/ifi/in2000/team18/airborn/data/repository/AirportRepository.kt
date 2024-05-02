@@ -97,7 +97,8 @@ class AirportRepository @Inject constructor(
             }
         }.toMutableList()
         val tafs = tafLines.asSequence().map { Taf(it) }.toMutableList()
-        MetarTaf(metars, tafs).also { tafMetarDataCache[icao] = it }
+        val airport = getByIcao(icao)
+        MetarTaf(metars, tafs, airport).also { tafMetarDataCache[icao] = it }
     }
 
     // Sigchart logic
