@@ -358,7 +358,14 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
     val sections: List<@Composable () -> Unit> = listOf(
         { AirportBriefHeader(state.airport) },
         { Sundata(sun = state.sun) },
-        { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
+        {
+            MetarTaf(state.metarTaf,
+                airports = state.nearbyAirportsWithMetar,
+                initMetar = { viewModel.initMetarTaf() },
+                onShowNearby = { viewModel.initNearby() },
+                onNewAirport = { viewModel.initNewMetar(it) }
+            )
+        },
         { IsobaricData(state.isobaric) { viewModel.initIsobaric() } },
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
