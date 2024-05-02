@@ -7,7 +7,6 @@ import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
-import no.uio.ifi.in2000.team18.airborn.model.GribFile
 import no.uio.ifi.in2000.team18.airborn.model.NextHourDetails
 import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.Pressure
@@ -18,7 +17,6 @@ import no.uio.ifi.in2000.team18.airborn.model.TimeSeries
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RouteProgress
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
@@ -44,51 +42,8 @@ class WeatherRepository @Inject constructor(
     private val locationForecastDataSource: LocationForecastDataSource,
     private val gribDataSource: GribDataSource,
 ) {
-
-    private var isobaricDataCache =
-        ConcurrentHashMap(mutableMapOf<Position, IsobaricData>())
+    private var isobaricDataCache = ConcurrentHashMap(mutableMapOf<Position, IsobaricData>())
     private var weatherDataCache = ConcurrentHashMap(mutableMapOf<Airport, List<WeatherDay>>())
-
-    // todo: rather put current values in State of FlightBriefViewModel or in Route-object?
-    // todo: work on this...
-    var currentFraction: RouteProgress? = null
-    var currentPosition: Position? = null
-    var currentDistance: Distance? = null
-    var currentBearing: Direction? = null
-    private var bearingsAndDistances: MutableMap<RouteProgress, Triple<Position, Distance, Direction>?> =
-        mutableMapOf(
-            RouteProgress.p0 to null,
-            RouteProgress.p25 to null,
-            RouteProgress.p50 to null,
-            RouteProgress.p75 to null,
-            RouteProgress.p100 to null,
-        )
-
-    // Todo: probably delete this
-    private var isobaricDataMap: MutableMap<Double, IsobaricData?> =
-        mutableMapOf(0.0 to null, 0.25 to null, 0.5 to null, 0.75 to null, 1.0 to null)
-
-    suspend fun initializeTimeseries(): Map<ZonedDateTime, GribFile> {
-        val available = gribDataSource.availableGribFiles()
-        val availableTimes =
-            available.map { it.params.time to it }.toMap().toSortedMap(compareBy { it })
-        return availableTimes
-    }
-
-    // todo: try to delete this fun, it is implemented in getIsobaricData
-    private fun currentGribFile(timeSeries: Map<ZonedDateTime, GribFile>): GribFile? {
-        val now = ZonedDateTime.now(ZoneOffset.UTC)
-        val returnTime = timeSeries.filterKeys {
-            it.isBefore(now) || it.isEqual(now) && it.plusHours(
-                3
-            ).isAfter(
-                now
-            )
-        }.keys
-        val returnValue = timeSeries[returnTime.first()]
-        Log.d("Route", "currentGribFile: $returnTime")
-        return returnValue
-    }
 
     suspend fun getIsobaricData(position: Position): IsobaricData {
         val cachedIsobaric = isobaricDataCache[position]
@@ -104,26 +59,21 @@ class WeatherRepository @Inject constructor(
                     now
                 )
             } ?: gribFiles.last()
-            val windsAloft =
-                gribDataSource.useGribFile(gribFile) { dataset ->
-                    val windU =
-                        dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
-                    val windV =
-                        dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
-                    val temperature =
-                        dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
+            val windsAloft = gribDataSource.useGribFile(gribFile) { dataset ->
+                val windU = dataset.grids.find { it.shortName == "u-component_of_wind_isobaric" }!!
+                val windV = dataset.grids.find { it.shortName == "v-component_of_wind_isobaric" }!!
+                val temperature = dataset.grids.find { it.shortName == "Temperature_isobaric" }!!
 
-                    Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
+                Log.d("grib", "${windU.fullName} ${windV.fullName} ${temperature.fullName}")
 
-                    temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
-                        (named.name.trim().toInt() / 100) to listOf(
-                            temperature.sampleAtPosition(position, i).toDouble(),
-                            windU.sampleAtPosition(position, i).toDouble(),
-                            windV.sampleAtPosition(position, i).toDouble(),
-                        )
-                    }.toMap()
-                        .filterKeys { it > 500.0 }// only use high pressureLayers = low altitude
-                }
+                temperature.coordinateSystem.verticalAxis.names.mapIndexed { i, named ->
+                    (named.name.trim().toInt() / 100) to listOf(
+                        temperature.sampleAtPosition(position, i).toDouble(),
+                        windU.sampleAtPosition(position, i).toDouble(),
+                        windV.sampleAtPosition(position, i).toDouble(),
+                    )
+                }.toMap().filterKeys { it > 500.0 }// only use high pressureLayers = low altitude
+            }
 
             val airPressureASL = getAirPressureAtSeaLevel(position)
             val layers = windsAloft.map { (key, value) ->
@@ -169,43 +119,6 @@ class WeatherRepository @Inject constructor(
         )
     }
 
-
-// TODO Check if this is necessary at all
-//    suspend fun updateRouteIsobaric(route: Route, progress: RouteProgress, time: ZonedDateTime) {
-//        // TODO: check for cached stuff
-//        route.isobaric = route.positions?.get(progress)?.let { pos ->
-//            route.timeSeries?.let { it ->
-//                currentGribFile(it)?.let { file ->
-//                    fetchIsobaricData(file, pos, time)
-//                }
-//            }
-//        }
-//
-//        currentFraction = progress
-//
-//        if (bearingsAndDistances[progress] == null && route.positions != null) {
-//            val pos = route.positions!![progress]
-//            val dest = route.arrival.position
-//            val dist = pos!!.distanceTo(dest)
-//            val bear = pos.bearingTo(dest)
-//            bearingsAndDistances[progress] = Triple(pos, dist, bear)
-//        }
-//        currentPosition = bearingsAndDistances[progress]!!.first
-//        currentDistance = bearingsAndDistances[progress]!!.second
-//        currentBearing = bearingsAndDistances[progress]!!.third
-//        Log.d(
-//            "routeCache", "curPos: $currentPosition, curDist: $currentDistance," +
-//                    "curBear: $currentBearing"
-//        )
-//
-//        // TODO: cache stuff.
-//
-//        val distance = route.departure.position.distanceTo(route.arrival.position)
-//        val bearing = route.departure.position.bearingTo(route.arrival.position)
-//
-//        // TODO: something like updating
-//        //  route.positions.fraction.value.timeSeries.time with fetching IsobaricData?
-//    }
 
     private fun calculateWindSpeed(uWind: Double, vWind: Double): Speed =
         (sqrt(uWind.pow(2) + vWind.pow(2))).mps
@@ -253,8 +166,7 @@ class WeatherRepository @Inject constructor(
         val airPressureAtSeaLevelNow =
             availableTimeSeries.first().data.instant.details.airPressureAtSeaLevel
         Log.d(
-            "weather",
-            "airPressureASL: $airPressureAtSeaLevelNow"
+            "weather", "airPressureASL: $airPressureAtSeaLevelNow"
         )
         return airPressureAtSeaLevelNow
     }

@@ -31,7 +31,6 @@ import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import java.net.SocketException
 import java.nio.channels.UnresolvedAddressException
-import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -164,6 +163,7 @@ class FlightBriefViewModel @Inject constructor(
         }
     }
 
+    /*
     fun initRouteInfo() {
         viewModelScope.launch {
             val departure = airportRepository.getByIcao(state.value.departureIcao)!!
@@ -174,6 +174,7 @@ class FlightBriefViewModel @Inject constructor(
             var availableGribTimes: List<ZonedDateTime>? = null
         }
     }
+     */
 
     fun initRoute() {
         viewModelScope.launch {
