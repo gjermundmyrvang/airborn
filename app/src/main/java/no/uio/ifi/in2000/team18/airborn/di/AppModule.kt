@@ -2,6 +2,8 @@ package no.uio.ifi.in2000.team18.airborn.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,7 +43,13 @@ class AppModule {
             appContext,
             AppDatabase::class.java,
             "airborn.db"
-        ).createFromAsset("database/airborn.db").build()
+        ).createFromAsset("database/airborn.db")
+            .addMigrations(object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE builtin_airport ADD COLUMN is_favourite INTEGER NOT NULL DEFAULT false;")
+                }
+            })
+            .build()
 
     @Provides
     @Singleton

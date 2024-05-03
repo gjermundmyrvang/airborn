@@ -60,6 +60,7 @@ import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportS
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
+import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.plugin.PuckBearing
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.generated.LocationComponentSettings
@@ -121,6 +122,7 @@ fun Map(
             it.first.position.distanceTo(it.second.position)
         }
         MapboxMap(
+            mapViewportState = mapViewportState,
             locationComponentSettings = LocationComponentSettings(
                 locationPuck = createDefault2DPuck(true)
             ) {
@@ -128,7 +130,7 @@ fun Map(
                 puckBearing = PuckBearing.HEADING
                 puckBearingEnabled = true
             },
-            mapViewportState = mapViewportState,
+            style = { MapStyle(style = "mapbox://styles/gjerry10/clvntbvgq01ks01qv4p092dap") }
         ) {
             airports.forEach { airport ->
                 Annotation(airport) {

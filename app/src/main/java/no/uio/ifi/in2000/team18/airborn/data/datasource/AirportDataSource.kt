@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.data.datasource
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.uio.ifi.in2000.team18.airborn.data.dao.BuiltinAirportDao
@@ -25,15 +26,18 @@ class AirportDataSource @Inject constructor(
         )
     }
 
-    suspend fun search(query: String): List<Airport> = withContext(Dispatchers.IO) {
-        builtinAirportDao.search(query).map {
-            Airport(
-                icao = Icao(it.icao),
-                name = it.name,
-                position = Position(latitude = it.lat, longitude = it.lon)
-            )
-        }
+    suspend fun search(query: String) = withContext(Dispatchers.IO) {
+        builtinAirportDao.search(query)
     }
 
-    suspend fun all(): List<Airport> = search("")
+    suspend fun all() = search("")
+    suspend fun addFaovourite(icao: Icao) = withContext(Dispatchers.IO) {
+        Log.d("favourite", "Adding $icao to favourites")
+        builtinAirportDao.addFavourite(icao.code)
+    }
+
+    suspend fun removeFavourite(icao: Icao) = withContext(Dispatchers.IO) {
+        Log.d("favourite", "Adding $icao to favourites")
+        builtinAirportDao.removeFavourite(icao.code)
+    }
 }

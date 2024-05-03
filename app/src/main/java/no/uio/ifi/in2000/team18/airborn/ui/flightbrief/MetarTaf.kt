@@ -6,12 +6,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,16 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,9 +47,11 @@ import kotlinx.datetime.toKotlinTimeZone
 import kotlinx.datetime.toLocalDateTime
 import no.uio.ifi.in2000.team18.airborn.data.repository.parsers.parseMetar
 import no.uio.ifi.in2000.team18.airborn.model.Direction
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Cav
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.CloudType
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Clouds
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Metar
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarTaf
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.MetarWindDirection
@@ -62,10 +63,16 @@ import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import java.time.ZoneId
 
 @Composable
-fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollapsible(
+fun MetarTaf(
+    state: LoadingState<MetarTaf?>,
+    airports: LoadingState<List<Airport>>,
+    initMetar: () -> Unit,
+    onShowNearby: () -> Unit,
+    onNewAirport: (Icao) -> Unit
+) = LazyCollapsible(
     header = "Metar/Taf", value = state, onExpand = initMetar
 ) { metarTaf ->
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(10.dp)) {
         val clipboardManager = LocalClipboardManager.current
         val metar = metarTaf?.latestMetar
         val taf = metarTaf?.latestTaf
@@ -73,13 +80,24 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
             mutableStateOf(false)
         }
         val rotate by animateFloatAsState(
-            targetValue = if (rotated) 180f else 0f
+            targetValue = if (rotated) 180f else 0f, label = ""
         )
-
+        var newAirportName by remember { mutableStateOf("") }
         if (metar == null && taf == null) {
-            Text("No metar or taf for this airport")
+            onShowNearby()
+            Text("Nearby airports with metar/taf:")
+            Spacer(modifier = Modifier.height(8.dp))
+            ShowNearbyAirports(
+                state = airports,
+                initialAirport = metarTaf?.airport,
+                onAirportSelected = { onNewAirport(it.icao); newAirportName = it.name })
             return@LazyCollapsible
         }
+        if (newAirportName.isNotBlank()) Text(
+            "Showing metar for: $newAirportName",
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -119,8 +137,7 @@ fun MetarTaf(state: LoadingState<MetarTaf?>, initMetar: () -> Unit) = LazyCollap
                                 )
                                 .padding(horizontal = 16.dp, vertical = 3.dp)
                                 .clip(RoundedCornerShape(14.dp))
-                                .clickable { rotated = !rotated }
-                        ) {
+                                .clickable { rotated = !rotated }) {
                             Text("Decode")
                         }
                     }
@@ -341,105 +358,55 @@ fun MetarClouds(clouds: Clouds) {
     }
 }
 
-// Create new icon
 @Composable
-fun rememberFlip(): ImageVector {
-    return remember {
-        ImageVector.Builder(
-            name = "flip",
-            defaultWidth = 40.0.dp,
-            defaultHeight = 40.0.dp,
-            viewportWidth = 40.0f,
-            viewportHeight = 40.0f
-        ).apply {
-            path(
-                fill = SolidColor(Color.Black),
-                fillAlpha = 1f,
-                stroke = null,
-                strokeAlpha = 1f,
-                strokeLineWidth = 1.0f,
-                strokeLineCap = StrokeCap.Butt,
-                strokeLineJoin = StrokeJoin.Miter,
-                strokeLineMiter = 1f,
-                pathFillType = PathFillType.NonZero
+fun ShowNearbyAirports(
+    state: LoadingState<List<Airport>>,
+    onAirportSelected: (Airport) -> Unit,
+    initialAirport: Airport?
+) = NearbyAirportHandler(value = state) { airports ->
+    LazyRow(content = {
+        items(airports) { airport ->
+            Column(
+                Modifier
+                    .background(
+                        MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(5.dp)
+                    )
+                    .clickable { onAirportSelected(airport) }
+                    .clip(RoundedCornerShape(5.dp))
+                    .padding(10.dp)
+                    .width(IntrinsicSize.Max)
+                    .height(IntrinsicSize.Max),
             ) {
-                moveTo(7.875f, 34.75f)
-                quadToRelative(-1.042f, 0f, -1.833f, -0.792f)
-                quadToRelative(-0.792f, -0.791f, -0.792f, -1.833f)
-                verticalLineTo(7.875f)
-                quadToRelative(0f, -1.042f, 0.792f, -1.833f)
-                quadToRelative(0.791f, -0.792f, 1.833f, -0.792f)
-                horizontalLineToRelative(6.917f)
-                quadToRelative(0.541f, 0f, 0.937f, 0.396f)
-                reflectiveQuadToRelative(0.396f, 0.937f)
-                quadToRelative(0f, 0.542f, -0.396f, 0.917f)
-                reflectiveQuadToRelative(-0.937f, 0.375f)
-                horizontalLineTo(7.875f)
-                verticalLineToRelative(24.25f)
-                horizontalLineToRelative(6.917f)
-                quadToRelative(0.541f, 0f, 0.937f, 0.375f)
-                reflectiveQuadToRelative(0.396f, 0.917f)
-                quadToRelative(0f, 0.583f, -0.396f, 0.958f)
-                reflectiveQuadToRelative(-0.937f, 0.375f)
-                close()
-                moveToRelative(12.208f, 3.417f)
-                quadToRelative(-0.583f, 0f, -0.958f, -0.375f)
-                reflectiveQuadToRelative(-0.375f, -0.959f)
-                verticalLineTo(3.208f)
-                quadToRelative(0f, -0.541f, 0.396f, -0.937f)
-                reflectiveQuadToRelative(0.937f, -0.396f)
-                quadToRelative(0.542f, 0f, 0.917f, 0.396f)
-                reflectiveQuadToRelative(0.375f, 0.937f)
-                verticalLineToRelative(33.625f)
-                quadToRelative(0f, 0.584f, -0.375f, 0.959f)
-                reflectiveQuadToRelative(-0.917f, 0.375f)
-                close()
-                moveTo(32.125f, 7.875f)
-                horizontalLineToRelative(-0.417f)
-                verticalLineTo(5.25f)
-                horizontalLineToRelative(0.417f)
-                quadToRelative(1.042f, 0f, 1.833f, 0.792f)
-                quadToRelative(0.792f, 0.791f, 0.792f, 1.833f)
-                verticalLineToRelative(0.417f)
-                horizontalLineToRelative(-2.625f)
-                close()
-                moveToRelative(0f, 14.25f)
-                verticalLineToRelative(-4.25f)
-                horizontalLineToRelative(2.625f)
-                verticalLineToRelative(4.25f)
-                close()
-                moveToRelative(0f, 12.625f)
-                horizontalLineToRelative(-0.417f)
-                verticalLineToRelative(-2.625f)
-                horizontalLineToRelative(0.417f)
-                verticalLineToRelative(-0.458f)
-                horizontalLineToRelative(2.625f)
-                verticalLineToRelative(0.458f)
-                quadToRelative(0f, 1.042f, -0.792f, 1.833f)
-                quadToRelative(-0.791f, 0.792f, -1.833f, 0.792f)
-                close()
-                moveToRelative(0f, -19.5f)
-                verticalLineToRelative(-4.292f)
-                horizontalLineToRelative(2.625f)
-                verticalLineToRelative(4.292f)
-                close()
-                moveToRelative(0f, 13.792f)
-                verticalLineTo(24.75f)
-                horizontalLineToRelative(2.625f)
-                verticalLineToRelative(4.292f)
-                close()
-                moveToRelative(-8.083f, 5.708f)
-                verticalLineToRelative(-2.625f)
-                horizontalLineToRelative(5f)
-                verticalLineToRelative(2.625f)
-                close()
-                moveToRelative(0f, -26.875f)
-                verticalLineTo(5.25f)
-                horizontalLineToRelative(5f)
-                verticalLineToRelative(2.625f)
-                close()
+                Text(
+                    airport.icao.code,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold,
+                    fontStyle = FontStyle.Italic
+                )
+                Text(
+                    airport.name.substringBefore(","), fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Distance: ${
+                        initialAirport?.position?.distanceTo(airport.position)?.formatAsNm()
+                    }"
+                )
             }
-        }.build()
+            Spacer(modifier = Modifier.width(5.dp))
+        }
+    })
+}
+
+@Composable
+fun <T> NearbyAirportHandler(value: LoadingState<T>, content: @Composable RowScope.(T) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth()
+    ) {
+        when (value) {
+            is LoadingState.Success -> content(value.value)
+            is LoadingState.Loading -> LoadingScreen()
+            is LoadingState.Error -> Error(message = "Failed to get nearby airports. ${value.message}")
+        }
     }
 }
 
