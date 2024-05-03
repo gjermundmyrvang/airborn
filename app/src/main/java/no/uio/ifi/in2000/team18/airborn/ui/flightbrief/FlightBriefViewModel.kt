@@ -25,7 +25,6 @@ import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
-import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RouteProgress
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
@@ -139,13 +138,14 @@ class FlightBriefViewModel @Inject constructor(
             }
             _state.update { it.copy(routeInfo = info) }
 
-            val data = load {
+            val data = Unit.let {
                 weatherRepository.getRouteIsobaric(
                     departure,
                     arrival,
-                    newRoute.positions[RouteProgress.p50] ?: departure.position // use midway
+                    departure.position, // todo: use midway
+                    ZonedDateTime.now().minusHours(2) // GRIB-files always valid 3 hour intervals
                 )
-            }
+            }.toSuccess()
             _state.update { it.copy(routeIsobaric = data) }
         }
     }

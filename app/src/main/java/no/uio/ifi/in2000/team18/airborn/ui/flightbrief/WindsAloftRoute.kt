@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -134,9 +136,10 @@ fun DistanceToIsobaricSlider(
     var buttonEnabled by rememberSaveable {
         mutableStateOf(false)
     }
-    var time by rememberSaveable {
+    var time by remember {
         mutableIntStateOf(0)
     }
+    Log.d("time", "time-value in WindsAloftRoute: $time")
 
     Row(
         Modifier
@@ -190,7 +193,7 @@ fun DistanceToIsobaricSlider(
         ),
         enabled = buttonEnabled
     ) {
-        Text("Update isobaric data")
+        Text("Update")
     }
     TimeRow(
         current = time,

@@ -3,7 +3,6 @@ package no.uio.ifi.in2000.team18.airborn.data.repository
 import android.util.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.datetime.LocalDateTime
 import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.data.datasource.GribDataSource
 import no.uio.ifi.in2000.team18.airborn.data.datasource.LocationForecastDataSource
@@ -24,6 +23,7 @@ import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
 import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import no.uio.ifi.in2000.team18.airborn.ui.common.monthDayHourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import ucar.nc2.dt.GridDatatype
 import java.time.ZonedDateTime
@@ -53,10 +53,10 @@ class WeatherRepository @Inject constructor(
     private var timeSeriesDataCache: List<ZonedDateTime> = listOf()
 
     private suspend fun getIsobaricData(
-        position: Position, time: ZonedDateTime? = null
+        position: Position, time: ZonedDateTime
     ): IsobaricData {
         val gribFile: GribFile
-        if (timeSeriesDataCache.isEmpty() || time == null) { //Runs on init
+        if (timeSeriesDataCache.isEmpty()) { //Runs on init
             val gribFiles = gribDataSource.availableGribFiles()
             allGribFiles = ConcurrentHashMap(gribFiles.associateBy { it.params.time })
             timeSeriesMutex.withLock { this.timeSeriesDataCache = allGribFiles.keys.sorted() }
@@ -66,7 +66,7 @@ class WeatherRepository @Inject constructor(
             }
             gribFile = allGribFiles[firstTime] ?: gribFiles.last()
         } else {
-            //gribFile will never be null
+            Log.d("grib", "$allGribFiles")
             gribFile = allGribFiles[time]!!
         }
 
@@ -89,7 +89,7 @@ class WeatherRepository @Inject constructor(
                 .also { isobaricDataCache[Pair(position, time)] = it }
         }
 
-        val airPressureASL = getAirPressureAtSeaLevel(position)
+        val airPressureASL = getAirPressureAtSeaLevel(position, time)
         val layers = windsAloft.map { (key, value) ->
             val layer = IsobaricLayer(
                 pressure = Pressure(key.toDouble()),
@@ -104,19 +104,21 @@ class WeatherRepository @Inject constructor(
             layer
         }.filter {
             val h = it.height
-            val maxHeight = 15000
+            val maxHeight = 12000
             val result = if (h != null) (h.feet <= maxHeight) else false
             result
         }
-        return IsobaricData(position,
+        return IsobaricData(
+            position,
             gribFile.params.time.toSystemZoneOffset(),
             layers,
-            timeSeriesMutex.withLock { this.timeSeriesDataCache })
+            timeSeriesDataCache
+        )
 
     }
 
     suspend fun getRouteIsobaric(
-        departure: Airport, arrival: Airport, pos: Position, time: ZonedDateTime? = null
+        departure: Airport, arrival: Airport, pos: Position, time: ZonedDateTime
     ): RouteIsobaric {
         val distance = departure.position.distanceTo(arrival.position)
         val bearing = departure.position.bearingTo(arrival.position)
@@ -161,24 +163,24 @@ class WeatherRepository @Inject constructor(
         return Distance(result)
     }
 
-    // TODO: make use of time parameter. Goal: get localForecast valid for the same time as param.
     private suspend fun getAirPressureAtSeaLevel(
         position: Position,
-        //time: ZonedDateTime
+        time: ZonedDateTime
     ): Pressure {
         val availableTimeSeries =
             locationForecastDataSource.fetchForecast(position, "compact").properties.timeseries
-        val availableTimes = availableTimeSeries.map {
-            LocalDateTime.parse(it.time.trim().substring(0, 19))
+        val availableTimes = availableTimeSeries.mapIndexed { index, timeSeries ->
+            Pair(index, ZonedDateTime.parse(timeSeries.time))
         }
-        //Log.d("weather", "time (ZonedDateTime) sent as param to getAirPressureAtSeaLeve: $time")
-        Log.d("weather", "available timeseries compact locForecast: $availableTimeSeries")
-        Log.d("weather", "available times: $availableTimes")
+        val timeMinute = time.monthDayHourMinute()
+        val timeMinuteOneHourAfter = time.plusHours(1).monthDayHourMinute()
+        val index =
+            availableTimes.firstOrNull() {
+                val availableMinute = it.second.monthDayHourMinute()
+                availableMinute >= timeMinute && availableMinute < timeMinuteOneHourAfter
+            }?.first ?: 0
         val airPressureAtSeaLevelNow =
-            availableTimeSeries.first().data.instant.details.airPressureAtSeaLevel
-        Log.d(
-            "weather", "airPressureASL: $airPressureAtSeaLevelNow"
-        )
+            availableTimeSeries[index].data.instant.details.airPressureAtSeaLevel
         return airPressureAtSeaLevelNow
     }
 
