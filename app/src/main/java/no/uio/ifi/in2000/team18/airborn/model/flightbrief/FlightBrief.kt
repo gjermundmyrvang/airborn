@@ -19,15 +19,20 @@ data class Airport(
     val icao: Icao,
     val name: String,
     val position: Position,
+    val isFavourite: Boolean = false,
 ) {
     companion object {
         fun fromBuiltinAirport(airport: BuiltinAirport) =
             Airport(
                 icao = Icao(airport.icao),
                 name = airport.name,
-                position = Position(airport.lat, airport.lon)
+                position = Position(airport.lat, airport.lon),
+                isFavourite = airport.isfavourite,
             )
     }
+
+    override fun toString() =
+        "${position.latitude}N/${position.longitude}E" // TODO: support south and west
 }
 
 data class Icao(val code: String) {

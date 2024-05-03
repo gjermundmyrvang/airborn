@@ -67,11 +67,53 @@ class AirportRepository @Inject constructor(
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
 
     private val aiportsWithMetar = listOf(
-        "ENAL", "ENAN", "ENAS", "ENAT", "ENBL", "ENBN", "ENBO", "ENBR", "ENBS", "ENBV",
-        "ENCN", "ENDU", "ENEV", "ENFL", "ENGM", "ENHD", "ENHF", "ENHK", "ENHV", "ENKB",
-        "ENKR", "ENLK", "ENMH", "ENML", "ENNA", "ENNM", "ENNO", "ENOL", "ENOV", "ENRA",
-        "ENRM", "ENRO", "ENRS", "ENSB", "ENSD", "ENSG", "ENSH", "ENSK", "ENSO", "ENSR",
-        "ENSS", "ENST", "ENTC", "ENTO", "ENVA", "ENVD", "ENZV"
+        "ENAL",
+        "ENAN",
+        "ENAS",
+        "ENAT",
+        "ENBL",
+        "ENBN",
+        "ENBO",
+        "ENBR",
+        "ENBS",
+        "ENBV",
+        "ENCN",
+        "ENDU",
+        "ENEV",
+        "ENFL",
+        "ENGM",
+        "ENHD",
+        "ENHF",
+        "ENHK",
+        "ENHV",
+        "ENKB",
+        "ENKR",
+        "ENLK",
+        "ENMH",
+        "ENML",
+        "ENNA",
+        "ENNM",
+        "ENNO",
+        "ENOL",
+        "ENOV",
+        "ENRA",
+        "ENRM",
+        "ENRO",
+        "ENRS",
+        "ENSB",
+        "ENSD",
+        "ENSG",
+        "ENSH",
+        "ENSK",
+        "ENSO",
+        "ENSR",
+        "ENSS",
+        "ENST",
+        "ENTC",
+        "ENTO",
+        "ENVA",
+        "ENVD",
+        "ENZV"
     )
 
     suspend fun getAirportNearby(airport: Airport, max: Int = 5) =
@@ -82,9 +124,10 @@ class AirportRepository @Inject constructor(
     suspend fun getNearbyAirportsWithMetar(airport: Airport) =
         getAirportNearby(airport).filter { it.icao.code in aiportsWithMetar }
 
-    suspend fun search(query: String) = airportDataSource.search(query)
+    suspend fun search(query: String) =
+        airportDataSource.search(query).map { Airport.fromBuiltinAirport(it) }
 
-    suspend fun all() = airportDataSource.all()
+    suspend fun all() = airportDataSource.all().map { Airport.fromBuiltinAirport(it) }
 
     // TAF/METAR logic
     suspend fun fetchTafMetar(icao: Icao) = tafMetarDataCache[icao] ?: run {
@@ -212,4 +255,7 @@ class AirportRepository @Inject constructor(
         radarDataCache = listOf()
         routeDataCache = listOf()
     }
+
+    suspend fun removeFavourite(icao: Icao) = airportDataSource.removeFavourite(icao)
+    suspend fun addFavourite(icao: Icao) = airportDataSource.addFaovourite(icao)
 }
