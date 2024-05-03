@@ -609,7 +609,27 @@ fun AlertLocationPermissionDialog(onDismiss: (Boolean) -> Unit) {
             ) {
                 Text("Go to settings")
             }
+        },
+        dismissButton = {
+            Button(
+                onClick = {
+                    onDismiss(false)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp)
+                    .clip(RoundedCornerShape(10.dp))
+            ) {
+                Text("Dismiss")
+            }
+
+
         }
+
     )
 }
 
