@@ -228,22 +228,26 @@ fun <T> LazyCollapsible(
     var open by rememberSaveable {
         mutableStateOf(expanded)
     }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = header, fontSize = 22.sp, modifier = Modifier.padding(start = 10.dp))
-        IconButton(onClick = {
-            onExpand()
-            open = !open
-        }) {
-            Icon(
-                imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                modifier = Modifier.size(30.dp),
-                contentDescription = if (open) "Show less" else "Show more"
-            )
+    Column(modifier = Modifier.clickable { onExpand(); open = !open }) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = header, fontSize = 22.sp, modifier = Modifier.padding(start = 10.dp))
+            IconButton(onClick = {
+                onExpand()
+                open = !open
+            }) {
+                Icon(
+                    imageVector = if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    modifier = Modifier.size(30.dp),
+                    contentDescription = if (open) "Show less" else "Show more"
+                )
+            }
+        }
+        if (open && value is LoadingState.Loading) Box(modifier = Modifier.padding(bottom = 10.dp)) {
+            LoadingScreen()
         }
     }
     if (!open) return@Column
@@ -253,10 +257,9 @@ fun <T> LazyCollapsible(
             content(value.value)
         }
 
-        is LoadingState.Loading -> LoadingScreen()
+        is LoadingState.Loading -> {}
         is LoadingState.Error -> Error(
-            "failed to load ${header}: ${value.message}",
-            modifier = Modifier.padding(16.dp, 8.dp)
+            "failed to load ${header}: ${value.message}", modifier = Modifier.padding(16.dp, 8.dp)
         )
     }
 }
@@ -481,7 +484,7 @@ fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header
         is LoadingState.Loading -> LinearProgressIndicator(
             color = MaterialTheme.colorScheme.secondary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
+            modifier = Modifier.fillMaxWidth()
         )
 
         is LoadingState.Error -> Text(

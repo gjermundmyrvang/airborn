@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -424,11 +425,13 @@ fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
 fun Sundata(sun: LoadingState<Sun?>) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         SunComposable(
-            modifier = Modifier.padding(end = 10.dp), sun = sun, header = ""
+            modifier = Modifier.padding(end = 10.dp, bottom = 10.dp),
+            sun = sun,
+            header = ""
         )
     }
 }
@@ -448,12 +451,22 @@ fun AirportInfo(airport: Airport) = Column(
     ) {
         if (!hasSeperator) {
             Column {
-                Text(text = airport.icao.code, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    text = airport.icao.code,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                )
                 Text(text = airport.name)
             }
         } else {
             Column {
-                Text(text = airport.icao.code, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    text = airport.icao.code,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                )
                 Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
             }
             Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)

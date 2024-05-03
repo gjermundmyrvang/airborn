@@ -518,7 +518,7 @@ fun InfoBox(
             sun = state.sun,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 5.dp),
+                .padding(vertical = 10.dp),
             header = "Sun info:"
         )
 
