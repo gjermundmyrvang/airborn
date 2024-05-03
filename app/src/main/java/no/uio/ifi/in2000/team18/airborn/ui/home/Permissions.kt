@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
 import android.Manifest
-import android.app.AlertDialog
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +42,7 @@ import androidx.compose.ui.window.Dialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import no.uio.ifi.in2000.team18.airborn.R
 
 @ExperimentalPermissionsApi
@@ -54,36 +54,31 @@ fun LocationPermissionRequest(
     var askForPermission by remember { mutableStateOf(true) }
     val context = LocalContext.current
     if (!askForPermission) return
+    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    if (sharedPreferences.getBoolean("first_time_opened", true)) {
+        when {
+            coarsePermissionState.status.isGranted && finePermissionState.status.shouldShowRationale -> {
+                LocationPermissionDialog(message = "This app works better with precise location",
+                    onDismissRequest = { askForPermission = false },
+                    onClick = {
+                        finePermissionState.launchPermissionRequest()
+                    })
+            }
 
-    when {
-        coarsePermissionState.status.isGranted -> {
-            askForPermission = false
-        }
+            finePermissionState.status.shouldShowRationale -> {
+                LocationPermissionDialog(message = "This app need acces to your location to show where you are",
+                    onDismissRequest = { askForPermission = false },
+                    onClick = {
+                        finePermissionState.launchPermissionRequest()
+                    })
+            }
 
-        finePermissionState.status.isGranted -> {
-            askForPermission = false
-        }
-
-        !finePermissionState.status.isGranted -> {
-            LaunchedEffect(false) {
-                showFirstTimeDialog(context) {
+            !finePermissionState.status.isGranted -> {
+                LaunchedEffect(false) {
                     finePermissionState.launchPermissionRequest()
                 }
             }
         }
-    }
-}
-
-fun showFirstTimeDialog(context: Context, onDismiss: () -> Unit) {
-    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-    if (sharedPreferences.getBoolean("first_time_opened", true)) {
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle("Welcome")
-            .setMessage("Welcome to Airborn!\nTo get the full experience of the app, please give us access to your location")
-            .setPositiveButton("ok") { dialog, _ ->
-                dialog.dismiss(); onDismiss()
-            }
-            .show()
         saveFirstTimeOpenedFlag(context)
     }
 }

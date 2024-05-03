@@ -1,10 +1,6 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,8 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -48,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -104,6 +97,7 @@ fun Map(
     var isClicked by remember { mutableStateOf(false) }
     var showAlertMessage by remember { mutableStateOf(false) }
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
+    val finePermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val permissionState =
         rememberPermissionState(permission = Manifest.permission.ACCESS_COARSE_LOCATION)
     val mapViewportState = rememberMapViewportState {
@@ -153,7 +147,7 @@ fun Map(
                 )
             }
         }
-        if (showAlertMessage) AlertLocationPermissionDialog { showAlertMessage = it }
+        if (showAlertMessage) finePermissionState.launchPermissionRequest()
         Box(
             modifier = Modifier
                 .offset(0.dp, -sheetHeight)
@@ -574,48 +568,6 @@ fun InfoBox(
             }
         }
     }
-}
-
-@Composable
-fun AlertLocationPermissionDialog(onDismiss: (Boolean) -> Unit) {
-    val context = LocalContext.current
-    AlertDialog(
-        onDismissRequest = { onDismiss(false) },
-        title = {
-            Text("Access to location required")
-        },
-        text = {
-            Text(
-                "This function needs access to your location" +
-                        "\nPlease grant location access in settings.\n" +
-                        "NB! You may have to restart the app"
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    openSettings(context)
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .clip(RoundedCornerShape(10.dp))
-            ) {
-                Text("Go to settings")
-            }
-        }
-    )
-}
-
-fun openSettings(context: Context) {
-    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-    val uri = Uri.fromParts("package", context.packageName, null)
-    intent.data = uri
-    context.startActivity(intent)
 }
 
 @Preview(showSystemUi = true)
