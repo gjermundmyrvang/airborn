@@ -19,10 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
@@ -123,9 +126,12 @@ fun Route(state: LoadingState<RouteIsobaric>, initRouteIsobaric: () -> Unit) =
                             text = "Bearing from ${routeIsobaric.departure.name.substringBefore(" ")}: ${routeIsobaric.bearing}",
                             style = TextStyle(fontWeight = FontWeight.Bold)
                         )
-                        RotatableArrowIcon(
-                            direction = Direction(routeIsobaric.bearing.degrees - 180.0),
-                            iconColor = MaterialTheme.colorScheme.primaryContainer
+                        Icon(
+                            painter =
+                            painterResource(id = R.drawable.local_airport_24),
+                            contentDescription = "windsalofticon",
+                            tint = MaterialTheme.colorScheme.background,
+                            modifier = Modifier.rotate((routeIsobaric.bearing.degrees).toFloat())
                         )
                     }
                 }
