@@ -71,9 +71,10 @@ class AirportRepository @Inject constructor(
             .map { Airport.fromBuiltinAirport(it) }
             .sortedBy { airport.position.distanceTo(it.position).meters }.take(max)
 
-    suspend fun search(query: String) = airportDataSource.search(query)
+    suspend fun search(query: String) =
+        airportDataSource.search(query).map { Airport.fromBuiltinAirport(it) }
 
-    suspend fun all() = airportDataSource.all()
+    suspend fun all() = airportDataSource.all().map { Airport.fromBuiltinAirport(it) }
 
     // TAF/METAR logic
     suspend fun fetchTafMetar(icao: Icao) = tafMetarDataCache[icao] ?: run {
@@ -200,4 +201,7 @@ class AirportRepository @Inject constructor(
         radarDataCache = listOf()
         routeDataCache = listOf()
     }
+
+    suspend fun removeFavourite(icao: Icao) = airportDataSource.removeFavourite(icao)
+    suspend fun addFavourite(icao: Icao) = airportDataSource.addFaovourite(icao)
 }

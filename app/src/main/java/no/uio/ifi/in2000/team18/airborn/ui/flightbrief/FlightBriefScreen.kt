@@ -120,12 +120,12 @@ fun FlightBriefScreen(
                     }
                 },
                 colors = TopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-                navigationIconContentColor = MaterialTheme.colorScheme.primary,
-                scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
-                actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
-            )
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                    scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
+                    actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
+                )
             )
         }, containerColor = MaterialTheme.colorScheme.primaryContainer
     ) { padding ->
@@ -135,6 +135,8 @@ fun FlightBriefScreen(
             onSelectArrival = { viewModel.selectArrivalAirport(it) },
             clearArrivalInput = { viewModel.clearArrivalInput() },
             modifier = Modifier.padding(padding),
+            addToFavorites = { viewModel.addToFavourites(it) },
+            removeFromFavorites = { viewModel.removeFromFavourites(it) },
         )
     }
 }
@@ -183,7 +185,9 @@ fun FlightBriefScreenContent(
     filterArrivalAirports: (String) -> Unit,
     onSelectArrival: (String) -> Unit,
     clearArrivalInput: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    addToFavorites: (Icao) -> Unit = {},
+    removeFromFavorites: (Icao) -> Unit = {},
 ) = Column(modifier = modifier) {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
@@ -191,10 +195,14 @@ fun FlightBriefScreenContent(
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureAirportBriefTab()
-            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(state,
+            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(
+                state,
                 filterArrivalAirports = { filterArrivalAirports(it) },
                 onSelectArrival = { onSelectArrival(it) },
-                clearArrivalInput = { clearArrivalInput() })
+                clearArrivalInput = { clearArrivalInput() },
+                addToFavorites = addToFavorites,
+                removeFromFavorites = removeFromFavorites
+            )
 
             2 -> OverallAirportBrieftab()
         }
@@ -256,7 +264,9 @@ fun ArrivalSelectionTab(
     state: FlightBriefViewModel.UiState,
     filterArrivalAirports: (String) -> Unit,
     onSelectArrival: (String) -> Unit,
-    clearArrivalInput: () -> Unit
+    clearArrivalInput: () -> Unit,
+    addToFavorites: (Icao) -> Unit = {},
+    removeFromFavorites: (Icao) -> Unit = {},
 ) {
     val airports = state.airports
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -309,10 +319,14 @@ fun ArrivalSelectionTab(
         Spacer(modifier = Modifier.height(8.dp))
         LazyColumn(modifier = Modifier.imePadding(), content = {
             items(airports) { airport ->
-                AirportInfoRow(modifier = Modifier, airport) {
+                AirportInfoRow(modifier = Modifier, airport, {
                     keyboardController?.hide()
                     enabled = true
                     onSelectArrival(it.icao.code)
+                }, {
+                    addToFavorites(airport.icao)
+                }) {
+                    removeFromFavorites(airport.icao)
                 }
             }
         })
