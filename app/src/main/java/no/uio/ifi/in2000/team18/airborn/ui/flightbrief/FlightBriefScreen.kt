@@ -88,43 +88,54 @@ fun FlightBriefScreen(
     val navController = LocalNavController.current
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = {
-                Image(
-                    painter = painterResource(id = R.drawable.newtextlogo2),
-                    contentDescription = "",
-                    modifier = Modifier.size(200.dp)
+            CenterAlignedTopAppBar(
+                title = {
+                    Image(
+                        painter = painterResource(id = R.drawable.newtextlogo2),
+                        contentDescription = "",
+                        modifier = Modifier.size(200.dp)
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack(route = "home", inclusive = false)
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Home",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            viewModel.setLoadingState()
+                            navController.navigate("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}") {
+                                popUpTo("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}") {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "refresh",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                },
+                colors = TopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                    scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
+                    actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
                 )
-            }, navigationIcon = {
-                IconButton(
-                    onClick = {
-                        navController.popBackStack(route = "home", inclusive = false)
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Home",
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }, actions = {
-                IconButton(
-                    onClick = {
-                        navController.navigate("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}")
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "refresh",
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }, colors = TopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-                navigationIconContentColor = MaterialTheme.colorScheme.primary,
-                scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
-                actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor
-            )
             )
         }, containerColor = MaterialTheme.colorScheme.primaryContainer
     ) { padding ->
