@@ -217,4 +217,21 @@ class FlightBriefViewModel @Inject constructor(
             airportRepository.removeFavourite(icao)
         }
     }
+
+    fun setLoadingState(){
+        viewModelScope.launch {
+            weatherRepository.clearWeatherCache()
+            airportRepository.clearCache()
+            _state.update {
+                it.copy(
+                    sigcharts = Loading,
+                    offshoreMaps = Loading,
+                    geoSatelliteImage = Loading,
+                    route = Loading,
+                    radarAnimations = Loading,
+                    routeForecast = Loading,
+                )
+            }
+        }
+    }
 }

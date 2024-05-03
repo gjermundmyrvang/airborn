@@ -111,6 +111,7 @@ fun FlightBriefScreen(
                 actions = {
                     IconButton(
                         onClick = {
+                            viewModel.setLoadingState()
                             navController.navigate("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}") {
                                 popUpTo("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}") {
                                     inclusive = true
