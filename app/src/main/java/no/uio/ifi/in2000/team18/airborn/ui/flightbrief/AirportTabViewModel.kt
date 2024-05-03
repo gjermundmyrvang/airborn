@@ -50,6 +50,7 @@ sealed class AirportTabViewModel(
         val sun: LoadingState<Sun?> = Loading,
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
         val hasTurbulence: Boolean = false,
+        val nearbyAirportsWithMetar: LoadingState<List<Airport>> = Loading,
     )
 
     init {
@@ -74,6 +75,24 @@ sealed class AirportTabViewModel(
         viewModelScope.launch {
             val metarTaf = load { airportRepository.fetchTafMetar(icao) }
             _state.update { it.copy(metarTaf = metarTaf) }
+        }
+    }
+
+    fun initNewMetar(icao: Icao) {
+        viewModelScope.launch {
+            val metarTaf = load { airportRepository.fetchTafMetar(icao) }
+            _state.update { it.copy(metarTaf = metarTaf) }
+        }
+    }
+
+    fun initNearby() {
+        viewModelScope.launch {
+            val airport = airportRepository.getByIcao(icao)
+            airport?.let {
+                val nearbyAirportsWithMetar =
+                    load { airportRepository.getNearbyAirportsWithMetar(it) }
+                _state.update { it.copy(nearbyAirportsWithMetar = nearbyAirportsWithMetar) }
+            }
         }
     }
 

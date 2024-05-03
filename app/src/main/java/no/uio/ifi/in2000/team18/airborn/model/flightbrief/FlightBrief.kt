@@ -1,12 +1,12 @@
 package no.uio.ifi.in2000.team18.airborn.model.flightbrief
 
-import com.mapbox.geojson.Point
 import no.uio.ifi.in2000.team18.airborn.data.entity.BuiltinAirport
 import no.uio.ifi.in2000.team18.airborn.model.Position
 
 data class MetarTaf(
     val metars: List<Metar>,
     val tafs: List<Taf>,
+    val airport: Airport?,
 ) {
     val latestTaf
         get(): Taf? = if (tafs.isNotEmpty()) tafs.last() else null
@@ -33,12 +33,6 @@ data class Airport(
 
     override fun toString() =
         "${position.latitude}N/${position.longitude}E" // TODO: support south and west
-}
-
-data class Position(
-    val latitude: Double, val longitude: Double
-) {
-    fun toPoints(): Point = Point.fromLngLat(longitude, latitude)
 }
 
 data class Icao(val code: String) {

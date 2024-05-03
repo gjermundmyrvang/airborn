@@ -372,7 +372,14 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
     val sections: List<@Composable () -> Unit> = listOf(
         { AirportBriefHeader(state.airport) },
         { Sundata(sun = state.sun) },
-        { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
+        {
+            MetarTaf(state.metarTaf,
+                airports = state.nearbyAirportsWithMetar,
+                initMetar = { viewModel.initMetarTaf() },
+                onShowNearby = { viewModel.initNearby() },
+                onNewAirport = { viewModel.initNewMetar(it) }
+            )
+        },
         { IsobaricData(state.isobaric) { viewModel.initIsobaric() } },
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
@@ -412,9 +419,7 @@ fun Sundata(sun: LoadingState<Sun?>) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         SunComposable(
-            modifier = Modifier.padding(end = 10.dp),
-            sun = sun,
-            header = ""
+            modifier = Modifier.padding(end = 10.dp), sun = sun, header = ""
         )
     }
 }
@@ -428,8 +433,7 @@ fun AirportInfo(airport: Airport) = Column(
 ) {
     val hasSeperator = airport.name.contains(",")
     Row(
-        Modifier
-            .fillMaxWidth(),
+        Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.Bottom
     ) {
