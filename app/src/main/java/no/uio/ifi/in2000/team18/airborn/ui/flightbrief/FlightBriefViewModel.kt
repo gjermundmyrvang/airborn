@@ -25,6 +25,7 @@ import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Icao
+import no.uio.ifi.in2000.team18.airborn.model.flightbrief.RouteProgress
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState.Loading
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
@@ -90,8 +91,7 @@ class FlightBriefViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isIgaRoute = airportRepository.isRoute(
-                                departureIcao,
-                                arrivalIcao
+                                departureIcao, arrivalIcao
                             )
                         )
                     }
@@ -133,9 +133,9 @@ class FlightBriefViewModel @Inject constructor(
         viewModelScope.launch {
             val departure = airportRepository.getByIcao(state.value.departureIcao)!!
             val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
-
+            val newRoute = initRouteInfo(departure, arrival)
             val info = load {
-                RouteInfo(departure, arrival)
+                newRoute
             }
             _state.update { it.copy(routeInfo = info) }
 
@@ -143,7 +143,7 @@ class FlightBriefViewModel @Inject constructor(
                 weatherRepository.getRouteIsobaric(
                     departure,
                     arrival,
-                    departure.position
+                    newRoute.positions[RouteProgress.p50] ?: departure.position // use midway
                 )
             }
             _state.update { it.copy(routeIsobaric = data) }
@@ -161,6 +161,17 @@ class FlightBriefViewModel @Inject constructor(
                 load { weatherRepository.getRouteIsobaric(departure, arrival, newPos, time) }
             _state.update { it.copy(routeIsobaric = newIsobaric) }
         }
+    }
+
+    private fun initRouteInfo(departure: Airport, arrival: Airport): RouteInfo {
+        val resultRoute = RouteInfo(departure, arrival)
+        viewModelScope.launch {
+            // TODO: will we be using timeSeries? If so, where in the code?
+//            resultRoute.timeSeries = weatherRepository.initializeTimeseries()
+            Log.d("Route", "init route has timeSeries ${resultRoute.timeSeries}")
+            var availableGribTimes: List<ZonedDateTime>? = null // todo: consider this
+        }
+        return resultRoute
     }
 
     fun initRoute() {
