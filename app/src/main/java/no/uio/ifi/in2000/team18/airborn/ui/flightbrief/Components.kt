@@ -481,7 +481,8 @@ fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header
         is LoadingState.Loading -> LinearProgressIndicator(
             color = MaterialTheme.colorScheme.secondary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
         )
 
         is LoadingState.Error -> Text(
