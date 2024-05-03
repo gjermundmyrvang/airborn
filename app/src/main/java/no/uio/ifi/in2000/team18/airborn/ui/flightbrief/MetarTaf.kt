@@ -371,11 +371,12 @@ fun ShowNearbyAirports(
                     .background(
                         MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(5.dp)
                     )
+                    .clickable { onAirportSelected(airport) }
                     .clip(RoundedCornerShape(5.dp))
                     .padding(10.dp)
                     .width(IntrinsicSize.Max)
-                    .height(IntrinsicSize.Max)
-                    .clickable { onAirportSelected(airport) }) {
+                    .height(IntrinsicSize.Max),
+            ) {
                 Text(
                     airport.icao.code,
                     color = MaterialTheme.colorScheme.secondary,
