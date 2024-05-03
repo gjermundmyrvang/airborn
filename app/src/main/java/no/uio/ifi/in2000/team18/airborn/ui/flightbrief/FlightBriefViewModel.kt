@@ -20,7 +20,6 @@ import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Radar
 import no.uio.ifi.in2000.team18.airborn.model.RouteForecast
-import no.uio.ifi.in2000.team18.airborn.model.RouteInfo
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -55,7 +54,6 @@ class FlightBriefViewModel @Inject constructor(
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
         val routeForecast: LoadingState<List<RouteForecast>> = Loading,
         val isIgaRoute: Boolean = false,
-        val routeInfo: LoadingState<RouteInfo> = Loading,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
     }
@@ -90,8 +88,7 @@ class FlightBriefViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isIgaRoute = airportRepository.isRoute(
-                                departureIcao,
-                                arrivalIcao
+                                departureIcao, arrivalIcao
                             )
                         )
                     }
@@ -134,16 +131,9 @@ class FlightBriefViewModel @Inject constructor(
             val departure = airportRepository.getByIcao(state.value.departureIcao)!!
             val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
 
-            val info = load {
-                RouteInfo(departure, arrival)
-            }
-            _state.update { it.copy(routeInfo = info) }
-
             val data = load {
                 weatherRepository.getRouteIsobaric(
-                    departure,
-                    arrival,
-                    departure.position
+                    departure, arrival, departure.position
                 )
             }
             _state.update { it.copy(routeIsobaric = data) }
