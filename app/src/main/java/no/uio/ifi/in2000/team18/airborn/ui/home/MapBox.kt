@@ -626,10 +626,7 @@ fun AlertLocationPermissionDialog(onDismiss: (Boolean) -> Unit) {
             ) {
                 Text("Dismiss")
             }
-
-
         }
-
     )
 }
 
