@@ -11,6 +11,7 @@ interface BuiltinAirportDao {
         SELECT *
         FROM builtin_airport
         WHERE icao LIKE '%' || :q || '%' OR name LIKE '%' || :q || '%'
+        ORDER BY is_favourite DESC
         """
     )
     fun search(q: String): List<BuiltinAirport>
@@ -29,7 +30,7 @@ interface BuiltinAirportDao {
         )
         SELECT icao, name, lat, lon, is_favourite
         FROM airport_dist 
-        ORDER BY distance_squared
+        ORDER BY distance_squared, is_favourite DESC
         LIMIT :max
         OFFSET 1;
         """
