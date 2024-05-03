@@ -87,29 +87,37 @@ fun FlightBriefScreen(
     val navController = LocalNavController.current
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = {
-                Image(
-                    painter = painterResource(id = R.drawable.newtextlogo2),
-                    contentDescription = "",
-                    modifier = Modifier.size(200.dp)
-                )
-            }, navigationIcon = {
-                IconButton(
-                    onClick = {
-                        navController.popBackStack(route = "home", inclusive = false)
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Home",
-                        tint = MaterialTheme.colorScheme.secondary
+            CenterAlignedTopAppBar(
+                title = {
+                    Image(
+                        painter = painterResource(id = R.drawable.newtextlogo2),
+                        contentDescription = "",
+                        modifier = Modifier.size(200.dp)
                     )
-                }
-            },
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack(route = "home", inclusive = false)
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Home",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = {
-                            navController.navigate("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}")
+                            navController.navigate("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}") {
+                                popUpTo("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}") {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         },
                     ) {
                         Icon(
