@@ -143,7 +143,6 @@ class FlightBriefViewModel @Inject constructor(
                     departure,
                     arrival,
                     departure.position, // todo: use midway
-                    ZonedDateTime.now().minusHours(2) // GRIB-files always valid 3 hour intervals
                 )
             }.toSuccess()
             _state.update { it.copy(routeIsobaric = data) }
