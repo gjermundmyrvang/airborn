@@ -256,7 +256,6 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
     ViewAnnotation(
         options = viewAnnotationOptions {
             geometry(airport.position.toPoints())
-            allowOverlap(true)
             allowOverlapWithPuck(true)
             annotationAnchor {
                 anchor(ViewAnnotationAnchor.CENTER)
@@ -270,9 +269,9 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
                 .clickable { onAirportClicked(airport) }, contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.local_airport_24),
+                painter = painterResource(id = R.drawable.flight_location_icon_2),
                 contentDescription = "Marker",
-                modifier = Modifier.size(12.dp),
+                modifier = Modifier.size(17.dp),
             )
         }
     }
