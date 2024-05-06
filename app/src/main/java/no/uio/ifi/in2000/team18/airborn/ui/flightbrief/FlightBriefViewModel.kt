@@ -142,7 +142,7 @@ class FlightBriefViewModel @Inject constructor(
                 weatherRepository.getRouteIsobaric(
                     departure,
                     arrival,
-                    departure.position, // todo: use midway
+                    departure.position.halfwayTo(arrival.position),
                 )
             }.toSuccess()
             _state.update { it.copy(routeIsobaric = data) }

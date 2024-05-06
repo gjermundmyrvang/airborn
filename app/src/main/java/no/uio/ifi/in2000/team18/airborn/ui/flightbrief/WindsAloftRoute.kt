@@ -134,7 +134,7 @@ fun DistanceToIsobaricSlider(
         .clip(RoundedCornerShape(8.dp)),
 ) {
     val distanceNm = totalDistance.nauticalMiles.toFloat()
-    var sliderPosition by rememberSaveable { mutableFloatStateOf(0f) }
+    var sliderPosition by rememberSaveable { mutableFloatStateOf(distanceNm / 2) }
     var buttonEnabled by rememberSaveable {
         mutableStateOf(false)
     }
