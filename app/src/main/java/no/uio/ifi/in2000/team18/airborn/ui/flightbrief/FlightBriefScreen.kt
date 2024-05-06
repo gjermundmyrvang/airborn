@@ -362,16 +362,14 @@ fun OverallAirportBrieftab(
         modifier = Modifier.fillMaxSize()
     ) {
         item { Sigchart(state.sigcharts) { viewModel.initSigchart() } }
-        if (state.hasArrival) {
-            item {
-                WindsAloftRoute(state.routeIsobaric,
-                    initRouteIsobaric = { viewModel.initRouteIsobaric() },
-                    onUpdateIsobaric = { distance, time ->
-                        viewModel.changeRouteIsobaric(
-                            distance, time
-                        )
-                    })
-            }
+        item {
+            WindsAloftRoute(state.routeIsobaric,
+                initRouteIsobaric = { viewModel.initRouteIsobaric() },
+                onUpdateIsobaric = { distance, time ->
+                    viewModel.changeRouteIsobaric(
+                        distance, time
+                    )
+                })
         }
         item { RadarAnimations(state.radarAnimations) { viewModel.initRadarAnimations() } }
         item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }

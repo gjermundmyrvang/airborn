@@ -130,6 +130,10 @@ class FlightBriefViewModel @Inject constructor(
 
     fun initRouteIsobaric() {
         viewModelScope.launch {
+            if (!_state.value.hasArrival) {
+                _state.update { it.copy(routeIsobaric = LoadingState.Error("Add an arrival departure")) }
+                return@launch
+            }
             val departure = airportRepository.getByIcao(state.value.departureIcao)!!
             val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
             val newRoute = initRouteInfo(departure, arrival)
