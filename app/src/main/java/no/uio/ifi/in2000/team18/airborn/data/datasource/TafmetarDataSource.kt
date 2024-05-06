@@ -9,11 +9,17 @@ import javax.inject.Inject
 
 class TafmetarDataSource @Inject constructor(val client: HttpClient) {
     suspend fun fetchTaf(icao: Icao): String {
-        return client.get("weatherapi/tafmetar/1.0/taf.txt?icao=$icao").body()
+        val res = client.get("weatherapi/tafmetar/1.0/taf.txt?icao=$icao")
+        if (res.status.value >= 400)
+            throw ApiException()
+        return res.body()
     }
 
     suspend fun fetchMetar(icao: Icao): String {
-        return client.get("weatherapi/tafmetar/1.0/metar.txt?icao=$icao").body()
+        val res = client.get("weatherapi/tafmetar/1.0/metar.txt?icao=$icao")
+        if (res.status.value >= 400)
+            throw ApiException()
+        return res.body()
     }
 }
 
