@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "no.uio.ifi.in2000.team18.airborn"
-        minSdk = 26
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -64,7 +64,7 @@ dependencies {
     val navVersion = "2.7.7"
     val ktorVersion = "2.3.9"
     val roomVersion = "2.6.1"
-   
+
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
 
