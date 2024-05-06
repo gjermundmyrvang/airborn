@@ -142,7 +142,7 @@ fun HomeScreen(
                 }) {
                 Text(
                     "Select Airport",
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
