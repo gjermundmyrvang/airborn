@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team18.airborn.data.datasource.ApiException
 import no.uio.ifi.in2000.team18.airborn.data.repository.AirportRepository
 import no.uio.ifi.in2000.team18.airborn.data.repository.WeatherRepository
 import no.uio.ifi.in2000.team18.airborn.model.Area
@@ -226,8 +227,10 @@ class FlightBriefViewModel @Inject constructor(
             LoadingState.Error("Something went wrong with the api")
         } catch (e: JsonConvertException) {
             LoadingState.Error("Something went wrong with the api")
+        } catch (e: ApiException) {
+            LoadingState.Error("Something went wrong with the api")
         } catch (e: Exception) {
-            LoadingState.Error(message = "Unknown Error: $e")
+            LoadingState.Error("Unknown Error: $e")
         }
     }
 
