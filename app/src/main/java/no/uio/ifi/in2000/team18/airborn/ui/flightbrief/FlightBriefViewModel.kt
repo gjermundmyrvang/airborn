@@ -173,7 +173,7 @@ class FlightBriefViewModel @Inject constructor(
         return resultRoute
     }
 
-    fun initRoute() {
+    fun initRouteForecast() {
         viewModelScope.launch {
             val departure = _state.value.departureIcao
             val arrival =
