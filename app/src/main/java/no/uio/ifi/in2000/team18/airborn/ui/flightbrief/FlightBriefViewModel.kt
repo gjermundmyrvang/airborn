@@ -138,13 +138,13 @@ class FlightBriefViewModel @Inject constructor(
             }
             _state.update { it.copy(routeInfo = info) }
 
-            val data = Unit.let {
+            val data = load {
                 weatherRepository.getRouteIsobaric(
                     departure,
                     arrival,
                     departure.position.halfwayTo(arrival.position),
                 )
-            }.toSuccess()
+            }
             _state.update { it.copy(routeIsobaric = data) }
         }
     }
