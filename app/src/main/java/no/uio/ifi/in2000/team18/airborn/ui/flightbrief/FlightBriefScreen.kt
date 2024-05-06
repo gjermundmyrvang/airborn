@@ -402,15 +402,13 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
         },
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
+        { Turbulence(state.turbulence) { viewModel.initTurbulence() } }
     )
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
         items(sections) { section ->
             section()
-        }
-        if (state.hasTurbulence) {
-            item { Turbulence(state.turbulence) { viewModel.initTurbulence() } }
         }
     }
 }
