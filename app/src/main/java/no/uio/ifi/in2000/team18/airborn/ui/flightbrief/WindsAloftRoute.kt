@@ -31,10 +31,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import no.uio.ifi.in2000.team18.airborn.R
 import no.uio.ifi.in2000.team18.airborn.model.Direction
 import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.Position
@@ -43,7 +46,6 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.nauticalMiles
 import no.uio.ifi.in2000.team18.airborn.model.round
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
-import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import java.time.ZonedDateTime
@@ -152,7 +154,14 @@ fun DistanceToIsobaricSlider(
             Text("Longitude: ${currentPos.longitude.round(2)}")
         }
         Column(horizontalAlignment = Alignment.End) {
-            RotatableArrowIcon(direction = bearing, flip = false)
+            Icon(
+                painter =
+                painterResource(id = R.drawable.local_airport_24),
+                contentDescription = "windsalofticon",
+                tint = MaterialTheme.colorScheme.background,
+                modifier = Modifier.rotate(bearing.degrees.toFloat())
+            )
+
             Row {
                 Text("Bearing: ")
                 Text(bearing.formatAsDegrees())
