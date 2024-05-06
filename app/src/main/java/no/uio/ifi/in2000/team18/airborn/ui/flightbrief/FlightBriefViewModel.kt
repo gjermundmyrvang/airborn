@@ -230,4 +230,43 @@ class FlightBriefViewModel @Inject constructor(
             LoadingState.Error(message = "Unknown Error: $e")
         }
     }
+
+    fun addToFavourites(icao: Icao) {
+        _state.update { s ->
+            s.copy(airports = s.airports.map {
+                if (icao == it.icao) it.copy(isFavourite = true) else it
+            })
+        }
+        viewModelScope.launch {
+            airportRepository.addFavourite(icao)
+        }
+    }
+
+    fun removeFromFavourites(icao: Icao) {
+        _state.update { s ->
+            s.copy(airports = s.airports.map {
+                if (icao == it.icao) it.copy(isFavourite = false) else it
+            })
+        }
+        viewModelScope.launch {
+            airportRepository.removeFavourite(icao)
+        }
+    }
+
+    fun setLoadingState() {
+        viewModelScope.launch {
+            weatherRepository.clearWeatherCache()
+            airportRepository.clearCache()
+            _state.update {
+                it.copy(
+                    sigcharts = Loading,
+                    offshoreMaps = Loading,
+                    geoSatelliteImage = Loading,
+                    routeIsobaric = Loading,
+                    radarAnimations = Loading,
+                    routeForecast = Loading,
+                )
+            }
+        }
+    }
 }

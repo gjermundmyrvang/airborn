@@ -23,10 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dagger.hilt.android.AndroidEntryPoint
 import no.uio.ifi.in2000.team18.airborn.ui.Navigation
 import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
 import no.uio.ifi.in2000.team18.airborn.ui.connectivity.NetworkConnectivityObserver
+import no.uio.ifi.in2000.team18.airborn.ui.home.LocationPermissionRequest
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import javax.inject.Inject
 
@@ -36,6 +38,7 @@ val LocalNavController = compositionLocalOf<NavController> {
 
 @AndroidEntryPoint
 class MainActivity @Inject constructor() : ComponentActivity() {
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         val networkStatusFlow = NetworkConnectivityObserver(applicationContext).observe()
 
@@ -50,6 +53,7 @@ class MainActivity @Inject constructor() : ComponentActivity() {
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     NetworkStatus(status = networkStatus) {
+                        LocationPermissionRequest()
                         Navigation()
                     }
                 }
@@ -58,7 +62,7 @@ class MainActivity @Inject constructor() : ComponentActivity() {
     }
 }
 
-    @Composable
+@Composable
 fun NetworkStatus(status: ConnectivityObserver.Status, content: @Composable () -> Unit) = Column {
     Box(
         modifier = Modifier

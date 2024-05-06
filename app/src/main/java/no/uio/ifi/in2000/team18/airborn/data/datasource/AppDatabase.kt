@@ -9,7 +9,7 @@ import no.uio.ifi.in2000.team18.airborn.data.entity.BuiltinAirport
     entities = [
         BuiltinAirport::class,
     ],
-    version = 1,
+    version = 2,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract val builtinAirportDao: BuiltinAirportDao

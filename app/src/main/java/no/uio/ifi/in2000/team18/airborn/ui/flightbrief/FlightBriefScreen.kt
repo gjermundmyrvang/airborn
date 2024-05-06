@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -87,29 +88,38 @@ fun FlightBriefScreen(
     val navController = LocalNavController.current
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = {
-                Image(
-                    painter = painterResource(id = R.drawable.newtextlogo2),
-                    contentDescription = "",
-                    modifier = Modifier.size(200.dp)
-                )
-            }, navigationIcon = {
-                IconButton(
-                    onClick = {
-                        navController.popBackStack(route = "home", inclusive = false)
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Home",
-                        tint = MaterialTheme.colorScheme.secondary
+            CenterAlignedTopAppBar(
+                title = {
+                    Image(
+                        painter = painterResource(id = R.drawable.newtextlogo2),
+                        contentDescription = "",
+                        modifier = Modifier.size(200.dp)
                     )
-                }
-            },
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack(route = "home", inclusive = false)
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Home",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = {
-                            navController.navigate("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}")
+                            viewModel.setLoadingState()
+                            navController.navigate("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}") {
+                                popUpTo("flightBrief/${state.departureIcao}/${state.arrivalIcao ?: "null"}") {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         },
                     ) {
                         Icon(
@@ -135,6 +145,8 @@ fun FlightBriefScreen(
             onSelectArrival = { viewModel.selectArrivalAirport(it) },
             clearArrivalInput = { viewModel.clearArrivalInput() },
             modifier = Modifier.padding(padding),
+            addToFavorites = { viewModel.addToFavourites(it) },
+            removeFromFavorites = { viewModel.removeFromFavourites(it) },
         )
     }
 }
@@ -183,7 +195,9 @@ fun FlightBriefScreenContent(
     filterArrivalAirports: (String) -> Unit,
     onSelectArrival: (String) -> Unit,
     clearArrivalInput: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    addToFavorites: (Icao) -> Unit = {},
+    removeFromFavorites: (Icao) -> Unit = {},
 ) = Column(modifier = modifier) {
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
@@ -191,10 +205,14 @@ fun FlightBriefScreenContent(
     HorizontalPager(state = pagerState, modifier = Modifier.weight(1.0F)) { index ->
         when (index) {
             0 -> DepartureAirportBriefTab()
-            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(state,
+            1 -> if (state.hasArrival) ArrivalAirportBriefTab() else ArrivalSelectionTab(
+                state,
                 filterArrivalAirports = { filterArrivalAirports(it) },
                 onSelectArrival = { onSelectArrival(it) },
-                clearArrivalInput = { clearArrivalInput() })
+                clearArrivalInput = { clearArrivalInput() },
+                addToFavorites = addToFavorites,
+                removeFromFavorites = removeFromFavorites
+            )
 
             2 -> OverallAirportBrieftab()
         }
@@ -256,7 +274,9 @@ fun ArrivalSelectionTab(
     state: FlightBriefViewModel.UiState,
     filterArrivalAirports: (String) -> Unit,
     onSelectArrival: (String) -> Unit,
-    clearArrivalInput: () -> Unit
+    clearArrivalInput: () -> Unit,
+    addToFavorites: (Icao) -> Unit = {},
+    removeFromFavorites: (Icao) -> Unit = {},
 ) {
     val airports = state.airports
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -309,10 +329,14 @@ fun ArrivalSelectionTab(
         Spacer(modifier = Modifier.height(8.dp))
         LazyColumn(modifier = Modifier.imePadding(), content = {
             items(airports) { airport ->
-                AirportInfoRow(modifier = Modifier, airport) {
+                AirportInfoRow(modifier = Modifier, airport, {
                     keyboardController?.hide()
                     enabled = true
                     onSelectArrival(it.icao.code)
+                }, {
+                    addToFavorites(airport.icao)
+                }) {
+                    removeFromFavorites(airport.icao)
                 }
             }
         })
@@ -367,8 +391,15 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
     val state by viewModel.state.collectAsState()
     val sections: List<@Composable () -> Unit> = listOf(
         { AirportBriefHeader(state.airport) },
-        { Sundata(state.sun) },
-        { MetarTaf(state.metarTaf) { viewModel.initMetarTaf() } },
+        { Sundata(sun = state.sun) },
+        {
+            MetarTaf(state.metarTaf,
+                airports = state.nearbyAirportsWithMetar,
+                initMetar = { viewModel.initMetarTaf() },
+                onShowNearby = { viewModel.initNearby() },
+                onNewAirport = { viewModel.initNewMetar(it) }
+            )
+        },
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
     )
@@ -403,11 +434,12 @@ fun AirportBriefHeader(airportstate: LoadingState<Airport>) = Column {
 fun Sundata(sun: LoadingState<Sun?>) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         SunComposable(
-            modifier = Modifier.padding(end = 10.dp), sun = sun, header = ""
+            modifier = Modifier.padding(end = 10.dp, bottom = 10.dp),
+            sun = sun, header = "",
         )
     }
 }
@@ -427,12 +459,22 @@ fun AirportInfo(airport: Airport) = Column(
     ) {
         if (!hasSeperator) {
             Column {
-                Text(text = airport.icao.code, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    text = airport.icao.code,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                )
                 Text(text = airport.name)
             }
         } else {
             Column {
-                Text(text = airport.icao.code, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    text = airport.icao.code,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                )
                 Text(text = airport.name.substringBefore(","), fontWeight = FontWeight.Bold)
             }
             Text("/", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)

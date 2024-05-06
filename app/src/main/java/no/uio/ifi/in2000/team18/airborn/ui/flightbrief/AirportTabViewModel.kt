@@ -50,6 +50,7 @@ sealed class AirportTabViewModel(
         val sun: LoadingState<Sun?> = Loading,
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
         val hasTurbulence: Boolean = false,
+        val nearbyAirportsWithMetar: LoadingState<List<Airport>> = Loading,
     )
 
     init {
@@ -77,18 +78,23 @@ sealed class AirportTabViewModel(
         }
     }
 
-    //TODO: probably to be deleted (moved to FlightBriefViewModel, Overall section)
-    /*fun initIsobaric() {
+    fun initNewMetar(icao: Icao) {
+        viewModelScope.launch {
+            val metarTaf = load { airportRepository.fetchTafMetar(icao) }
+            _state.update { it.copy(metarTaf = metarTaf) }
+        }
+    }
+
+    fun initNearby() {
         viewModelScope.launch {
             val airport = airportRepository.getByIcao(icao)
-            if (airport == null) {
-                _state.update { it.copy(isobaric = LoadingState.Error("Failed to get airport")) }
-                return@launch
+            airport?.let {
+                val nearbyAirportsWithMetar =
+                    load { airportRepository.getNearbyAirportsWithMetar(it) }
+                _state.update { it.copy(nearbyAirportsWithMetar = nearbyAirportsWithMetar) }
             }
-            val isobaric = load { weatherRepository.fetchGribFiles(airport.position) }
-            _state.update { it.copy(isobaric = isobaric) }
         }
-    }*/
+    }
 
 
     fun initTurbulence() {

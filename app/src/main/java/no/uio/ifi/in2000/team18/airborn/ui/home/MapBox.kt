@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -97,16 +96,15 @@ fun Map(
     val sigmets = state.sigmets
     var selectedAirport by remember { mutableStateOf<Airport?>(null) }
     var isClicked by remember { mutableStateOf(false) }
+    var showAlertMessage by remember { mutableStateOf(false) }
     var sigmetClicked by rememberSaveable { mutableIntStateOf(0) }
+    val finePermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val permissionState =
         rememberPermissionState(permission = Manifest.permission.ACCESS_COARSE_LOCATION)
     val mapViewportState = rememberMapViewportState {
         if (permissionState.status.isGranted) {
             transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .zoom(7.000)
-                    .pitch(0.0)
-                    .build(),
+                FollowPuckViewportStateOptions.Builder().zoom(7.000).pitch(0.0).build(),
                 DefaultViewportTransitionOptions.Builder().build(),
             )
         } else {
@@ -118,20 +116,7 @@ fun Map(
             }
         }
     }
-    var showNoSigmetMessage = state.showNoSigmetMessage
-
-    LaunchedEffect(permissionState.status.isGranted) {
-        if (permissionState.status.isGranted) {
-            mapViewportState.transitionToFollowPuckState(
-                FollowPuckViewportStateOptions.Builder()
-                    .zoom(7.000)
-                    .pitch(0.0)
-                    .build(),
-                DefaultViewportTransitionOptions.Builder().build(),
-            )
-        }
-    }
-
+    val showNoSigmetMessage = state.showNoSigmetMessage
     Box {
         val distance = state.airportPair?.let {
             it.first.position.distanceTo(it.second.position)
@@ -164,32 +149,32 @@ fun Map(
                 )
             }
         }
-        if (permissionState.status.isGranted) {
-            Box(
-                modifier = Modifier
-                    .offset(0.dp, -sheetHeight)
-                    .align(Alignment.BottomEnd),
-            ) {
-                FloatingActionButton(
-                    modifier = Modifier.padding(10.dp),
-                    onClick = {
-                        mapViewportState.transitionToFollowPuckState(
-                            FollowPuckViewportStateOptions.Builder()
-                                .zoom(7.000)
-                                .pitch(0.0)
-                                .build(),
-                            DefaultViewportTransitionOptions.Builder().build(),
-                        )
-                    }) {
-                    Icon(
-                        modifier = Modifier.size(32.dp),
-                        painter =
-                        painterResource(
-                            id = R.drawable.center
-                        ),
-                        contentDescription = "Recenter"
+        if (showAlertMessage) finePermissionState.launchPermissionRequest()
+        Box(
+            modifier = Modifier
+                .offset(0.dp, -sheetHeight)
+                .align(Alignment.BottomEnd),
+        ) {
+            FloatingActionButton(
+                modifier = Modifier.padding(10.dp),
+                onClick = {
+                    if (!permissionState.status.isGranted) showAlertMessage = true
+                    mapViewportState.transitionToFollowPuckState(
+                        FollowPuckViewportStateOptions.Builder()
+                            .zoom(7.000)
+                            .pitch(0.0)
+                            .build(),
+                        DefaultViewportTransitionOptions.Builder().build(),
                     )
-                }
+                }) {
+                Icon(
+                    modifier = Modifier.size(32.dp),
+                    painter =
+                    painterResource(
+                        id = R.drawable.center
+                    ),
+                    contentDescription = "Recenter"
+                )
             }
         }
         Column(modifier = Modifier.padding(top = 6.dp)) {
@@ -533,7 +518,7 @@ fun InfoBox(
             sun = state.sun,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 5.dp),
+                .padding(vertical = 10.dp),
             header = "Sun info:"
         )
 
@@ -586,7 +571,6 @@ fun InfoBox(
         }
     }
 }
-
 
 @Preview(showSystemUi = true)
 @Composable

@@ -66,14 +66,68 @@ class AirportRepository @Inject constructor(
     // Airport logic
     suspend fun getByIcao(icao: Icao) = airportDataSource.getByIcao(icao)
 
+    private val aiportsWithMetar = listOf(
+        "ENAL",
+        "ENAN",
+        "ENAS",
+        "ENAT",
+        "ENBL",
+        "ENBN",
+        "ENBO",
+        "ENBR",
+        "ENBS",
+        "ENBV",
+        "ENCN",
+        "ENDU",
+        "ENEV",
+        "ENFL",
+        "ENGM",
+        "ENHD",
+        "ENHF",
+        "ENHK",
+        "ENHV",
+        "ENKB",
+        "ENKR",
+        "ENLK",
+        "ENMH",
+        "ENML",
+        "ENNA",
+        "ENNM",
+        "ENNO",
+        "ENOL",
+        "ENOV",
+        "ENRA",
+        "ENRM",
+        "ENRO",
+        "ENRS",
+        "ENSB",
+        "ENSD",
+        "ENSG",
+        "ENSH",
+        "ENSK",
+        "ENSO",
+        "ENSR",
+        "ENSS",
+        "ENST",
+        "ENTC",
+        "ENTO",
+        "ENVA",
+        "ENVD",
+        "ENZV"
+    )
+
     suspend fun getAirportNearby(airport: Airport, max: Int = 5) =
         airportDataSource.getAirportsNearby(airport, (max * 1.2).roundToInt())
             .map { Airport.fromBuiltinAirport(it) }
             .sortedBy { airport.position.distanceTo(it.position).meters }.take(max)
 
-    suspend fun search(query: String) = airportDataSource.search(query)
+    suspend fun getNearbyAirportsWithMetar(airport: Airport) =
+        getAirportNearby(airport).filter { it.icao.code in aiportsWithMetar }
 
-    suspend fun all() = airportDataSource.all()
+    suspend fun search(query: String) =
+        airportDataSource.search(query).map { Airport.fromBuiltinAirport(it) }
+
+    suspend fun all() = airportDataSource.all().map { Airport.fromBuiltinAirport(it) }
 
     // TAF/METAR logic
     suspend fun fetchTafMetar(icao: Icao) = tafMetarDataCache[icao] ?: run {
@@ -86,7 +140,8 @@ class AirportRepository @Inject constructor(
             }
         }.toMutableList()
         val tafs = tafLines.asSequence().map { Taf(it) }.toMutableList()
-        MetarTaf(metars, tafs).also { tafMetarDataCache[icao] = it }
+        val airport = getByIcao(icao)
+        MetarTaf(metars, tafs, airport).also { tafMetarDataCache[icao] = it }
     }
 
     // Sigchart logic
@@ -200,4 +255,7 @@ class AirportRepository @Inject constructor(
         radarDataCache = listOf()
         routeDataCache = listOf()
     }
+
+    suspend fun removeFavourite(icao: Icao) = airportDataSource.removeFavourite(icao)
+    suspend fun addFavourite(icao: Icao) = airportDataSource.addFaovourite(icao)
 }

@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.team18.airborn.ui.home
 
-import android.Manifest
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -29,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
@@ -59,7 +61,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team18.airborn.LocalNavController
 import no.uio.ifi.in2000.team18.airborn.R
@@ -69,7 +70,7 @@ import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTextFieldColors
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -139,12 +140,13 @@ fun HomeScreen(
                         }
                     }
                 }) {
-                Text("Select Airport",
-                    color = MaterialTheme.colorScheme.onPrimary)
+                Text(
+                    "Select Airport",
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
     )
-    RequestPermission(permission = Manifest.permission.ACCESS_FINE_LOCATION)
 }
 
 
@@ -283,16 +285,21 @@ private fun AirportSelection(
     if (!(departureFocused || arrivalFocused)) return@Column
     LazyColumn(modifier = Modifier.height(configuration.screenHeightDp.dp)) {
         items(searchResults) { airport ->
-            AirportInfoRow(item = airport) { clickedAirport ->
-                keyboardController?.hide()
-                if (departureFocused) {
-                    viewModel.selectDepartureAirport(clickedAirport)
-                    focusManager.clearFocus(true)
-                } else {
-                    viewModel.selectArrivalAirport(clickedAirport)
-                    focusManager.clearFocus(true)
-                }
-            }
+            AirportInfoRow(
+                item = airport,
+                addToFavorites = { viewModel.addToFavourites(airport.icao) },
+                removeFromFavourites = { viewModel.removeFromFavourites(airport.icao) },
+                onItemClick = { clickedAirport ->
+                    keyboardController?.hide()
+                    if (departureFocused) {
+                        viewModel.selectDepartureAirport(clickedAirport)
+                        focusManager.clearFocus(true)
+                    } else {
+                        viewModel.selectArrivalAirport(clickedAirport)
+                        focusManager.clearFocus(true)
+                    }
+                },
+            )
         }
     }
 }
@@ -379,10 +386,12 @@ fun AirportInfoRow(
     modifier: Modifier = Modifier,
     item: Airport,
     onItemClick: (Airport) -> Unit,
+    addToFavorites: () -> Unit,
+    removeFromFavourites: () -> Unit,
 ) {
     Row(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(12.dp)
             .clickable { onItemClick(item) },
         verticalAlignment = Alignment.CenterVertically,
@@ -393,7 +402,7 @@ fun AirportInfoRow(
             tint = MaterialTheme.colorScheme.secondary
         )
         Spacer(modifier = Modifier.width(24.dp))
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.name,
                 color = MaterialTheme.colorScheme.primary,
@@ -406,10 +415,20 @@ fun AirportInfoRow(
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    text = "${item.position.latitude}N/${item.position.longitude}E",
+                    text = item.position.toString(),
                     color = MaterialTheme.colorScheme.primary
                 )
             }
+
+        }
+        IconToggleButton(
+            checked = item.isFavourite,
+            onCheckedChange = {
+                if (!item.isFavourite) addToFavorites() else removeFromFavourites()
+            }
+        ) {
+            val icon = if (item.isFavourite) Icons.Filled.Favorite else Icons.Default.FavoriteBorder
+            Icon(icon, contentDescription = null, Modifier, Color.White)
         }
     }
     HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.tertiary)
