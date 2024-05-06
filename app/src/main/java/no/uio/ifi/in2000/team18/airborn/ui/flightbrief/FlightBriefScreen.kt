@@ -362,10 +362,20 @@ fun OverallAirportBrieftab(
         modifier = Modifier.fillMaxSize()
     ) {
         item { Sigchart(state.sigcharts) { viewModel.initSigchart() } }
-        item { Route(state.route) { viewModel.initRouteIsobaric() } }
+        if (state.hasArrival) {
+            item {
+                WindsAloftRoute(state.routeIsobaric,
+                    initRouteIsobaric = { viewModel.initRouteIsobaric() },
+                    onUpdateIsobaric = { distance, time ->
+                        viewModel.changeRouteIsobaric(
+                            distance, time
+                        )
+                    })
+            }
+        }
         item { RadarAnimations(state.radarAnimations) { viewModel.initRadarAnimations() } }
         item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
-        item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMpas() } }
+        item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMaps() } }
         if (state.isIgaRoute) { // Only show this composable if selected departure and arrival is a route
             item {
                 RouteForecast(state = state.routeForecast) {
@@ -390,7 +400,6 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
                 onNewAirport = { viewModel.initNewMetar(it) }
             )
         },
-        { IsobaricData(state.isobaric) { viewModel.initIsobaric() } },
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
     )
@@ -430,8 +439,7 @@ fun Sundata(sun: LoadingState<Sun?>) {
     ) {
         SunComposable(
             modifier = Modifier.padding(end = 10.dp, bottom = 10.dp),
-            sun = sun,
-            header = ""
+            sun = sun, header = "",
         )
     }
 }

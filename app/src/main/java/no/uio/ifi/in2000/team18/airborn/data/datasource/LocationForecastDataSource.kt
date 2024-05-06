@@ -8,8 +8,9 @@ import no.uio.ifi.in2000.team18.airborn.model.Position
 import javax.inject.Inject
 
 class LocationForecastDataSource @Inject constructor(val client: HttpClient) {
-    suspend fun fetchForecast(position: Position): LocationData {
-        return client.get("weatherapi/locationforecast/2.0/complete?lat=${position.latitude}&lon=${position.longitude}")
+    suspend fun fetchForecast(position: Position, type: String = "complete"): LocationData {
+        return client
+            .get("weatherapi/locationforecast/2.0/$type?lat=${position.latitude}&lon=${position.longitude}")
             .body()
     }
 }

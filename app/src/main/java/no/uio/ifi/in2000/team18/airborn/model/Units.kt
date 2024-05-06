@@ -5,6 +5,7 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.mapbox.geojson.Point
 import java.util.Locale
+import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow
@@ -124,7 +125,7 @@ data class Distance(val meters: Double) {
     fun formatAsNm(): String = "${nauticalMiles.roundToInt()} nm"
     val feet get() = meters * 3.2808399
     val nauticalMiles get() = meters * 0.000539956803
-
+    val kilometers get() = meters / 1000
     operator fun times(x: Number) = Distance(meters = meters * x.toDouble())
     operator fun plus(x: Distance) = Distance(meters + x.meters)
 }
@@ -209,6 +210,26 @@ data class Position(
         val x = (cos(startLat) * sin(endLat)).minus(sin(startLat) * cos(endLat) * cos(deltaLon))
         val theta = atan2(y, x)
         return Math.toDegrees((theta)).mod(360.0).degrees // bearing in degrees
+    }
+
+    fun getPointAtDistance( // This function misses by a hundred meters, but that is not important for grib data
+        lat1: Double = latitude,
+        lon1: Double = longitude,
+        d: Distance,
+        bearing: Double,
+        R: Double = 6371.0
+    ): Position {
+        val distance = d.kilometers
+        val lat1Rad = Math.toRadians(lat1)
+        val lon1Rad = Math.toRadians(lon1)
+        val a = Math.toRadians(bearing)
+        val lat2Rad =
+            asin(sin(lat1Rad) * cos(distance / R) + cos(lat1Rad) * sin(distance / R) * cos(a))
+        val lon2Rad = lon1Rad + atan2(
+            sin(a) * sin(distance / R) * cos(lat1Rad),
+            cos(distance / R) - sin(lat1Rad) * sin(lat2Rad)
+        )
+        return Position(Math.toDegrees(lat2Rad), Math.toDegrees(lon2Rad))
     }
 }
 
