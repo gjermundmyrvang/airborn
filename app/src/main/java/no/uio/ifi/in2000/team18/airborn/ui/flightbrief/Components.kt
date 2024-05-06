@@ -338,10 +338,10 @@ fun TableContent(isobaricData: IsobaricData) {
             .padding(8.dp)
             .heightIn(min = 0.dp, max = 800.dp)
     ) {
-        val column1Weight = .3f
-        val column2Weight = .21f
-        val column3Weight = .21f
-        val column4Weight = .28f
+        val column1Weight = 1.1f
+        val column2Weight = 1f
+        val column3Weight = 1f
+        val column4Weight = 1.5f
         item {
             Row(
                 Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
