@@ -130,7 +130,7 @@ fun HomeScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                 ),
-                border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.background),
+                border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.primary),
                 onClick = {
                     scope.launch {
                         if (airportInputSelected) {
