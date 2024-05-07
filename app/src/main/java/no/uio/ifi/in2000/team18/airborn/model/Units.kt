@@ -214,12 +214,11 @@ data class Position(
     }
 
     fun getPointAtDistance(
-        pos: Position,
         d: Distance,
         bearing: Direction,
     ): Position {
-        val lat1Rad = Math.toRadians(pos.latitude)
-        val lon1Rad = Math.toRadians(pos.longitude)
+        val lat1Rad = Math.toRadians(this.latitude)
+        val lon1Rad = Math.toRadians(this.longitude)
         val a = Math.toRadians(
             bearing.degrees
         )
