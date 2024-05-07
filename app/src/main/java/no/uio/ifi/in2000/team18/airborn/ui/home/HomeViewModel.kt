@@ -3,6 +3,9 @@ package no.uio.ifi.in2000.team18.airborn.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.client.call.NoTransformationFoundException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -16,6 +19,7 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Sun
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
 import no.uio.ifi.in2000.team18.airborn.ui.connectivity.ConnectivityObserver
+import java.net.SocketException
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
@@ -188,6 +192,14 @@ class HomeViewModel @Inject constructor(
             f().toSuccess()
         } catch (e: UnresolvedAddressException) {
             LoadingState.Error(message = "Unresolved Address")
+        } catch (e: ConnectTimeoutException) {
+            LoadingState.Error("Connection Timed out")
+        } catch (e: SocketException) {
+            LoadingState.Error("Failed to connect to api")
+        } catch (e: NoTransformationFoundException) {
+            LoadingState.Error("Something went wrong with the api")
+        } catch (e: JsonConvertException) {
+            LoadingState.Error("Something went wrong with the api")
         } catch (e: Exception) {
             LoadingState.Error(message = "Unknown Error: $e")
         }
