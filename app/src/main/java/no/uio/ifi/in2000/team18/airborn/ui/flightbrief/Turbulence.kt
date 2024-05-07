@@ -22,10 +22,14 @@ import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 
 @Composable
-fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>>, initTurbulence: () -> Unit) =
+fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulence: () -> Unit) =
     LazyCollapsible(
         header = "Turbulence", value = state, onExpand = initTurbulence,
     ) { turbulence ->
+        if (turbulence == null) {
+            Text("Selected airport does not have turbulence data", Modifier.padding(start = 10.dp))
+            return@LazyCollapsible
+        }
         var currentlySelectedType by rememberSaveable { mutableStateOf(turbulence.keys.first()) }
         var selectedTime by rememberSaveable { mutableIntStateOf(0) }
         val selectedMap = turbulence[currentlySelectedType]

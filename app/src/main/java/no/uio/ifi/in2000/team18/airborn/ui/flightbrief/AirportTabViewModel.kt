@@ -45,12 +45,11 @@ sealed class AirportTabViewModel(
         val airport: LoadingState<Airport> = Loading,
         val metarTaf: LoadingState<MetarTaf> = Loading,
         val isobaric: LoadingState<IsobaricData> = Loading,
-        val turbulence: LoadingState<Map<String, List<Turbulence>>> = Loading,
+        val turbulence: LoadingState<Map<String, List<Turbulence>>?> = Loading,
         val webcams: LoadingState<List<Webcam>> = Loading,
         val weather: LoadingState<List<WeatherDay>> = Loading,
         val sun: LoadingState<Sun?> = Loading,
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
-        val hasTurbulence: Boolean = false,
         val nearbyAirportsWithMetar: LoadingState<List<Airport>> = Loading,
     )
 
@@ -69,7 +68,6 @@ sealed class AirportTabViewModel(
                 _state.update { it.copy(networkStatus = status) }
             }
         }
-        _state.update { it.copy(hasTurbulence = airportRepository.hasTurbulence(icao)) }
     }
 
     fun initMetarTaf() {

@@ -362,24 +362,22 @@ fun OverallAirportBrieftab(
         modifier = Modifier.fillMaxSize()
     ) {
         item { Sigchart(state.sigcharts) { viewModel.initSigchart() } }
-        if (state.hasArrival) {
-            item {
-                WindsAloftRoute(state.routeIsobaric,
-                    initRouteIsobaric = { viewModel.initRouteIsobaric() },
-                    onUpdateIsobaric = { distance, time ->
-                        viewModel.changeRouteIsobaric(
-                            distance, time
-                        )
-                    })
-            }
+        item {
+            WindsAloftRoute(state.routeIsobaric,
+                initRouteIsobaric = { viewModel.initRouteIsobaric() },
+                onUpdateIsobaric = { distance, time ->
+                    viewModel.changeRouteIsobaric(
+                        distance, time
+                    )
+                })
         }
         item { RadarAnimations(state.radarAnimations) { viewModel.initRadarAnimations() } }
         item { GeoSatelliteImage(state.geoSatelliteImage) { viewModel.initGeosatelliteImage() } }
         item { OffshoreMaps(state.offshoreMaps) { viewModel.initOffshoreMaps() } }
-        if (state.isIgaRoute) { // Only show this composable if selected departure and arrival is a route
+        if (state.isIgaRoute) {
             item {
                 RouteForecast(state = state.routeForecast) {
-                    viewModel.initRoute()
+                    viewModel.initRouteForecast()
                 }
             }
         }
@@ -402,15 +400,13 @@ fun AirportBriefTab(viewModel: AirportTabViewModel) {
         },
         { WebcamSection(state.webcams) { viewModel.initWebcam() } },
         { WeatherSection(state.weather) { viewModel.initWeather() } },
+        { Turbulence(state.turbulence) { viewModel.initTurbulence() } }
     )
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
         items(sections) { section ->
             section()
-        }
-        if (state.hasTurbulence) {
-            item { Turbulence(state.turbulence) { viewModel.initTurbulence() } }
         }
     }
 }

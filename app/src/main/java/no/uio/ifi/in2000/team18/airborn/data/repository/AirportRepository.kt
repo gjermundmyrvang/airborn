@@ -176,11 +176,14 @@ class AirportRepository @Inject constructor(
         "ENVA"
     )
 
-    fun hasTurbulence(icao: Icao) = icao.code in availableTurbulence
-    suspend fun fetchTurbulence(icao: Icao) =
-        turbulenceDataCache[icao] ?: turbulenceDataSource.fetchTurbulenceMap(icao)
+    private fun hasTurbulence(icao: Icao) = icao.code in availableTurbulence
+    suspend fun fetchTurbulence(icao: Icao): Map<String, List<Turbulence>>? {
+        if (!hasTurbulence(icao)) {
+            return null
+        }
+        return turbulenceDataCache[icao] ?: turbulenceDataSource.fetchTurbulenceMap(icao)
             .groupBy { it.params.type }.also { turbulenceDataCache[icao] = it }
-
+    }
 
     // Webcam Logic
     suspend fun fetchWebcamImages(airport: Airport) = webcamDataCache[airport]
