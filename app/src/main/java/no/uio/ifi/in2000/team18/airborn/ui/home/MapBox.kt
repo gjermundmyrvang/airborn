@@ -130,7 +130,7 @@ fun Map(
                 puckBearing = PuckBearing.HEADING
                 puckBearingEnabled = true
             },
-            style = { MapStyle(style = "mapbox://styles/gjerry10/clvntbvgq01ks01qv4p092dap") }
+            style = { MapStyle(style = "mapbox://styles/gjerry10/clvp6ie7e00gp01pc88154ilm") }
         ) {
             airports.forEach { airport ->
                 Annotation(airport) {
