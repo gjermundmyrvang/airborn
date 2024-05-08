@@ -1,8 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
 import com.google.gson.annotations.JsonAdapter
-import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
-import no.uio.ifi.in2000.team18.airborn.ui.common.DateTimeAdapter
+import java.time.ZonedDateTime
 
 data class Turbulence(
     val params: Params,
@@ -11,7 +10,7 @@ data class Turbulence(
 
 data class Params(
     val icao: String,
-    @JsonAdapter(DateTimeAdapter::class) val time: DateTime,
+    @JsonAdapter(ZonedDateTimeAdapter::class) val time: ZonedDateTime,
     val type: String
 )
 
