@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonWriter
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class ZDTAdapter : TypeAdapter<ZonedDateTime>() {
     override fun write(writer: JsonWriter, value: ZonedDateTime) {
@@ -36,6 +37,17 @@ fun ZonedDateTime.hourMinute(): String {
     return "$hour:$minute"
 }
 
+fun ZonedDateTime.dayOfWeek(): String {
+    return this.dayOfWeek.toString().lowercase()
+        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+}
+
 fun ZonedDateTime.toSystemZoneOffset(): ZonedDateTime {
     return this.withZoneSameInstant(ZoneId.systemDefault())
 }
+
+fun ZonedDateTime.systemDayOfWeek() = this.toSystemZoneOffset().dayOfWeek()
+
+fun ZonedDateTime.systemHourMinute() = this.toSystemZoneOffset().hourMinute()
+
+fun ZonedDateTime.systemMonthDayHourMinute() = this.toSystemZoneOffset().monthDayHourMinute()
