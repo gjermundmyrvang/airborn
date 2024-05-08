@@ -22,7 +22,8 @@ import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricData
 import no.uio.ifi.in2000.team18.airborn.model.isobaric.IsobaricLayer
 import no.uio.ifi.in2000.team18.airborn.model.mps
-import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemDayOfWeek
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemHourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
 import ucar.nc2.dt.GridDatatype
 import java.time.ZoneId
@@ -181,7 +182,7 @@ class WeatherRepository @Inject constructor(
         val availableTimeSeries =
             locationForecastDataSource.fetchForecast(position, "compact").properties.timeseries
         val availableTimes = availableTimeSeries.mapIndexed { index, timeSeries ->
-            Pair(index, ZonedDateTime.parse(timeSeries.time))
+            Pair(index, timeSeries.time)
         }
         val preferredTime =
             time ?: ZonedDateTime.now().truncatedTo(ChronoUnit.HOURS)
@@ -244,12 +245,12 @@ class WeatherRepository @Inject constructor(
 
 
     private fun mapToWeatherDay(timeseries: List<TimeSeries>): List<WeatherDay> {
-        val groupedByDate = timeseries.groupBy { DateTime(isoDateTime = it.time).date }
+        val groupedByDate = timeseries.groupBy { it.time.dayOfMonth }
         return groupedByDate.map { (_, timeSeriesList) ->
-            WeatherDay(date = DateTime(isoDateTime = timeSeriesList.first().time),
+            WeatherDay(date = timeSeriesList.first().time.systemDayOfWeek(),
                 weather = timeSeriesList.map { timeSeries ->
                     WeatherHour(
-                        time = DateTime(isoDateTime = timeSeries.time).time,
+                        time = timeSeries.time.systemHourMinute(),
                         weatherDetails = timeSeries.data.instant.details,
                         nextOneHour = if (timeSeries.data.next_1_hours != null) english[timeSeries.data.next_1_hours.summary.symbol_code.substringBefore(
                             "_"

@@ -2,7 +2,7 @@ package no.uio.ifi.in2000.team18.airborn.model
 
 import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
-import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
+import java.time.ZonedDateTime
 
 
 data class LocationData(
@@ -10,7 +10,7 @@ data class LocationData(
 )
 
 data class WeatherDay(
-    val date: DateTime,
+    val date: String,
     val weather: List<WeatherHour>
 )
 
@@ -48,7 +48,7 @@ data class SummaryData(
 )
 
 data class TimeSeries(
-    val time: String,
+    @JsonAdapter(ZonedDateTimeAdapter::class) val time: ZonedDateTime,
     val data: TimeSeriesData
 )
 
