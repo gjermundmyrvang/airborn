@@ -136,6 +136,20 @@ class UnitTest {
     }
 
     @Test
+    fun getPointAtDistanceLongDistanceEastWestCorrect() {
+        // Arrange
+        val start = Position(60.4, 5.3) // Bergen Airport (approx)
+        val end = Position(60.2, 11.1) // Oslo Airport (approx)
+        val totalDistance = start.distanceTo(end)
+        // Act
+        val initBearing = start.bearingTo(end)
+        val calculatedPosition: Position = start.getPointAtDistance(totalDistance, initBearing)
+        val distanceToRealPosition: Distance = calculatedPosition.distanceTo(end)
+        // Assert
+        Assert.assertEquals(0.0, distanceToRealPosition.meters, 3000.0) // 2.5 km difference
+    }
+
+    @Test
     fun `format double with 3 decimals`() {
         val pi = 3.14159265358979
         assertEquals("3.142", pi.format(3))

@@ -128,6 +128,7 @@ data class Distance(val meters: Double) {
     val kilometers get() = meters / 1000
     operator fun times(x: Number) = Distance(meters = meters * x.toDouble())
     operator fun plus(x: Distance) = Distance(meters + x.meters)
+    operator fun div(x: Distance): Double = meters / x.meters
 }
 
 data class Fraction(val fraction: Double) {
@@ -140,7 +141,7 @@ data class Position(
     override fun toString(): String = "($latitude, $longitude)"
 
     companion object {
-        const val EARTH_RADIUS_METERS: Double = 6371000.0
+        val EARTH_RADIUS = 6371000.m
     }
 
     fun toPoints(): Point = Point.fromLngLat(longitude, latitude)
@@ -163,7 +164,7 @@ data class Position(
         val a = sin(deltaLat / 2).pow(2) +
                 cos(startLat) * cos(endLat) * sin(deltaLon / 2).pow(2)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        return Distance(EARTH_RADIUS_METERS * c)
+        return Distance(EARTH_RADIUS.meters * c)
     }
 
     /**
@@ -212,6 +213,31 @@ data class Position(
         return Math.toDegrees((theta)).mod(360.0).degrees // bearing in degrees
     }
 
+    fun getPointAtDistance(
+        d: Distance,
+        bearing: Direction,
+    ): Position {
+        val lat1Rad = Math.toRadians(this.latitude)
+        val lon1Rad = Math.toRadians(this.longitude)
+        val a = Math.toRadians(
+            bearing.degrees
+        )
+        val lat2Rad =
+            asin(
+                sin(lat1Rad) * cos(d / EARTH_RADIUS) + cos(lat1Rad) * sin(d / EARTH_RADIUS) * cos(
+                    a
+                )
+            )
+        val lon2Rad = lon1Rad + atan2(
+            sin(a) * sin(d / EARTH_RADIUS) * cos(lat1Rad),
+            cos(
+                d / EARTH_RADIUS
+            ) - sin(lat1Rad) * sin(lat2Rad)
+        )
+        return Position(Math.toDegrees(lat2Rad), Math.toDegrees(lon2Rad))
+    }
+
+    @Deprecated("Use the version that uses Position")
     fun getPointAtDistance( // This function misses by a hundred meters, but that is not important for grib data
         lat1: Double = latitude,
         lon1: Double = longitude,
@@ -269,7 +295,7 @@ val Number.nauticalMiles get() = this * 1852.m
 // Utilities:
 fun Double.format(decimals: Int) =
     if (decimals <= 0) "${this.round(decimals).roundToInt()}"
-    else String.format(Locale.ENGLISH, "%.${decimals}f",this)
+    else String.format(Locale.ENGLISH, "%.${decimals}f", this)
 
 fun Double.round(decimals: Int): Double {
     var multiplier = Math.pow(10.0, decimals.toDouble())
