@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
@@ -261,6 +263,32 @@ fun <T> LazyCollapsible(
         is LoadingState.Error -> Error(
             "failed to load ${header}: ${value.message}", modifier = Modifier.padding(16.dp, 8.dp)
         )
+    }
+}
+
+@Composable
+fun Compass(rotation: Float, size: Dp) = Box(Modifier.size(size), contentAlignment = Alignment.Center) {
+    Icon(
+        painter = painterResource(R.drawable.compass),
+        contentDescription = "Compass",
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.fillMaxSize()
+
+
+    )
+    Icon(
+        painter = painterResource(id = R.drawable.local_airport_24),
+        contentDescription = "airplaneicon",
+        tint = MaterialTheme.colorScheme.background,
+        modifier = Modifier.rotate(rotation).fillMaxSize(0.35F)
+    )
+}
+
+@Preview
+@Composable
+fun PreviewCompass() {
+    AirbornTheme {
+        Compass(90F, 500.dp)
     }
 }
 
