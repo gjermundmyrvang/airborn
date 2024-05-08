@@ -130,7 +130,7 @@ fun Map(
                 puckBearing = PuckBearing.HEADING
                 puckBearingEnabled = true
             },
-            style = { MapStyle(style = "mapbox://styles/gjerry10/clvntbvgq01ks01qv4p092dap") }
+            style = { MapStyle(style = "mapbox://styles/gjerry10/clvp6ie7e00gp01pc88154ilm") }
         ) {
             airports.forEach { airport ->
                 Annotation(airport) {
@@ -241,8 +241,8 @@ fun Polyline(positions: Pair<Airport, Airport>) {
     val pos2 = positions.second.position
     PolylineAnnotation(
         points = listOf(pos1, pos2).map { it.toPoints() },
-        lineColorInt = Color(0xFF1D1D1D).toArgb(),
-        lineWidth = 3.0,
+        lineColorInt = MaterialTheme.colorScheme.secondary.toArgb(),
+        lineWidth = 3.5,
         onClick = {
             true
         },
