@@ -38,9 +38,11 @@ import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team18.airborn.model.Labels
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreParams
-import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemHourMinute
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemMonthDayHourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
+import java.time.ZonedDateTime
 
 @Composable
 fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffshoreMap: () -> Unit) =
@@ -49,9 +51,9 @@ fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffsho
     ) { offshoreMap ->
         val options = remember {
             listOf(
-                "helicopterlightningobservations" to "Lightningobservations",
-                "helicoptersignificantwaveheight" to "Significantwaveheight",
-                "helicoptertriggeredlightningindex" to "Triggeredlightningindex"
+                "helicopterlightningobservations" to "Lightning observations",
+                "helicoptersignificantwaveheight" to "Significant wave height",
+                "helicoptertriggeredlightningindex" to "Triggered lightning index"
             )
         }
         val areas = remember {
@@ -77,7 +79,7 @@ fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffsho
             Text("Unable to find images that matches selected parameters")
         } else {
             TimeRow(current = selectedOffshoreMapTime,
-                times = offshoreMapList.map { it.params.time.time },
+                times = offshoreMapList.map { it.params.time.systemHourMinute() },
                 selectedColor = MaterialTheme.colorScheme.secondary,
                 notSelectedColor = MaterialTheme.colorScheme.tertiaryContainer,
                 modifier = Modifier.padding(start = 10.dp),
@@ -127,23 +129,23 @@ fun OptionList(
 fun TestOffshoreMaps() {
     val exampleOffshoreMap = OffshoreMap(
         endpoint = "helicopterlightningobservations",
-        params = OffshoreParams("norway", DateTime("2019-01-15T12:00:00Z")),
+        params = OffshoreParams("norway", ZonedDateTime.now()),
         labels = Labels("Norway"),
-        updated = DateTime("2019-01-15T12:00:00Z"),
+        updated = ZonedDateTime.now(),
         uri = "https://api.met.no/weatherapi/offshoremaps/1.0/helicopterlightningobservations?area=northern_norway"
     )
     val exampleOffshoreMap2 = OffshoreMap(
         endpoint = "helicoptersignificantwaveheight",
-        params = OffshoreParams("northern_norway", DateTime("2019-01-15T12:00:00Z")),
+        params = OffshoreParams("northern_norway", ZonedDateTime.now()),
         labels = Labels("Norway"),
-        updated = DateTime("2019-01-15T12:00:00Z"),
+        updated = ZonedDateTime.now(),
         uri = "https://api.met.no/weatherapi/offshoremaps/1.0/helicopterlightningobservations?area=northern_norway"
     )
     val exampleOffshoreMap3 = OffshoreMap(
         endpoint = "helicoptertriggeredlightningindex",
-        params = OffshoreParams("norway", DateTime("2019-01-15T12:00:00Z")),
+        params = OffshoreParams("norway", ZonedDateTime.now()),
         labels = Labels("Norway"),
-        updated = DateTime("2019-01-15T12:00:00Z"),
+        updated = ZonedDateTime.now(),
         uri = "https://api.met.no/weatherapi/offshoremaps/1.0/helicopterlightningobservations?area=northern_norway"
     )
     val testMap = mapOf("helicopterlightningobservations" to List(10) { exampleOffshoreMap },
@@ -227,7 +229,7 @@ fun TestOffshoreMaps() {
                                 imageVector = if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange,
                                 contentDescription = ""
                             )
-                            Text(text = "${map.updated.dayMonthHour} LT")
+                            Text(text = "${map.updated.systemMonthDayHourMinute()} LT")
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                     }
