@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team18.airborn.model.RouteForecast
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemHourMinute
 
 
 @Composable
@@ -28,7 +29,7 @@ fun RouteForecast(
     var selected by rememberSaveable { mutableIntStateOf(0) }
     TimeRow(modifier = Modifier.padding(start = 10.dp),
         current = selected,
-        times = routeForecasts.map { it.params.time.time },
+        times = routeForecasts.map { it.params.time.systemHourMinute() },
         selectedColor = MaterialTheme.colorScheme.secondary,
         notSelectedColor = MaterialTheme.colorScheme.tertiaryContainer,
         onTimeClicked = { selected = it })
