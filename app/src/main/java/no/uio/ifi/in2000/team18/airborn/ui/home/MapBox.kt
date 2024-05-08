@@ -241,8 +241,8 @@ fun Polyline(positions: Pair<Airport, Airport>) {
     val pos2 = positions.second.position
     PolylineAnnotation(
         points = listOf(pos1, pos2).map { it.toPoints() },
-        lineColorInt = Color(0xFF1D1D1D).toArgb(),
-        lineWidth = 3.0,
+        lineColorInt = MaterialTheme.colorScheme.secondary.toArgb(),
+        lineWidth = 3.5,
         onClick = {
             true
         },
