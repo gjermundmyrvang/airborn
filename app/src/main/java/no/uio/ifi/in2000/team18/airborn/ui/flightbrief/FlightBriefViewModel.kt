@@ -159,7 +159,7 @@ class FlightBriefViewModel @Inject constructor(
             val departure = airportRepository.getByIcao(state.value.departureIcao)!!
             val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
             val newPos = departure.position.getPointAtDistance(
-                d = traveled, bearing = departure.position.bearingTo(arrival.position).degrees
+                d = traveled, bearing = departure.position.bearingTo(arrival.position)
             )
             val newIsobaric =
                 load { weatherRepository.getRouteIsobaric(departure, arrival, newPos, time) }

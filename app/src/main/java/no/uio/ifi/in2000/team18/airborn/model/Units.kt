@@ -236,27 +236,6 @@ data class Position(
         )
         return Position(Math.toDegrees(lat2Rad), Math.toDegrees(lon2Rad))
     }
-
-    @Deprecated("Use the version that uses Position")
-    fun getPointAtDistance( // This function misses by a hundred meters, but that is not important for grib data
-        lat1: Double = latitude,
-        lon1: Double = longitude,
-        d: Distance,
-        bearing: Double,
-        R: Double = 6371.0
-    ): Position {
-        val distance = d.kilometers
-        val lat1Rad = Math.toRadians(lat1)
-        val lon1Rad = Math.toRadians(lon1)
-        val a = Math.toRadians(bearing)
-        val lat2Rad =
-            asin(sin(lat1Rad) * cos(distance / R) + cos(lat1Rad) * sin(distance / R) * cos(a))
-        val lon2Rad = lon1Rad + atan2(
-            sin(a) * sin(distance / R) * cos(lat1Rad),
-            cos(distance / R) - sin(lat1Rad) * sin(lat2Rad)
-        )
-        return Position(Math.toDegrees(lat2Rad), Math.toDegrees(lon2Rad))
-    }
 }
 
 // Speed
