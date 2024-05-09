@@ -1,4 +1,4 @@
-#Sekvensdiagram: Valg av departure/arrival
+# Sekvensdiagram: Valg av departure/arrival
 
 ```mermaid
 sequenceDiagram
@@ -69,7 +69,7 @@ Tekstlig beskrivelse:
 **Postbetingelser:** Departure og arrival flyplass er valgt. Appen er klar til å opprette
 flightbrief
 
-##Hovedflyt:
+## Hovedflyt:
 1.User starts app
 2.Appen viser HomeScreen
 3.Piloten skrive inn "ENG" i departure input feltet
@@ -91,13 +91,13 @@ flightbrief
 19. HomeScreen viser soldata for Ålesund, ENAL
 20. Bruker trykker på add arrival knappen i InfoBoxen
 
-##Alternativ flyt:
+## Alternativ flyt:
 15.1: fetchSunriseSunet klarer ikke å hente data fra api, returnerer error melding til airportRepository
 15.2: Feilmelding blir returnert til HomeViewModel. state sin sun blir satt til Error
 15.3: Feilmelding vises til bruker i InfoBox
 
 
-#Aktivitetsdiagram metar/taf
+# Aktivitetsdiagram metar/taf
 
 ```mermaid
 flowchart TD;
