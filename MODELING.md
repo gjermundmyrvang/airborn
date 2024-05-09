@@ -1,4 +1,4 @@
-**Sekvensdiagram: Valg av departure/arrival**
+#Sekvensdiagram: Valg av departure/arrival
 
 ```mermaid
 sequenceDiagram
@@ -55,7 +55,6 @@ sequenceDiagram
 
     Bruker->> HomeScreen: Clicks add arrival button in "ENAL" Infobox
 
-
     deactivate HomeViewModel
     deactivate AirportRepository
     deactivate AirportDataSource
@@ -69,8 +68,8 @@ Tekstlig beskrivelse:
 **Prebetingelser:** Ingen prebetingelser
 **Postbetingelser:** Departure og arrival flyplass er valgt. Appen er klar til å opprette
 flightbrief
-**Hovedflyt:**
 
+##Hovedflyt:
 1.User starts app
 2.Appen viser HomeScreen
 3.Piloten skrive inn "ENG" i departure input feltet
@@ -78,7 +77,6 @@ flightbrief
 5.search("ENG") i airportRepository blir kalt
 6.search funksjonen i AirportDataSource blir kalt og returnerer flyplasser filtrert på "ENG"
 7.de filtrerte flyplassene returneres fra AirportRepository til HomeViewModel
-
 8. searchResults i homeViewModel UiState oppdateres til de filtrerte flyplassene
 9. De filtrerte flyplassene vises til bruker
 10. Bruker velger "Oslo lufthavn, Gardemoen" som departure flyplass
@@ -93,13 +91,13 @@ flightbrief
 19. HomeScreen viser soldata for Ålesund, ENAL
 20. Bruker trykker på add arrival knappen i InfoBoxen
 
-**Alternativ flyt:**
-15.1: fetchSunriseSunet klarer ikke å hente data fra api, returnerer error melding til
-airportRepository
+##Alternativ flyt:
+15.1: fetchSunriseSunet klarer ikke å hente data fra api, returnerer error melding til airportRepository
 15.2: Feilmelding blir returnert til HomeViewModel. state sin sun blir satt til Error
 15.3: Feilmelding vises til bruker i InfoBox
 
-**Aktivitetsdiagram metar/taf**
+
+#Aktivitetsdiagram metar/taf
 
 ```mermaid
 flowchart TD;
