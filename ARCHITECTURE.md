@@ -169,8 +169,8 @@ TafmetarDataSource osv.
 
 ViewModel-laget er koblingen mellom forretningslogikken og brukergrensesnittet. Her har vi
 forskjellige viewmodeller som er ansvarlige for å behandle data og forberede det for visning. For
-eksempel, FlightBriefViewModel håndterer logikken for visning av flyinformasjon på forsiden, mens
-AirportTabViewModel styrer visningen av flyplassinformasjon i fanen for flyplasser.
+eksempel, HomeViewModel håndterer logikken for visning av flyinformasjon på homescreen, mens
+FlightBriefViewModel og AirportTabViewModel styrer visningen av værdata i flightbriefscreen.
 
 ### View laget
 
