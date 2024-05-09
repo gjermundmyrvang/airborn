@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.model.Turbulence
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemHourMinute
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemMonthDayHourMinute
 
 @Composable
 fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulence: () -> Unit) =
@@ -40,10 +42,10 @@ fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulen
                 currentlySelectedType = it; selectedTime = 0
             })
         if (selectedMap != null) {
-            date = selectedMap[selectedTime].params.time.dayNumberMonth
+            date = selectedMap[selectedTime].params.time.systemMonthDayHourMinute()
             TimeRow(modifier = Modifier.padding(start = 10.dp),
                 current = selectedTime,
-                times = selectedMap.map { it.params.time.time },
+                times = selectedMap.map { it.params.time.systemHourMinute() },
                 selectedColor = MaterialTheme.colorScheme.secondary,
                 notSelectedColor = MaterialTheme.colorScheme.tertiaryContainer,
                 onTimeClicked = { selectedTime = it })

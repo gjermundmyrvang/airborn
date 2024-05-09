@@ -51,7 +51,6 @@ import no.uio.ifi.in2000.team18.airborn.model.UvIndex
 import no.uio.ifi.in2000.team18.airborn.model.WeatherDay
 import no.uio.ifi.in2000.team18.airborn.model.WeatherHour
 import no.uio.ifi.in2000.team18.airborn.model.celsius
-import no.uio.ifi.in2000.team18.airborn.ui.common.DateTime
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.RotatableArrowIcon
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSuccess
@@ -163,7 +162,7 @@ fun WeatherDayCard(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = if (today) "Today" else weatherDay.date.day,
+                text = if (today) "Today" else weatherDay.date,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -276,7 +275,7 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
             Row {
                 Column {
                     Text(
-                        text = if (today) "Today" else weatherDay.date.dayNumberMonth,
+                        text = if (today) "Today" else weatherDay.date,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
@@ -448,7 +447,7 @@ fun TestWeatherSection() {
         )
     )
     val day = WeatherDay(
-        date = DateTime("2024-04-09T09:44:36Z"), weather = listOf(
+        date = "11. may", weather = listOf(
             hour, hour, hour, hour
         )
     )
@@ -494,7 +493,7 @@ fun TestWeatherNowSection() {
         )
     )
     val day = WeatherDay(
-        date = DateTime("2024-04-09T09:44:36Z"), weather = listOf(
+        date = "11. May", weather = listOf(
             hour, hour, hour
         )
     )

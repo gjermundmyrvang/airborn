@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team18.airborn.model.Area
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemHourMinute
 
 @Composable
 fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () -> Unit) =
@@ -32,7 +33,7 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
             onToggleChange = { selectedArea = Area.valueOf(it) })
 
         TimeRow(current = selectedSigchart,
-            times = sigchartList.map { it.params.time.time },
+            times = sigchartList.map { it.params.time.systemHourMinute() },
             selectedColor = MaterialTheme.colorScheme.secondary,
             notSelectedColor = MaterialTheme.colorScheme.secondaryContainer,
             modifier = Modifier.padding(start = 10.dp),

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import no.uio.ifi.in2000.team18.airborn.model.Webcam
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
+import no.uio.ifi.in2000.team18.airborn.ui.common.systemMonthDayHourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.ImageComposable
 import no.uio.ifi.in2000.team18.airborn.ui.flightbrief.LazyCollapsible
 
@@ -72,7 +73,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
                 text = webcams[selectedWebcam].title, fontWeight = FontWeight.Bold, fontSize = 14.sp
             )
             Text(
-                text = "updated: ${webcams[selectedWebcam].lastUpdatedOn.dayNumberMonthTime} (LT)",
+                text = "updated: ${webcams[selectedWebcam].lastUpdatedOn.systemMonthDayHourMinute()} (LT)",
                 fontSize = 12.sp
             )
         }
