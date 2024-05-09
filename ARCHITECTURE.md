@@ -264,7 +264,7 @@ funksjonalitet.
 # Vedlikehold
 
 - Gjennomgå alle avhengigheter og biblioteker som appen bruker, inkludert
-  versjoner [build.gradle](app/build.gradle)
+  versjoner [build.gradle](app/build.gradle.kts)
 - Oppdatere API nøkler
 - Se over enhetstester
 - Opprettholde og oppdatere dokumentasjonen for prosjektet
