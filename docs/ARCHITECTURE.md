@@ -197,8 +197,25 @@ funksjonalitet.
 
 # Vedlikehold
 
+- Gjennomgå alle avhengigheter og biblioteker som appen bruker, inkludert
+  versjoner [build.gradle](app/build.gradle)
+- Oppdatere API nøkler
+- Se over enhetstester
+- Opprettholde og oppdatere dokumentasjonen for prosjektet
+
 # Videreutvikling
+
+- Bruke `Instant` for tidspunkter
+- Mer persistent caching
+- Slette gamle gribfiler fra cachen
+- Bruk enhetstestene dersom man skal viderutvikle funksjonalitet
+- Gi parserne mer testdata for at de skal håndtere flere ulike meldinger
+- Ha en notifier som sier i fra dersom ny data har kommet
+- Eksportere brief som PDF
+- NOTAM beskjeder på kartet
+- Logge en tur
 
 # API nivå
 
-Vi har valgt å bruke API nivå 33. Grunnen til dette er fordi
+Vi har valgt å bruke API nivå 33. Grunnen til dette er fordi biblioteket vi bruker for å lese
+gribfiler ikke fungerer på lavere nivå.
