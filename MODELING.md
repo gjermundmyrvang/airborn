@@ -180,3 +180,5 @@ airportRepository\
         K --> stop((End))
         I --> stop 
  ```
+
+![Use case diagram](docs/use-case-winds-aloft.png)
