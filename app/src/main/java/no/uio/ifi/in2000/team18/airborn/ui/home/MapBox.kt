@@ -173,7 +173,7 @@ fun Map(
                     painterResource(
                         id = R.drawable.center
                     ),
-                    contentDescription = "Recenter"
+                    contentDescription = "Recenter button"
                 )
             }
         }
@@ -270,7 +270,7 @@ fun Annotation(airport: Airport, onAirportClicked: (Airport) -> Unit) {
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.flight_location_icon_2),
-                contentDescription = "Marker",
+                contentDescription = "Marker ${airport.name}",
                 modifier = Modifier.size(32.dp),
                 tint = Color(0xFFFFEB3B)
             )

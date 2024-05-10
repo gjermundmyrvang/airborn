@@ -187,13 +187,13 @@ private fun AirportSelection(
                         painter = painterResource(
                             id = R.drawable.flight_takeoff
                         ),
-                        contentDescription = "takeoff icon",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.background
                     )
                 },
                 trailingIcon = {
                     IconButton(onClick = { viewModel.clearDepartureInput() }) {
-                        Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
+                        Icon(Icons.Filled.Close, contentDescription = "Clear departure inputfield")
                     }
                 },
                 keyboardActions = KeyboardActions(onDone = {
@@ -219,13 +219,13 @@ private fun AirportSelection(
                         painter = painterResource(
                             id = R.drawable.flight_landing
                         ),
-                        contentDescription = "landing icon",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.background
                     )
                 },
                 trailingIcon = {
                     IconButton(onClick = { viewModel.clearArrivalInput() }) {
-                        Icon(Icons.Filled.Close, contentDescription = "clear arrival inputfield")
+                        Icon(Icons.Filled.Close, contentDescription = "Clear arrival inputfield")
                     }
                 },
                 keyboardActions = KeyboardActions(onDone = {
@@ -251,7 +251,7 @@ private fun AirportSelection(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.switch_departure_arrival),
-                contentDescription = "Your icon",
+                contentDescription = "Switch departure/arrival airports",
                 tint = MaterialTheme.colorScheme.secondary
             )
         }
@@ -326,7 +326,7 @@ fun TestTextField() {
                 label = { Text("Departure airport") },
                 trailingIcon = {
                     IconButton(onClick = { }) {
-                        Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
+                        Icon(Icons.Filled.Close, contentDescription = "Clear departure inputfield")
                     }
                 },
                 keyboardActions = KeyboardActions(onDone = { }),
@@ -345,7 +345,7 @@ fun TestTextField() {
                 label = { Text("Arrival airport") },
                 trailingIcon = {
                     IconButton(onClick = { }) {
-                        Icon(Icons.Filled.Close, contentDescription = "clear departure inputfield")
+                        Icon(Icons.Filled.Close, contentDescription = "Clear departure inputfield")
                     }
                 },
                 keyboardActions = KeyboardActions(onDone = { }),
@@ -398,7 +398,7 @@ fun AirportInfoRow(
     ) {
         Icon(
             imageVector = Icons.Outlined.LocationOn,
-            contentDescription = "Location",
+            contentDescription = null,
             tint = MaterialTheme.colorScheme.secondary
         )
         Spacer(modifier = Modifier.width(24.dp))
@@ -428,7 +428,7 @@ fun AirportInfoRow(
             }
         ) {
             val icon = if (item.isFavourite) Icons.Filled.Favorite else Icons.Default.FavoriteBorder
-            Icon(icon, contentDescription = null, Modifier, Color.White)
+            Icon(icon, contentDescription = "Favourite airport button", Modifier, Color.White)
         }
     }
     HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.tertiary)

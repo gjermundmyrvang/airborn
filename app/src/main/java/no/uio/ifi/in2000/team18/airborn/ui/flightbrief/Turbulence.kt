@@ -53,7 +53,7 @@ fun Turbulence(state: LoadingState<Map<String, List<Turbulence>>?>, initTurbulen
         selectedMap?.get(selectedTime)?.let {
             ImageComposable(
                 uri = it.uri,
-                contentDescription = "",
+                contentDescription = "Image of Turbulence ${currentlySelectedType} at $date",
                 modifier = Modifier.aspectRatio(700f / 622f)
             )
         }

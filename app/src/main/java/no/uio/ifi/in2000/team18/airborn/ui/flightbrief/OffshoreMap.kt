@@ -86,7 +86,7 @@ fun OffshoreMaps(state: LoadingState<Map<String, List<OffshoreMap>>>, initOffsho
                 onTimeClicked = { selectedOffshoreMapTime = it })
             ImageComposable(
                 uri = offshoreMapList[selectedOffshoreMapTime].uri,
-                contentDescription = "Offshore picture",
+                contentDescription = "Image of $selectedMap for $selectedArea",
                 modifier = Modifier.aspectRatio(1f),
             )
         }
@@ -111,7 +111,7 @@ fun OptionList(
             if (indent) Spacer(modifier = Modifier.width(16.dp))
             Icon(
                 imageVector = if (isSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                contentDescription = "Select icon",
+                contentDescription = if (isSelected) "Selected icon" else null,
                 tint = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
             )
             Text(
@@ -186,7 +186,7 @@ fun TestOffshoreMaps() {
                     ) {
                         Icon(
                             imageVector = if (isSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                            contentDescription = ""
+                            contentDescription = null
                         )
                         Text(
                             text = mapType.uppercase(),
@@ -205,7 +205,7 @@ fun TestOffshoreMaps() {
                         Spacer(modifier = Modifier.width(16.dp))
                         Icon(
                             imageVector = if (areaIsSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                            contentDescription = ""
+                            contentDescription = null
                         )
                         Text(text = areaType.uppercase().replace("_", " "),
                             fontWeight = if (areaIsSelected) FontWeight.Bold else FontWeight.Normal,
@@ -227,7 +227,7 @@ fun TestOffshoreMaps() {
                         ) {
                             Icon(
                                 imageVector = if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange,
-                                contentDescription = ""
+                                contentDescription = null
                             )
                             Text(text = "${map.updated.systemMonthDayHourMinute()} LT")
                         }

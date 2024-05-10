@@ -33,7 +33,7 @@ fun RotatableArrowIcon(
     ) {
         Image(
             painter = arrowIcon,
-            contentDescription = "Arrow icon",
+            contentDescription = null,
             modifier = modifier
                 .size(iconSize)
                 .rotate((direction.degrees - metDirection).toFloat()),

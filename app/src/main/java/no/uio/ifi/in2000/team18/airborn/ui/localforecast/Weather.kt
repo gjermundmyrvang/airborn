@@ -139,8 +139,8 @@ fun WeatherDayCard(
     val isSelected = selected == weatherDay
     val borderColor =
         if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.outline
-    val icon =
-        if (today) hourNow.nextOneHour?.icon else hourNow.nextTwelweHour?.icon  // if today we want to show current weather, but for the rest of the week we want a overview
+    val displayHour =
+        if (today) hourNow.nextOneHour else hourNow.nextTwelweHour  // if today we want to show current weather, but for the rest of the week we want a overview
 
     OutlinedCard(
         colors = CardDefaults.cardColors(
@@ -167,10 +167,14 @@ fun WeatherDayCard(
                 fontWeight = FontWeight.Bold,
             )
             Image(
-                modifier = Modifier.size(50.dp), painter = painterResource(
-                    id = icon ?: hourNow.nextOneHour?.icon ?: hourNow.nextSixHour?.icon
+                modifier = Modifier.size(50.dp),
+                painter = painterResource(
+                    id = displayHour?.icon ?: hourNow.nextOneHour?.icon ?: hourNow.nextSixHour?.icon
                     ?: hourNow.nextTwelweHour?.icon ?: R.drawable.image_not_availeable
-                ), contentDescription = "Weathericon"
+                ),
+                contentDescription = displayHour?.symbol_code ?: hourNow.nextOneHour?.symbol_code
+                ?: hourNow.nextSixHour?.symbol_code
+                ?: hourNow.nextTwelweHour?.symbol_code ?: "WeatherIcon"
             )
             Text(
                 text = "${highestTemp.celsius} / ${lowestTemp.celsius}",
@@ -260,8 +264,8 @@ fun WeatherHourColumn(weatherHour: WeatherHour, selectedHour: WeatherHour, onCli
 @Composable
 fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: WeatherHour) {
     val nextHours = weatherHour.nextOneHour ?: weatherHour.nextSixHour ?: weatherHour.nextTwelweHour
-    val icon = weatherHour.nextOneHour?.icon ?: weatherHour.nextSixHour?.icon
-    ?: weatherHour.nextTwelweHour?.icon
+    val displayHour = weatherHour.nextOneHour ?: weatherHour.nextSixHour
+    ?: weatherHour.nextTwelweHour
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -291,8 +295,8 @@ fun WeatherNowSection(weatherDay: WeatherDay, today: Boolean, weatherHour: Weath
                 Spacer(modifier = Modifier.width(16.dp))
                 Image(
                     modifier = Modifier.size(80.dp), painter = painterResource(
-                        id = icon ?: R.drawable.image_not_availeable
-                    ), contentDescription = "WeatherIcon"
+                        id = displayHour?.icon ?: R.drawable.image_not_availeable
+                    ), contentDescription = displayHour?.symbol_code ?: "WeatherIcon"
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -385,7 +389,7 @@ fun WindCard(windSpeed: Speed, fromDegrees: Double) {
                 )
                 Image(
                     painter = painterResource(id = R.drawable.air_icon),
-                    contentDescription = "airIcon",
+                    contentDescription = null,
                     colorFilter = ColorFilter.tint(
                         MaterialTheme.colorScheme.secondary
                     )
