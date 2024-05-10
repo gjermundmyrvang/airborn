@@ -138,7 +138,7 @@ data class Fraction(val fraction: Double) {
 data class Position(
     val latitude: Double, val longitude: Double
 ) {
-    override fun toString(): String = "($latitude, $longitude)"
+    override fun toString(): String = "(${latitude.format(2)}, ${longitude.format(2)})"
 
     companion object {
         val EARTH_RADIUS = 6371000.m
