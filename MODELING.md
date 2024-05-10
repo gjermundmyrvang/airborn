@@ -1,3 +1,53 @@
+# Use Case Diagram: Fastest Route
+
+*Plan a flight aiming to find the fastest route according to winds aloft forecast at a certain
+time.*
+
+[Diagram](UseCaseWindsAloft.png)
+
+## Textual description
+
+### Actors
+
+- Pilot of a small plane (the user)
+- Norwegian Meteorological Institute (the API-provider)
+
+### Main Flow
+
+Pre-conditions:
+
+- Pilot has chosen departure and arrival airports
+- Pilot has generated brief and chosen the overall tab
+
+Post-conditions:
+
+- User has been presented to relevant winds aloft forecasts in order to plan the fastest flight
+  route
+
+Main Flow:
+
+1. User chooses «Winds Aloft»
+2. App displays flight direction (bearing) as a number and an icon pointing in the same direction
+3. App also displays winds aloft forecast, provided by the Norwegian Meteorological Institute, for
+   different heights halfway along the route. Direction of wind shows both as degrees and arrows,
+   making it easily comparable to flight direction (see above).
+4. User chooses another time stamp, according to time of planned flight, and pushes the Update
+   button
+5. App displays winds aloft forecast for new time, at same position as above
+6. User chooses another point along the route by using the slider and pushing Update
+7. App displays winds aloft forecast for new position, at same time as above
+8. The last two steps will likely be repeated a couple of times for other points along the route
+9. The user (the pilot) now has been presented forecast data from muliple points along the route,
+   and will be able to consider approximately which height might be suitable for the fastest route
+   at the planned flight time
+
+Alternative Flow:
+
+3. App displays error message if fetching forecast failed
+4. User closes the Winds Aloft section
+5. User opens the Winds Aloft section again (a bit later)
+6. If this time fetching forecast succeeded, flow continues at main flow step 2
+
 # Sekvensdiagram: Valg av departure/arrival
 
 ```mermaid
@@ -70,6 +120,7 @@ sequenceDiagram
 flightbrief
 
 ## Hovedflyt:
+
 1. User starts app
 2. Appen viser HomeScreen
 3. Piloten skrive inn "ENG" i departure input feltet
@@ -92,12 +143,14 @@ flightbrief
 20. Bruker trykker på add arrival knappen i InfoBoxen
 
 ## Alternativ flyt:
-15.1. fetchSunriseSunet klarer ikke å hente data fra api, returnerer error melding til airportRepository\
+
+15.1. fetchSunriseSunet klarer ikke å hente data fra api, returnerer error melding til
+airportRepository\
 15.2. Feilmelding blir returnert til HomeViewModel. state sin sun blir satt til Error\
 15.3. Feilmelding vises til bruker i InfoBox\
 
-
 # Aktivitetsdiagram metar/taf
+
 ```mermaid
     flowchart TD;
         style start fill:#000,stroke:#fff,stroke-width:2px;
