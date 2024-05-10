@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.R
@@ -41,10 +45,10 @@ import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.nauticalMiles
-import no.uio.ifi.in2000.team18.airborn.model.round
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
@@ -178,29 +182,98 @@ fun DistanceToIsobaricSlider(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.End
     ) {
-        Column {
-            Text("Position:", fontWeight = FontWeight.Bold)
-            Row {
-                Text("Lat: ${currentPos.latitude.round(2)} ")
-                Text("Lon: ${currentPos.longitude.round(2)}")
-            }
-        }
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
+            Modifier
                 .background(
-                    MaterialTheme.colorScheme.tertiaryContainer, shape = RoundedCornerShape(8.dp)
+                    MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(8.dp)
                 )
                 .clip(RoundedCornerShape(8.dp))
-                .padding(7.dp)
+                .padding(5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                painterResource(R.drawable.location_map),
+                null,
+                Modifier.size(70.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Row() {
+                Text(currentPos.toString())
+            }
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(
+            Modifier
+                .background(
+                    MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .clip(RoundedCornerShape(8.dp))
+                .padding(5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             Compass(rotation = bearing.degrees.toFloat(), size = 70.dp)
             Row() {
                 Text("Bearing: ", fontWeight = FontWeight.Bold)
-                Text(bearing.formatAsDegrees(), fontWeight = FontWeight.Bold)
+                Text(bearing.formatAsDegrees(2))
+            }
+        }
+    }
+}
+
+@Preview()
+@Composable
+fun PreviewWindsAloftLocationBearing() {
+    AirbornTheme {
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .padding(top = 10.dp),
+        ) {
+            Column(
+                Modifier
+                    .background(
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .clip(RoundedCornerShape(8.dp))
+                    .padding(5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    painterResource(R.drawable.location_map),
+                    null,
+                    Modifier.size(70.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Row() {
+                    Text("60.90")
+                    Text(" / 11.59")
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                Modifier
+                    .background(
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .clip(RoundedCornerShape(8.dp))
+                    .padding(5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Compass(rotation = 277F, size = 70.dp)
+                Row() {
+                    Text("Bearing: ", fontWeight = FontWeight.Bold)
+                    Text("277")
+                }
             }
         }
     }
