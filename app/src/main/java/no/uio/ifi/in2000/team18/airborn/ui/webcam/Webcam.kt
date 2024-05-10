@@ -79,7 +79,7 @@ fun WebcamSection(state: LoadingState<List<Webcam>>, initWebcam: () -> Unit) = L
         }
         ImageComposable(
             uri = webcams[selectedWebcam].images.current.preview,
-            contentDescription = "Webcam image",
+            contentDescription = "Webcam image for ${webcams[selectedWebcam].title} ",
             modifier = Modifier.aspectRatio(1920f / 1080f),
         )
         HyperlinkText(

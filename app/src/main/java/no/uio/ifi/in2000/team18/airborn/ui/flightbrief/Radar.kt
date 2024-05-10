@@ -128,7 +128,7 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) = L
     Spacer(modifier = Modifier.height(8.dp))
     GifComposable(
         uri = selectedList[selectedTypeIndex].uri,
-        contentDescription = "",
+        contentDescription = "Radar gif for $selectedArea, Type: ${types[selectedTypeIndex]}",
         modifier = Modifier.aspectRatio(widtRatio / heightRatio)
     )
     Button(
@@ -170,7 +170,7 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) = L
                 }, leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.LocationOn,
-                        contentDescription = "",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.background
                     )
                 })
@@ -195,7 +195,7 @@ fun RadarAnimations(state: LoadingState<List<Radar>>, initRadar: () -> Unit) = L
                 ) {
                     Icon(
                         imageVector = if (isSelected) Icons.Filled.PlayArrow else Icons.Outlined.PlayArrow,
-                        contentDescription = "Select icon",
+                        contentDescription = if (isSelected) "item selected" else null,
                         tint = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.tertiaryContainer
                     )
                     typeList[type]?.let {

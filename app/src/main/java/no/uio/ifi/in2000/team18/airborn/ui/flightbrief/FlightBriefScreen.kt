@@ -92,7 +92,7 @@ fun FlightBriefScreen(
                 title = {
                     Image(
                         painter = painterResource(id = R.drawable.newtextlogo2),
-                        contentDescription = "",
+                        contentDescription = null,
                         modifier = Modifier.size(200.dp)
                     )
                 },
@@ -104,7 +104,7 @@ fun FlightBriefScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Home",
+                            contentDescription = "Home button",
                             tint = MaterialTheme.colorScheme.secondary
                         )
                     }
@@ -124,7 +124,7 @@ fun FlightBriefScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "refresh",
+                            contentDescription = "Refresh",
                             tint = MaterialTheme.colorScheme.secondary
                         )
                     }
@@ -234,7 +234,7 @@ fun FlightBriefScreenContent(
             icon = {
                 Icon(
                     painter = painterResource(id = R.drawable.flight_takeoff),
-                    contentDescription = "Flight takeoff"
+                    contentDescription = null
                 )
             },
             selectedContentColor = MaterialTheme.colorScheme.background,
@@ -247,7 +247,7 @@ fun FlightBriefScreenContent(
             icon = {
                 Icon(
                     painter = painterResource(id = R.drawable.flight_landing),
-                    contentDescription = "Flight takeoff"
+                    contentDescription = null
                 )
             },
             selectedContentColor = MaterialTheme.colorScheme.background,
@@ -260,7 +260,7 @@ fun FlightBriefScreenContent(
             icon = {
                 Icon(
                     painter = painterResource(id = R.drawable.connecting_airports_icon),
-                    contentDescription = "Flight takeoff"
+                    contentDescription = null
                 )
             },
             selectedContentColor = MaterialTheme.colorScheme.background,
@@ -300,7 +300,7 @@ fun ArrivalSelectionTab(
                     enabled = false
                     clearArrivalInput()
                 }) {
-                    Icon(Icons.Filled.Close, contentDescription = "clear arrival inputfield")
+                    Icon(Icons.Filled.Close, contentDescription = "Clear arrival inputfield")
                 }
             },
             keyboardActions = KeyboardActions(onDone = {

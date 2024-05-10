@@ -65,7 +65,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
@@ -267,22 +266,23 @@ fun <T> LazyCollapsible(
 }
 
 @Composable
-fun Compass(rotation: Float, size: Dp) = Box(Modifier.size(size), contentAlignment = Alignment.Center) {
-    Icon(
-        painter = painterResource(R.drawable.compass),
-        contentDescription = "Compass",
-        tint = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.fillMaxSize()
-
-
-    )
-    Icon(
-        painter = painterResource(id = R.drawable.local_airport_24),
-        contentDescription = "airplaneicon",
-        tint = MaterialTheme.colorScheme.background,
-        modifier = Modifier.rotate(rotation).fillMaxSize(0.35F)
-    )
-}
+fun Compass(rotation: Float, size: Dp) =
+    Box(Modifier.size(size), contentAlignment = Alignment.Center) {
+        Icon(
+            painter = painterResource(R.drawable.compass),
+            contentDescription = "Compass",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxSize()
+        )
+        Icon(
+            painter = painterResource(id = R.drawable.local_airport_24),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.background,
+            modifier = Modifier
+                .rotate(rotation)
+                .fillMaxSize(0.35F)
+        )
+    }
 
 @Preview
 @Composable
