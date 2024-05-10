@@ -3,7 +3,7 @@
 *Plan a flight aiming to find the fastest route according to winds aloft forecast at a certain
 time.*
 
-[Diagram](UseCaseWindsAloft.png)
+![Use case diagram](docs/use-case-winds-aloft.png)
 
 ## Textual description
 
@@ -181,4 +181,3 @@ airportRepository\
         I --> stop 
  ```
 
-![Use case diagram](docs/use-case-winds-aloft.png)
