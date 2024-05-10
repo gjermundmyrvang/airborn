@@ -150,7 +150,9 @@ fun DistanceToIsobaricSlider(
                     painter = painterResource(id = R.drawable.local_airport_24),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.background,
-                    modifier = Modifier.rotate(90.0F)
+                    modifier = Modifier
+                        .rotate(90.0F)
+                        .size(40.dp)
                 )
             },
             valueRange = 0f..distanceNm
@@ -197,12 +199,12 @@ fun DistanceToIsobaricSlider(
         ) {
             Icon(
                 painterResource(R.drawable.location_map),
-                null,
+                "Coordinates",
                 Modifier.size(70.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
             )
             Row() {
-                Text(currentPos.toString())
+                Text(currentPos.toString(), fontWeight = FontWeight.Bold)
             }
         }
         Spacer(modifier = Modifier.width(16.dp))
