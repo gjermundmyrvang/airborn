@@ -220,7 +220,7 @@ fun DistanceToIsobaricSlider(
             Compass(rotation = bearing.degrees.toFloat(), size = 70.dp)
             Row() {
                 Text("Bearing: ", fontWeight = FontWeight.Bold)
-                Text(bearing.formatAsDegrees(2))
+                Text(bearing.formatAsDegrees(0))
             }
         }
     }
