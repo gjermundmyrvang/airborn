@@ -1,20 +1,21 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -32,9 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team18.airborn.R
@@ -44,10 +45,10 @@ import no.uio.ifi.in2000.team18.airborn.model.Position
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
 import no.uio.ifi.in2000.team18.airborn.model.nauticalMiles
-import no.uio.ifi.in2000.team18.airborn.model.round
 import no.uio.ifi.in2000.team18.airborn.ui.common.LoadingState
 import no.uio.ifi.in2000.team18.airborn.ui.common.hourMinute
 import no.uio.ifi.in2000.team18.airborn.ui.common.toSystemZoneOffset
+import no.uio.ifi.in2000.team18.airborn.ui.theme.AirbornTheme
 import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
@@ -64,44 +65,6 @@ fun WindsAloftRoute(
     Column(
         Modifier.padding(vertical = 10.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .padding(bottom = 25.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            Column {
-                Text(
-                    text = "${routeIsobaric.departure.icao}",
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Text(
-                    text = routeIsobaric.departure.name.substringBefore(" "),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                )
-            }
-            Icon(
-                Icons.AutoMirrored.Rounded.ArrowForward,
-                contentDescription = "Arrow forward",
-                modifier = Modifier
-                    .height(30.dp)
-                    .align(Alignment.Bottom)
-            )
-            Column {
-                Text(
-                    text = "${routeIsobaric.departure.icao}",
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Text(
-                    text = "${routeIsobaric.arrival.name.substringBefore(" ")} ",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.height(IntrinsicSize.Max)
-                )
-            }
-        }
         val timeStrings =
             routeIsobaric.isobaric.timeSeries.map { it.toSystemZoneOffset().hourMinute() }
         DistanceToIsobaricSlider(
@@ -118,6 +81,7 @@ fun WindsAloftRoute(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DistanceToIsobaricSlider(
     totalDistance: Distance,
@@ -130,7 +94,6 @@ fun DistanceToIsobaricSlider(
     Modifier
         .fillMaxWidth()
         .padding(10.dp)
-        .background(Color(0x801D1D1D), RoundedCornerShape(8.dp))
         .clip(RoundedCornerShape(8.dp)),
 ) {
     val distanceNm = totalDistance.nauticalMiles.toFloat()
@@ -141,68 +104,60 @@ fun DistanceToIsobaricSlider(
     var time by remember {
         mutableIntStateOf(0)
     }
-    Log.d("time", "time-value in WindsAloftRoute: $time")
-
     Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier
+            .padding(bottom = 5.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Column(horizontalAlignment = Alignment.Start) {
-            Text("Data from position:")
-            Text("Latitude: ${currentPos.latitude.round(2)}")
-            Text("Longitude: ${currentPos.longitude.round(2)}")
-        }
-        Column(horizontalAlignment = Alignment.End) {
-            Icon(
-                painter =
-                painterResource(id = R.drawable.local_airport_24),
-                contentDescription = "windsalofticon",
-                tint = MaterialTheme.colorScheme.background,
-                modifier = Modifier.rotate(bearing.degrees.toFloat())
+        Column {
+            Text(
+                text = "${airports.first.icao}", color = MaterialTheme.colorScheme.secondary
             )
-
-            Row {
-                Text("Bearing: ")
-                Text(bearing.formatAsDegrees())
-            }
+            Text(
+                text = airports.first.name.substringBefore(" "),
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+            )
+        }
+        Column {
+            Text(
+                text = "${airports.second.icao}", color = MaterialTheme.colorScheme.secondary
+            )
+            Text(
+                text = "${airports.second.name.substringBefore(" ")} ",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.height(IntrinsicSize.Max)
+            )
         }
     }
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(bottom = 10.dp)
     ) {
-        Text(airports.first.icao.code, color = MaterialTheme.colorScheme.secondary)
-        Text(airports.second.icao.code, color = MaterialTheme.colorScheme.secondary)
-    }
-    Slider(
-        modifier = Modifier.padding(horizontal = 5.dp),
-        value = sliderPosition,
-        onValueChange = { sliderPosition = it; buttonEnabled = true },
-        colors = SliderDefaults.colors(
-            thumbColor = MaterialTheme.colorScheme.background,
-            activeTrackColor = MaterialTheme.colorScheme.secondary,
-            inactiveTrackColor = MaterialTheme.colorScheme.tertiaryContainer,
-        ),
-        valueRange = 0f..distanceNm
-    )
-    Text(text = "Distance traveled: ${sliderPosition.roundToInt()} nm / ${distanceNm.roundToInt()} nm")
-    Button(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(bottomEnd = 8.dp, bottomStart = 8.dp),
-        onClick = {
-            onFractionSelected(sliderPosition.nauticalMiles, time); buttonEnabled = false
-        },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            contentColor = MaterialTheme.colorScheme.primaryContainer,
-            disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
-        ),
-        enabled = buttonEnabled
-    ) {
-        Text("Update")
+        Slider(
+            value = sliderPosition,
+            onValueChange = { sliderPosition = it; buttonEnabled = true },
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.background,
+                activeTrackColor = MaterialTheme.colorScheme.secondary,
+                inactiveTrackColor = MaterialTheme.colorScheme.tertiaryContainer,
+            ),
+            thumb = {
+                Icon(
+                    painter = painterResource(id = R.drawable.local_airport_24),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.background,
+                    modifier = Modifier
+                        .rotate(90.0F)
+                        .size(40.dp)
+                )
+            },
+            valueRange = 0f..distanceNm
+        )
+        Text(text = "${sliderPosition.roundToInt()} nm / ${distanceNm.roundToInt()} nm")
     }
     TimeRow(
         current = time,
@@ -212,4 +167,116 @@ fun DistanceToIsobaricSlider(
         onTimeClicked = { time = it; buttonEnabled = true },
         modifier = Modifier.align(Alignment.Start)
     )
+    Button(
+        modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), onClick = {
+            onFractionSelected(sliderPosition.nauticalMiles, time); buttonEnabled = false
+        }, colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.primaryContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer
+        ), enabled = buttonEnabled
+    ) {
+        Text("Update")
+    }
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Column(
+            Modifier
+                .background(
+                    MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .clip(RoundedCornerShape(8.dp))
+                .padding(5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                painterResource(R.drawable.location_map),
+                "Coordinates",
+                Modifier.size(70.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Row() {
+                Text(currentPos.toString(), fontWeight = FontWeight.Bold)
+            }
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(
+            Modifier
+                .background(
+                    MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .clip(RoundedCornerShape(8.dp))
+                .padding(5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Compass(rotation = bearing.degrees.toFloat(), size = 70.dp)
+            Row() {
+                Text("Bearing: ", fontWeight = FontWeight.Bold)
+                Text(bearing.formatAsDegrees(0))
+            }
+        }
+    }
+}
+
+@Preview()
+@Composable
+fun PreviewWindsAloftLocationBearing() {
+    AirbornTheme {
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .padding(top = 10.dp),
+        ) {
+            Column(
+                Modifier
+                    .background(
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .clip(RoundedCornerShape(8.dp))
+                    .padding(5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    painterResource(R.drawable.location_map),
+                    null,
+                    Modifier.size(70.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Row() {
+                    Text("60.90")
+                    Text(" / 11.59")
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                Modifier
+                    .background(
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .clip(RoundedCornerShape(8.dp))
+                    .padding(5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Compass(rotation = 277F, size = 70.dp)
+                Row() {
+                    Text("Bearing: ", fontWeight = FontWeight.Bold)
+                    Text("277")
+                }
+            }
+        }
+    }
 }
