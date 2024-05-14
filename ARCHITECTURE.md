@@ -64,7 +64,7 @@ graph TD
     class data dataColor
 ```
 ## MVVM
-### Datalage
+### Datalaget
 I datalaget har vi samlet alle datakilder (DataSources) og repositories. Datakildene henter data gjennnom API-kall og henting fra database. Datakildene blir tilgjengeligjort gjennom repositories, som også strukturerer dataen.
 
 ### ViewModel - laget
