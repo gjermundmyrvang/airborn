@@ -63,6 +63,18 @@ graph TD
     class viewmodel viewModelColor
     class data dataColor
 ```
+## MVVM
+### Datalage
+I datalaget har vi samlet alle datakilder (DataSources) og repositories. Datakildene henter data gjennnom API-kall og henting fra database. Datakildene blir tilgjengeligjort gjennom repositories, som også strukturerer dataen.
+
+### ViewModel - laget
+ViewModel-laget er bildeleddet mellom data og view-laget. De to overordnede delene av viewet har hver sin tilhørende ViewModel. De ulike viewmodelene holder på og forbereder data som skal vises i view-laget gjennom å hente data fra datalaget.
+
+### View-laget
+View-laget er det øverste laget i arkitekturen og endtepunktet for dataflyten. Her presenteres dataen til bruker gjennom grensesnittet.
+
+### Dataflyt
+Arkitekturen støtter en eveis dataflyt fra datalaget og oppover gjennom ViewModel-laget og ender i View-laget
 
 # Arkitektur ferdig app
 
