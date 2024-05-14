@@ -136,7 +136,110 @@ airportRepository\
 
 # Klassediagram som reflekterer usecaset ovenfor
 
-![Class diagram](docs/classdiagram.png)
+```mermaid
+---
+title: Classdiagram Reflecting Use Case Fastest Route
+---
+classDiagram
+    FlightBriefViewModel "1" --o "1" WeatherRepository
+    FlightBriefViewModel "1" --o "1" AirportRepository
+    RouteIsobaric "1" --o "2" Airport
+    Airport "1" --o "1" Position
+    RouteIsobaric "1" --* "1" IsobaricData
+    IsobaricData "1" --* "*" IsobaricLayer
+    FlightBriefViewModel "1" --* "1" FlightBriefViewModel-UIState
+    FlightBriefViewModel-UIState "1" --o "1" RouteIsobaric
+    WeatherRepository "1" -- "1" RouteIsobaric
+    WeatherRepository "1" --o "1" GribDataSource
+    WeatherRepository "1" --o "1" LocationForecastDataSource
+    GribDataSource "1" --* "*" GribFile
+    GribFile "1" --* "1" GribFileParams
+    AirportRepository -- Airport
+    RouteIsobaric -- Position
+
+    class FlightBriefViewModel {
+        initRouteIsobaric()
+        changeRouteIsobaric()
+    }
+
+    class GribDataSource {
+        useGribFiles(): Type
+        availableGribFiles(): GribFile
+        downloadGribFile(): File
+    }
+
+    class LocationForecastDataSource {
+        fetchForecast(): LocationData
+    }
+    class FlightBriefViewModel-UIState {
+        routeIsobaric: LoadingState
+    }
+
+    class GribFile {
+        endpoint: String,
+        params: GribFileParams,
+        updated: String,
+        uri: String
+    }
+
+    class GribFileParams {
+        area: String,
+        time: ZonedDateTime
+    }
+
+    class WeatherRepository {
+        getRouteIsobaric(): RouteIsobaric
+        calculateHeight(): Distance
+        getAirPressureAtSeaLevel(): Pressure
+    }
+
+    class AirportRepository {
+        getByIcao(): Airport?
+    }
+
+    class RouteIsobaric {
+        departure: Airport
+        arr: Airport
+        isobaric: IsobaricData
+        distance: Distance
+        bearing: Direction
+        currentPos: Position
+    }
+
+    class Airport {
+        icao: Icao
+        name: String
+        position: Position
+        isFavourite: Boolean
+        fromBuiltinAirport(airport: BuiltinAirport):: Airport
+        toString(): String
+    }
+
+    class Position {
+        latitude: Float
+        longitude: Float
+        halfwayTo(): Position
+        distanceTo(): Distance
+        bearingTo(): Direction
+        getPointAtDistance(): Position
+    }
+
+    class IsobaricData {
+        position: Position,
+        time: ZonedDateTime,
+        data: List(IsobaricLayer),
+        timeSeries: List(ZonedDateTime)
+    }
+    class IsobaricLayer {
+        pressure: Pressure,
+        temperature: Temperature,
+        uWind: Double,
+        vWind: Double,
+        windFromDirection: Direction? = null,
+        windSpeed: Speed? = null,
+        height: Distance? = null
+    }
+```
 
 # Aktivitetsdiagram metar/taf
 
