@@ -484,7 +484,7 @@ fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header
             text = sun.message, color = MaterialTheme.colorScheme.background
         )
 
-        is LoadingState.Success -> sun.value?.let { sun ->
+        is LoadingState.Success -> sun.value?.let { sunData ->
 
             Column(modifier = modifier) {
                 if (header != null) {
@@ -498,7 +498,7 @@ fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = sun.sunrise,
+                        text = sunData.sunrise,
                         modifier = Modifier.height(IntrinsicSize.Min),
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -512,7 +512,7 @@ fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = sun.sunset, color = MaterialTheme.colorScheme.primary
+                        text = sunData.sunset, color = MaterialTheme.colorScheme.primary
                     )
 
                     Image(
