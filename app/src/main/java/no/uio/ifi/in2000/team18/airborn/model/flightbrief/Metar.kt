@@ -32,9 +32,7 @@ sealed interface Metar {
         val instant: Instant? get() = downloaded?.let { time.resolveInstant(it) }
     }
 
-    data class OpaqueMetar(override val text: String) : Metar {
-
-    }
+    data class OpaqueMetar(override val text: String) : Metar
 
     val text: String
 }
