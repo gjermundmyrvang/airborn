@@ -48,6 +48,10 @@ Alternative Flow:
 5. User opens the Winds Aloft section again (a bit later)
 6. If this time fetching forecast succeeded, flow continues at main flow step 2
 
+# Klassediagram som reflekterer usecaset ovenfor
+
+![class diagram](docs/class-diagram.svg)
+
 # Sekvensdiagram: Valg av departure/arrival
 
 ```mermaid
@@ -134,26 +138,22 @@ airportRepository\
 15.2. Feilmelding blir returnert til HomeViewModel. state sin sun blir satt til Error\
 15.3. Feilmelding vises til bruker i InfoBox\
 
-# Klassediagram som reflekterer usecaset ovenfor
-
-![class diagram](docs/class-diagram.svg)
-
 # Aktivitetsdiagram Metar/Taf
 
 ```mermaid
 flowchart TD
-    style start fill:#000, stroke:#fff, stroke-width: 2px;
-    style B fill:#228B22;
-    style C fill:#1a8a99;
-    style D fill:#1a8a99;
-    style E fill:#228B22;
-    style F fill:#1a8a99;
-    style G fill:#ff7f0e;
-    style H fill:#228B22;
-    style I fill:#228B22;
-    style J fill:#1a8a99;
-    style K fill:#228B22, stroke:#228B22, stroke-width: 2px;
-    style stop fill:#000, stroke:#fff, stroke-width: 2px;
+    style start fill: #000, stroke: #fff, stroke-width: 2px;
+    style B fill: #228B22;
+    style C fill: #1a8a99;
+    style D fill: #1a8a99;
+    style E fill: #228B22;
+    style F fill: #1a8a99;
+    style G fill: #ff7f0e;
+    style H fill: #228B22;
+    style I fill: #228B22;
+    style J fill: #1a8a99;
+    style K fill: #228B22, stroke: #228B22, stroke-width: 2px;
+    style stop fill: #000, stroke: #fff, stroke-width: 2px;
     start((Start))
     start --> B(Homescreen)
     B --> C[/User chooses Departure/]
