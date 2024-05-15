@@ -23,7 +23,7 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
         value = state,
         onExpand = initSigchart,
     ) { sigcharts ->
-        var selectedArea by rememberSaveable { mutableStateOf(Area.norway) }
+        var selectedArea by rememberSaveable { mutableStateOf(Area.Norway) }
         var selectedSigchart by rememberSaveable { mutableIntStateOf(0) }
 
         val sigchartList = sigcharts[selectedArea]?.takeLast(3) ?: return@LazyCollapsible
