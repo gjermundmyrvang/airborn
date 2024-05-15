@@ -1,7 +1,7 @@
 # Use Case Diagram: Fastest Route
 
-*Plan a flight aiming to find the fastest route according to winds aloft forecast at a certain
-time.*
+_Plan a flight aiming to find the fastest route according to winds aloft forecast at a certain
+time._
 
 ![Use case diagram](docs/use-case-winds-aloft.png)
 
@@ -48,41 +48,32 @@ Alternative Flow:
 5. User opens the Winds Aloft section again (a bit later)
 6. If this time fetching forecast succeeded, flow continues at main flow step 2
 
+# Klassediagram som reflekterer usecaset ovenfor
+
+![class diagram](docs/class-diagram.svg)
+
 # Sekvensdiagram: Valg av departure/arrival
 
 ```mermaid
 sequenceDiagram
     actor Bruker
-    
-    Bruker->>+ HomeScreen: Starts app
+    Bruker ->>+ HomeScreen: Starts app
     activate HomeScreen
-
-
-    HomeScreen-->> Bruker: Show homescreen
-    Bruker->> HomeScreen: Writes "ENG" in departure input field
-
-
-    HomeScreen->> HomeViewModel: filterDepartureAirports("ENG")
+    HomeScreen -->> Bruker: Show homescreen
+    Bruker ->> HomeScreen: Writes "ENG" in departure input field
+    HomeScreen ->> HomeViewModel: filterDepartureAirports("ENG")
     activate HomeViewModel
-    HomeViewModel->> AirportRepository: search("ENG)
+    HomeViewModel ->> AirportRepository: search("ENG)
     activate AirportRepository
-    AirportRepository->> AirportDataSource: search("ENG")
+    AirportRepository ->> AirportDataSource: search("ENG")
     activate AirportDataSource
-
-
     AirportDataSource -->> AirportRepository: Filtered airports
     AirportRepository -->> HomeViewModel: Filtered airports
     HomeViewModel -->> HomeScreen: Filtered airports
     HomeScreen -->> Bruker: Show filtered airports to user
-
-
-    Bruker->> HomeScreen: Choose departure "Gardemoen, ENGM"
-    
-
-    Bruker->> HomeScreen: Clicks "ENAL" on map
+    Bruker ->> HomeScreen: Choose departure "Gardemoen, ENGM"
+    Bruker ->> HomeScreen: Clicks "ENAL" on map
     HomeScreen -->> Bruker: Show InfoBox for ENAL with Sun loading bar
-
-
     HomeScreen ->> HomeViewModel: updateSunriseSunset(ENAL)
     HomeViewModel ->> AirportRepository: fetchSunriseSunset (ENAL)
     AirportRepository ->> SunriseSunsetDataSource: fetchSunriseSunset(ENAL)
@@ -99,12 +90,10 @@ sequenceDiagram
         SunriseSunsetDataSource -->> AirportRepository: SunriseSunset
         AirportRepository -->> HomeViewModel: SunriseSunset
         HomeViewModel -->> HomeScreen: SunriseSunset
-
-        HomeScreen -->> Bruker: Show Sundata in InfoBox 
+        HomeScreen -->> Bruker: Show Sundata in InfoBox
     end
 
-    Bruker->> HomeScreen: Clicks add arrival button in "ENAL" Infobox
-
+    Bruker ->> HomeScreen: Clicks add arrival button in "ENAL" Infobox
     deactivate HomeViewModel
     deactivate AirportRepository
     deactivate AirportDataSource
@@ -149,35 +138,33 @@ airportRepository\
 15.2. Feilmelding blir returnert til HomeViewModel. state sin sun blir satt til Error\
 15.3. Feilmelding vises til bruker i InfoBox\
 
-# Aktivitetsdiagram metar/taf
+# Aktivitetsdiagram Metar/Taf
 
 ```mermaid
-    flowchart TD;
-        style start fill:#000,stroke:#fff,stroke-width:2px;
-        style B fill:#228B22;
-        style C fill:#1a8a99;
-        style D fill:#1a8a99;
-        style E fill:#228B22;
-        style F fill:#1a8a99;
-        style G fill:#ff7f0e;
-        style H fill:#228B22;
-        style I fill:#228B22;
-        style J fill:#1a8a99;
-        style K fill:#228B22,stroke:#228B22,stroke-width:2px;
-        style stop fill:#000,stroke:#fff,stroke-width:2px;
-        
-        start((Start))
-        start --> B(Homescreen)
-        B --> C[/User chooses Departure/]
-        C --> D[/User presses Go to brief/]
-        D --> E(Flightbriefscreen #departuretab)
-        E --> F[/Open metar/taf collapsible/]
-        F --> G{airport has metar/taf?}
-        G -->|no| H(Show nearby airports with metar/taf)
-        H --> J[/User selects new airport/]
-        J --> K(Metar/taf for selected airport)
-        G -->|yes| I(Show Metar/Taf)
-        K --> stop((End))
-        I --> stop 
- ```
-
+flowchart TD
+    style start fill: #000, stroke: #fff, stroke-width: 2px;
+    style B fill: #228B22;
+    style C fill: #1a8a99;
+    style D fill: #1a8a99;
+    style E fill: #228B22;
+    style F fill: #1a8a99;
+    style G fill: #ff7f0e;
+    style H fill: #228B22;
+    style I fill: #228B22;
+    style J fill: #1a8a99;
+    style K fill: #228B22, stroke: #228B22, stroke-width: 2px;
+    style stop fill: #000, stroke: #fff, stroke-width: 2px;
+    start((Start))
+    start --> B(Homescreen)
+    B --> C[/User chooses Departure/]
+    C --> D[/User presses Go to brief/]
+    D --> E(Flightbriefscreen #departuretab)
+    E --> F[/Open metar/taf collapsible/]
+    F --> G{airport has metar/taf?}
+    G -->|no| H(Show nearby airports with metar/taf)
+    H --> J[/User selects new airport/]
+    J --> K(Metar/taf for selected airport)
+    G -->|yes| I(Show Metar/Taf)
+    K --> stop((End))
+    I --> stop
+```
