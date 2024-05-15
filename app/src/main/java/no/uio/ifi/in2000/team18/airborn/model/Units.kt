@@ -118,7 +118,7 @@ data class UvIndex(val uv: Double) {
 
 data class Distance(val meters: Double) {
     override fun toString(): String = if (meters < 1) "${meters * 1000} mm"
-    else if (meters < 1000) "${meters} m"
+    else if (meters < 1000) "$meters m"
     else "${meters / 1000} km"
 
     fun formatAsFeet(): String = "${(round(feet / 10) * 10).toInt()} ft"
@@ -277,6 +277,6 @@ fun Double.format(decimals: Int) =
     else String.format(Locale.ENGLISH, "%.${decimals}f", this)
 
 fun Double.round(decimals: Int): Double {
-    var multiplier = Math.pow(10.0, decimals.toDouble())
+    val multiplier = 10.0.pow(decimals.toDouble())
     return round(this * multiplier) / multiplier
 }
