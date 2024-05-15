@@ -188,7 +188,7 @@ class WeatherRepository @Inject constructor(
                 .withZoneSameInstant(ZoneId.of("UTC"))
         Log.d("grib", "preferredTime: $preferredTime")
         val index =
-            availableTimes.firstOrNull() {
+            availableTimes.firstOrNull {
                 it.second == preferredTime
             }?.first ?: 0
         return availableTimeSeries[index].data.instant.details.airPressureAtSeaLevel

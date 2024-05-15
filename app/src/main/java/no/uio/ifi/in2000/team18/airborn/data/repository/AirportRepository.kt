@@ -116,7 +116,7 @@ class AirportRepository @Inject constructor(
         "ENZV"
     )
 
-    suspend fun getAirportNearby(airport: Airport, max: Int = 5) =
+    private suspend fun getAirportNearby(airport: Airport, max: Int = 5) =
         airportDataSource.getAirportsNearby(airport, (max * 1.2).roundToInt())
             .map { Airport.fromBuiltinAirport(it) }
             .sortedBy { airport.position.distanceTo(it.position).meters }.take(max)
