@@ -80,22 +80,3 @@ data class Details(
     @SerializedName("wind_from_direction") @JsonAdapter(DirectionAdapter::class) val windFromDirection: Direction,
     @SerializedName("wind_speed") @JsonAdapter(MpsAdapter::class) val windSpeed: Speed
 )
-
-enum class SymbolCode {
-    ClearskyDay,
-    ClearskyNight,
-    Cloudy,
-    FairDay,
-    FairNight,
-    Lightrain,
-    Lightsleet,
-    LightsleetshowersDay,
-    Lightsnow,
-    PartlycloudyDay,
-    PartlycloudyNight,
-    Rain,
-    Sleet,
-    Snow
-}
-
-
