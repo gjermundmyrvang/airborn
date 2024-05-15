@@ -72,7 +72,6 @@ class WeatherRepository @Inject constructor(
                 }
                 allGribFiles[firstTime] ?: gribFiles.last()
             } else {
-                //Log.d("grib", "time-param: $time, allGribFiles: $allGribFiles")
                 if (time != null) allGribFiles[time] ?: grabLastGrib()
                 else {
                     val firstTime = timeSeriesMutex.withLock {
