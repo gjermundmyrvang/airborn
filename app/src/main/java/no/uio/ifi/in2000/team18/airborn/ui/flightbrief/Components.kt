@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
-import android.os.Build.VERSION.SDK_INT
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -64,7 +63,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.SubcomposeAsyncImage
-import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import net.engawapg.lib.zoomable.rememberZoomState
@@ -406,11 +404,7 @@ fun TableContent(isobaricData: IsobaricData) {
 fun GifComposable(uri: String, contentDescription: String, modifier: Modifier = Modifier) {
     val zoomState = rememberZoomState()
     val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-        if (SDK_INT >= 28) {
-            add(ImageDecoderDecoder.Factory())
-        } else {
-            add(GifDecoder.Factory())
-        }
+        add(ImageDecoderDecoder.Factory())
     }.build()
     SubcomposeAsyncImage(modifier = Modifier
         .fillMaxWidth()
