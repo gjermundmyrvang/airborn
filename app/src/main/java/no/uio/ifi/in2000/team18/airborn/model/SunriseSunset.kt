@@ -36,7 +36,7 @@ data class Solar(
 )
 
 class ZonedDateTimeAdapter : TypeAdapter<ZonedDateTime>() {
-    override fun read(reader: JsonReader) = ZonedDateTime.parse(reader.nextString())
+    override fun read(reader: JsonReader): ZonedDateTime = ZonedDateTime.parse(reader.nextString())
     override fun write(writer: JsonWriter, value: ZonedDateTime) =
         writer.value(value.format(DateTimeFormatter.ISO_DATE)).let {}
 }
