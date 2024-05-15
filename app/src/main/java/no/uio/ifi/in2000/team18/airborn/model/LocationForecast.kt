@@ -4,7 +4,7 @@ import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 import java.time.ZonedDateTime
 
-
+// Ignoring underscore warnings
 data class LocationData(
     val properties: Properties
 )
