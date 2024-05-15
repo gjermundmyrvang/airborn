@@ -72,7 +72,6 @@ class WeatherRepository @Inject constructor(
                 }
                 allGribFiles[firstTime] ?: gribFiles.last()
             } else {
-                //Log.d("grib", "time-param: $time, allGribFiles: $allGribFiles")
                 if (time != null) allGribFiles[time] ?: grabLastGrib()
                 else {
                     val firstTime = timeSeriesMutex.withLock {
@@ -189,7 +188,7 @@ class WeatherRepository @Inject constructor(
                 .withZoneSameInstant(ZoneId.of("UTC"))
         Log.d("grib", "preferredTime: $preferredTime")
         val index =
-            availableTimes.firstOrNull() {
+            availableTimes.firstOrNull {
                 it.second == preferredTime
             }?.first ?: 0
         return availableTimeSeries[index].data.instant.details.airPressureAtSeaLevel

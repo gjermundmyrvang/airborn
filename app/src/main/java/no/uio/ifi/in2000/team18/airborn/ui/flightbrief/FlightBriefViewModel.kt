@@ -21,7 +21,6 @@ import no.uio.ifi.in2000.team18.airborn.model.Distance
 import no.uio.ifi.in2000.team18.airborn.model.OffshoreMap
 import no.uio.ifi.in2000.team18.airborn.model.Radar
 import no.uio.ifi.in2000.team18.airborn.model.RouteForecast
-import no.uio.ifi.in2000.team18.airborn.model.RouteInfo
 import no.uio.ifi.in2000.team18.airborn.model.RouteIsobaric
 import no.uio.ifi.in2000.team18.airborn.model.Sigchart
 import no.uio.ifi.in2000.team18.airborn.model.flightbrief.Airport
@@ -56,7 +55,6 @@ class FlightBriefViewModel @Inject constructor(
         val networkStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available,
         val routeForecast: LoadingState<List<RouteForecast>> = Loading,
         val isIgaRoute: Boolean = false,
-        val routeInfo: LoadingState<RouteInfo> = Loading,
     ) {
         val hasArrival: Boolean get() = arrivalIcao != null
     }
@@ -137,12 +135,6 @@ class FlightBriefViewModel @Inject constructor(
             }
             val departure = airportRepository.getByIcao(state.value.departureIcao)!!
             val arrival = airportRepository.getByIcao(_state.value.arrivalIcao!!)!!
-            val newRoute = initRouteInfo(departure, arrival)
-            val info = load {
-                newRoute
-            }
-            _state.update { it.copy(routeInfo = info) }
-
             val data = load {
                 weatherRepository.getRouteIsobaric(
                     departure,
@@ -165,17 +157,6 @@ class FlightBriefViewModel @Inject constructor(
                 load { weatherRepository.getRouteIsobaric(departure, arrival, newPos, time) }
             _state.update { it.copy(routeIsobaric = newIsobaric) }
         }
-    }
-
-    private fun initRouteInfo(departure: Airport, arrival: Airport): RouteInfo {
-        val resultRoute = RouteInfo(departure, arrival)
-        viewModelScope.launch {
-            // TODO: will we be using timeSeries? If so, where in the code?
-//            resultRoute.timeSeries = weatherRepository.initializeTimeseries()
-            Log.d("Route", "init route has timeSeries ${resultRoute.timeSeries}")
-            var availableGribTimes: List<ZonedDateTime>? = null // todo: consider this
-        }
-        return resultRoute
     }
 
     fun initRouteForecast() {
