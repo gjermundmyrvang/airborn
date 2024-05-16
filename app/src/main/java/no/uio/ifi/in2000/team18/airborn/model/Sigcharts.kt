@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team18.airborn.model
 
 import com.google.gson.annotations.JsonAdapter
+import com.google.gson.annotations.SerializedName
 import java.time.ZonedDateTime
 
 data class Sigchart(
@@ -13,5 +14,8 @@ data class SigchartParameters(
 )
 
 enum class Area {
-    Nordic, Norway
+    @SerializedName("noridc")
+    Nordic,
+    @SerializedName("norway")
+    Norway
 }
