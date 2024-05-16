@@ -16,13 +16,17 @@
 
 # Kjøre appen
 
-Du kan laste ned appen fra [vår hjemmeside](https://airborn.jetlund.com/) eller bygge den selv, ved å kjøre
+- Du kan laste ned appen fra [vår hjemmeside](https://airborn.jetlund.com/) 
+
+- Bygge den selv, ved å kjøre
 
 ```sh
 ./gradlew assembleRelease
 ```
 
 fra prosjektets rot-mappe. Dette forutsetter at du har installert android sdk og gradle.
+
+- Alternativt kan man åpne prosjektet i Android Studio og trykke "build".
 
 # Biblioteker brukt
 
