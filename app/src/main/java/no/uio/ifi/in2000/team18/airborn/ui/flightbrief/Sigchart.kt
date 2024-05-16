@@ -29,7 +29,7 @@ fun Sigchart(state: LoadingState<Map<Area, List<Sigchart>>>, initSigchart: () ->
         val sigchartList = sigcharts[selectedArea]?.takeLast(3) ?: return@LazyCollapsible
 
         MultiToggleButton(currentSelection = selectedArea.toString(),
-            toggleStates = listOf("norway", "nordic"),
+            toggleStates = listOf("Norway", "Nordic"),
             onToggleChange = { selectedArea = Area.valueOf(it) })
 
         TimeRow(current = selectedSigchart,
