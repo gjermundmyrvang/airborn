@@ -14,7 +14,7 @@ data class SigchartParameters(
 )
 
 enum class Area {
-    @SerializedName("noridc")
+    @SerializedName("nordic")
     Nordic,
     @SerializedName("norway")
     Norway
