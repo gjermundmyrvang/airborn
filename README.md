@@ -26,7 +26,7 @@
 
 fra prosjektets rot-mappe. Dette forutsetter at du har installert android sdk og gradle.
 
-- Alternativt kan man åpne prosjektet i Android Studio og trykke "build".
+- Alternativt kan man åpne prosjektet i Android Studio og trykke "run app".
 
 # Biblioteker brukt
 
