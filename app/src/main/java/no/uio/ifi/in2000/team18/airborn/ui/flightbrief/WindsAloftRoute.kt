@@ -203,7 +203,7 @@ fun DistanceToIsobaricSlider(
                 Modifier.size(70.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
-            Row() {
+            Row {
                 Text(currentPos.toString(), fontWeight = FontWeight.Bold)
             }
         }
@@ -220,7 +220,7 @@ fun DistanceToIsobaricSlider(
             verticalArrangement = Arrangement.Center,
         ) {
             Compass(rotation = bearing.degrees.toFloat(), size = 70.dp)
-            Row() {
+            Row {
                 Text("Bearing: ", fontWeight = FontWeight.Bold)
                 Text(bearing.formatAsDegrees(0))
             }
@@ -228,7 +228,7 @@ fun DistanceToIsobaricSlider(
     }
 }
 
-@Preview()
+@Preview
 @Composable
 fun PreviewWindsAloftLocationBearing() {
     AirbornTheme {
@@ -254,7 +254,7 @@ fun PreviewWindsAloftLocationBearing() {
                     Modifier.size(70.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
-                Row() {
+                Row {
                     Text("60.90")
                     Text(" / 11.59")
                 }
@@ -272,7 +272,7 @@ fun PreviewWindsAloftLocationBearing() {
                 verticalArrangement = Arrangement.Center,
             ) {
                 Compass(rotation = 277F, size = 70.dp)
-                Row() {
+                Row {
                     Text("Bearing: ", fontWeight = FontWeight.Bold)
                     Text("277")
                 }

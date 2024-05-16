@@ -25,7 +25,7 @@ class GribDataSource @Inject constructor(
     }
 
 
-    suspend fun downloadGribFile(gribFile: GribFile): File {
+    private suspend fun downloadGribFile(gribFile: GribFile): File {
         val file = resolveFile(gribFile)
         if (!file.exists()) {
             Log.d("grib", "downloading GRIP file ${gribFile.uri}")

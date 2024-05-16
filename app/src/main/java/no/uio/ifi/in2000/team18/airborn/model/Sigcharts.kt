@@ -13,5 +13,5 @@ data class SigchartParameters(
 )
 
 enum class Area {
-    nordic, norway
+    Nordic, Norway
 }

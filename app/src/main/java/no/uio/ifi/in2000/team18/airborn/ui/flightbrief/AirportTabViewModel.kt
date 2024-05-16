@@ -129,16 +129,17 @@ sealed class AirportTabViewModel(
         }
     }
 
+    @Suppress("unused") // Could be usefull in further development
     fun clearAllCache() {
         clearAirportCache()
         clearWeatherCache()
     }
 
-    fun clearAirportCache() {
+    private fun clearAirportCache() {
         airportRepository.clearCache()
     }
 
-    fun clearWeatherCache() {
+    private fun clearWeatherCache() {
         weatherRepository.clearWeatherCache()
     }
 

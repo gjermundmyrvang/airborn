@@ -49,7 +49,7 @@ class FractionAdapter : TypeAdapter<Fraction>() {
     override fun read(reader: JsonReader): Fraction = reader.nextDouble().fraction
 }
 
-
+@Suppress("unused")
 data class Pressure(val hpa: Double) {
     override fun toString(): String = "$hpa hPa"
     operator fun times(x: Number) = Pressure(hpa = hpa * x.toDouble())
@@ -61,6 +61,7 @@ data class Humidity(val humidity: Double) {
     override fun toString(): String = "$humidity %"
 }
 
+@Suppress("unused")
 data class Speed(val mps: Double) {
     override fun toString(): String = "$mps m/s"
     fun formatAsKnots(decimals: Int = 0): String = "${knots.format(decimals)} kt"
@@ -84,6 +85,7 @@ data class Direction(var degrees: Double) {
 
     override fun toString(): String = "${degrees.roundToInt()}\u00B0"
 
+    @Suppress("unused")
     companion object {
         val EAST: Direction = 90.degrees
         val WEST: Direction = 270.degrees
@@ -116,9 +118,10 @@ data class UvIndex(val uv: Double) {
     override fun toString(): String = "$uv"
 }
 
+@Suppress("unused")
 data class Distance(val meters: Double) {
     override fun toString(): String = if (meters < 1) "${meters * 1000} mm"
-    else if (meters < 1000) "${meters} m"
+    else if (meters < 1000) "$meters m"
     else "${meters / 1000} km"
 
     fun formatAsFeet(): String = "${(round(feet / 10) * 10).toInt()} ft"
@@ -241,16 +244,21 @@ data class Position(
 // Speed
 private operator fun Number.times(s: Speed) = s * this
 val Number.mps get() = Speed(mps = this.toDouble())
+
+@Suppress("unused")
 val Number.kmph get() = this * (1 / 3.6).mps
 val Number.knots get() = this * 0.51444424416.mps
 
 // Temperature
+@Suppress("unused")
 val Number.kelvin get() = Temperature(celsius = this.toDouble() - 273.15)
 val Number.celsius get() = Temperature(celsius = this.toDouble())
 
 // Pressure
 private operator fun Number.times(s: Pressure) = s * this
 val Number.hpa get() = Pressure(hpa = this.toDouble())
+
+@Suppress("unused")
 val Number.pa get() = this * 0.1.hpa
 
 
@@ -266,7 +274,11 @@ val Number.fraction get() = Fraction(fraction = this.toDouble())
 // Distance
 private operator fun Number.times(m: Distance) = m * this
 val Number.m get() = Distance(meters = this.toDouble())
+
+@Suppress("unused")
 val Number.km get() = this * 1000.m
+
+@Suppress("unused")
 val Number.mm get() = this * 0.001.m
 val Number.feet get() = this * 0.3048.m
 val Number.nauticalMiles get() = this * 1852.m
@@ -277,6 +289,6 @@ fun Double.format(decimals: Int) =
     else String.format(Locale.ENGLISH, "%.${decimals}f", this)
 
 fun Double.round(decimals: Int): Double {
-    var multiplier = Math.pow(10.0, decimals.toDouble())
+    val multiplier = 10.0.pow(decimals.toDouble())
     return round(this * multiplier) / multiplier
 }

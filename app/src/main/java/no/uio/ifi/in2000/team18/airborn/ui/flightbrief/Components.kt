@@ -1,7 +1,5 @@
 package no.uio.ifi.in2000.team18.airborn.ui.flightbrief
 
-import android.graphics.BlurMaskFilter
-import android.os.Build.VERSION.SDK_INT
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -51,16 +49,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,7 +65,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.SubcomposeAsyncImage
-import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import net.engawapg.lib.zoomable.rememberZoomState
@@ -132,36 +127,6 @@ fun LoadingScreen() {
         )
     }
 }
-
-fun Modifier.shadow(
-    color: Color = Color.Black,
-    offsetX: Dp = 0.dp,
-    offsetY: Dp = 0.dp,
-    blurRadius: Dp = 0.dp,
-) = then(drawBehind {
-    drawIntoCanvas { canvas ->
-        val paint = Paint()
-        val frameworkPaint = paint.asFrameworkPaint()
-        if (blurRadius != 0.dp) {
-            frameworkPaint.maskFilter =
-                (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
-        }
-        frameworkPaint.color = color.toArgb()
-
-        val leftPixel = offsetX.toPx()
-        val topPixel = offsetY.toPx()
-        val rightPixel = size.width + topPixel
-        val bottomPixel = size.height + leftPixel
-
-        canvas.drawRect(
-            left = leftPixel,
-            top = topPixel,
-            right = rightPixel,
-            bottom = bottomPixel,
-            paint = paint,
-        )
-    }
-})
 
 @Composable
 fun MultiToggleButton(
@@ -235,7 +200,12 @@ fun <T> LazyCollapsible(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = header, fontSize = 22.sp, modifier = Modifier.padding(start = 10.dp))
+            Text(
+                text = header,
+                fontSize = 22.sp,
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .semantics { heading() })
             IconButton(onClick = {
                 onExpand()
                 open = !open
@@ -441,11 +411,7 @@ fun TableContent(isobaricData: IsobaricData) {
 fun GifComposable(uri: String, contentDescription: String, modifier: Modifier = Modifier) {
     val zoomState = rememberZoomState()
     val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-        if (SDK_INT >= 28) {
-            add(ImageDecoderDecoder.Factory())
-        } else {
-            add(GifDecoder.Factory())
-        }
+        add(ImageDecoderDecoder.Factory())
     }.build()
     SubcomposeAsyncImage(modifier = Modifier
         .fillMaxWidth()
@@ -519,7 +485,7 @@ fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header
             text = sun.message, color = MaterialTheme.colorScheme.background
         )
 
-        is LoadingState.Success -> sun.value?.let { sun ->
+        is LoadingState.Success -> sun.value?.let { sunData ->
 
             Column(modifier = modifier) {
                 if (header != null) {
@@ -533,7 +499,7 @@ fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = sun.sunrise,
+                        text = sunData.sunrise,
                         modifier = Modifier.height(IntrinsicSize.Min),
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -547,7 +513,7 @@ fun SunComposable(sun: LoadingState<Sun?>, modifier: Modifier = Modifier, header
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = sun.sunset, color = MaterialTheme.colorScheme.primary
+                        text = sunData.sunset, color = MaterialTheme.colorScheme.primary
                     )
 
                     Image(

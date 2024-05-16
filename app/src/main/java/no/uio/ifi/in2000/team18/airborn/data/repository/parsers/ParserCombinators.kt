@@ -4,7 +4,7 @@ data class ParseState(
     val source: String,
     val pos: Int = 0,
 ) {
-    val sourceLength get() = source.length - pos
+    private val sourceLength get() = source.length - pos
     fun startsWith(prefix: String): Boolean =
         prefix.length <= sourceLength && source.substring(pos, pos + prefix.length) == prefix
 
@@ -51,7 +51,9 @@ abstract class Parser<T> {
 
     fun <T2> skip(p: Parser<T2>) = bind { v -> p.map { v } }
 
+    @Suppress("MemberVisibilityCanBePrivate") // This is part of the interface
     fun skipChars(predicate: (Char) -> Boolean) = skip(chars(predicate))
+
     fun skipSpace() = skipChars { it.isWhitespace() }
     fun optional(): Parser<T?> = map<T?> { it }.or(pure(null))
     fun optional(default: T): Parser<T> = or(pure(default))
@@ -76,7 +78,7 @@ fun word(word: String): Parser<String> = GenericParser { state ->
 
 fun chars(predicate: (Char) -> Boolean) = GenericParser { state ->
     var pos = state.pos
-    while (pos < state.source.length && predicate(state.source.get(pos))) {
+    while (pos < state.source.length && predicate(state.source[pos])) {
         pos += 1
     }
     ParseResult.Ok(
@@ -86,11 +88,11 @@ fun chars(predicate: (Char) -> Boolean) = GenericParser { state ->
 
 
 fun chars1(expected: String, predicate: (Char) -> Boolean): Parser<String> =
-    chars(predicate).filter({ it.length != 0 }, expected)
+    chars(predicate).filter({ it.isNotEmpty() }, expected)
 
 fun char(expected: String = "<unknown>", predicate: (Char) -> Boolean = { true }) =
     GenericParser { state ->
-        if (state.pos < state.source.length && predicate(state.source.get(state.pos))) ParseResult.Ok(
+        if (state.pos < state.source.length && predicate(state.source[state.pos])) ParseResult.Ok(
             state.source[state.pos], state.forward(1)
         )
         else ParseResult.Error(expected = listOf(expected))

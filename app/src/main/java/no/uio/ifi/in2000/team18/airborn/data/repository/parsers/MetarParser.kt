@@ -1,3 +1,5 @@
+@file:Suppress("NAME_SHADOWING")
+
 package no.uio.ifi.in2000.team18.airborn.data.repository.parsers
 
 import kotlinx.datetime.Instant
@@ -25,9 +27,7 @@ import no.uio.ifi.in2000.team18.airborn.model.m
 
 
 enum class PhenomenonQualifier {
-    Light,
-    Heavy,
-    Moderate;
+    Light, Heavy, Moderate;
 
     override fun toString() = when (this) {
         Light -> "light"
@@ -37,14 +37,7 @@ enum class PhenomenonQualifier {
 }
 
 enum class PhenomenonDescriptor {
-    Patches,
-    Blowing,
-    LowDrifting,
-    Freezing,
-    Shallow,
-    Partial,
-    Shower,
-    Thunderstorm;
+    Patches, Blowing, LowDrifting, Freezing, Shallow, Partial, Shower, Thunderstorm;
 
     override fun toString() = when (this) {
         Patches -> "patches"
@@ -59,15 +52,8 @@ enum class PhenomenonDescriptor {
 }
 
 enum class PhenomenonPrecipitation {
-    Drizzle,
-    Hail,
-    SmallHail, // And/Or snow pellets
-    Icecrystals,
-    Icepellets,
-    Rain,
-    SnowGrains,
-    Snow,
-    UnknownPrecipitation;
+    Drizzle, Hail, SmallHail, // And/Or snow pellets
+    Icecrystals, Icepellets, Rain, SnowGrains, Snow, UnknownPrecipitation;
 
     override fun toString() = when (this) {
         Drizzle -> "drizzle"
@@ -83,13 +69,7 @@ enum class PhenomenonPrecipitation {
 }
 
 enum class PhenomenonObscuration {
-    Mist,
-    WidespreadDust,
-    Fog,
-    Smoke,
-    Haze,
-    Sand,
-    VolcanicAsh;
+    Mist, WidespreadDust, Fog, Smoke, Haze, Sand, VolcanicAsh;
 
     override fun toString() = when (this) {
         Mist -> "mist"
@@ -103,11 +83,7 @@ enum class PhenomenonObscuration {
 }
 
 enum class PhenomenonExtra {
-    DustStorm,
-    FunnelClouds,
-    DustOrSandWhirls,
-    Squall,
-    Sandstorm;
+    DustStorm, FunnelClouds, DustOrSandWhirls, Squall, Sandstorm;
 
     override fun toString() = when (this) {
         DustStorm -> "dust storm"
@@ -138,12 +114,12 @@ private val metarParser = Unit.let {
                 number,
                 word("G").bind { number }.optional()
             ).bind { data ->
-                var direction = data.first
+                val direction = data.first
                 val speed = data.second
-                var gustSpeed = data.third
+                val gustSpeed = data.third
                 // TODO: does K mean something different than KT
                 word("KT").or(word("K")).map {
-                    MetarWind(direction, speed.let { it.knots }, gustSpeed?.let { it.knots })
+                    MetarWind(direction, speed.knots, gustSpeed?.knots)
                 }
             }
         val direction = threeDigitNumber.map { it.degrees }
@@ -172,10 +148,10 @@ private val metarParser = Unit.let {
             val visibility = clear.or(noVisibility).or(distance)
             // TODO: Directional visibility
             val directionalVisibility = pair(visibility.skipSpace(), cardinalDirectionLetter)
-            pair(visibility.skipSpace(), either(
-                word("NDV").map { null },
-                pure(Unit).skipSpace().bind { many(directionalVisibility).nullable() }
-            ))
+            pair(
+                visibility.skipSpace(), either(word("NDV").map { null },
+                    pure(Unit).skipSpace().bind { many(directionalVisibility).nullable() })
+            )
         }
 
         val rvr = Unit.let {
@@ -261,12 +237,7 @@ private val metarParser = Unit.let {
                 many1(other).optional(listOf()),
             ) { qualifier, inVicinity, descriptor, precipitation, obscuration, other ->
                 WeatherPhenomenon(
-                    qualifier,
-                    descriptor,
-                    precipitation,
-                    obscuration,
-                    other,
-                    inVicinity
+                    qualifier, descriptor, precipitation, obscuration, other, inVicinity
                 )
             }.filter({
                 it.qualifier != PhenomenonQualifier.Moderate //
