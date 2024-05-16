@@ -9,6 +9,25 @@
 - Ola
 - Henrik
 
+# Dokumentasjon
+
+- [Modeller](MODELING.md)
+- [Arkitekturskisser](ARCHITECTURE.md)
+
+# Kjøre appen
+
+- Du kan laste ned appen fra [vår hjemmeside](https://airborn.jetlund.com/) 
+
+- Bygge den selv, ved å kjøre
+
+```sh
+./gradlew assembleRelease
+```
+
+fra prosjektets rot-mappe. Dette forutsetter at du har installert android sdk og gradle.
+
+- Alternativt kan man åpne prosjektet i Android Studio og trykke "run app".
+
 # Biblioteker brukt
 
 ## AndroidX Room
