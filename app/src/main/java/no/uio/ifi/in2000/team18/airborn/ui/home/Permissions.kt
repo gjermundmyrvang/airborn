@@ -66,7 +66,7 @@ fun LocationPermissionRequest(
             }
 
             finePermissionState.status.shouldShowRationale -> {
-                LocationPermissionDialog(message = "This app need acces to your location to show where you are",
+                LocationPermissionDialog(message = "This app need access to your location to show where you are",
                     onDismissRequest = { askForPermission = false },
                     onClick = {
                         finePermissionState.launchPermissionRequest()
